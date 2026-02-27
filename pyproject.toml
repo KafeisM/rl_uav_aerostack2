@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "rl_uav_aerostack2"
+version = "0.1.0"
+description = "Reinforcement Learning for UAV training with Aerostack2 multirotor simulator"
+readme = "README.md"
+license = {text = "BSD-3-Clause"}
+requires-python = ">=3.10"
+dependencies = [
+    "gymnasium>=0.29.0",
+    "numpy>=1.24.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+train = [
+    "stable-baselines3>=2.0.0",
+    "tensorboard>=2.14.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["rl_uav*"]

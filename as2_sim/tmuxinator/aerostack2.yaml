@@ -1,0 +1,45 @@
+<%
+# Input parameters
+drone_namespace           = @settings["drone_namespace"]
+simulation_config_file    = @settings["simulation_config_file"]
+motion_controller_plugin  = @settings["motion_controller_plugin"]
+base_launch               = @settings["base_launch"] == "true"
+%>
+name: <%= drone_namespace %>
+attach: false
+root: ./
+startup_window: platform
+windows:
+  # Platform
+  - platform:
+      layout: tiled
+      panes:
+        - ros2 launch as2_platform_multirotor_simulator as2_platform_multirotor_simulator.launch.py
+            namespace:=<%= drone_namespace %>
+            config_file:=config/config.yaml
+            uav_config:=config/uav_config.yaml
+            world_config:=<%= simulation_config_file %>
+
+  # Basic Robotics Functions
+  - basics_robotics_functions:
+      layout:
+      panes:
+        # State Estimation
+        - ros2 launch as2_state_estimator state_estimator_launch.py
+            namespace:=<%= drone_namespace %>
+            config_file:=config/config.yaml
+        # Motion Controller
+        - ros2 launch as2_motion_controller controller_launch.py
+            namespace:=<%= drone_namespace %>
+            config_file:=config/config.yaml
+            plugin_name:=<%= motion_controller_plugin %>
+            plugin_config_file:=config/<%= motion_controller_plugin %>.yaml
+
+  # Behaviors
+  - behaviors:
+      layout:
+      panes:
+        # Motion Behaviors
+        - ros2 launch as2_behaviors_motion motion_behaviors_launch.py
+            namespace:=<%= drone_namespace %>
+            config_file:=config/config.yaml

@@ -1,0 +1,15 @@
+/**:
+  platform:
+    ros__parameters:
+      gps_origin:
+        latitude: 40.4405287
+        longitude: -3.6898277
+        altitude: 100.0
+
+drone0:
+  platform:
+    ros__parameters:
+      vehicle_initial_pose:
+        x: 0.0
+        y: 0.0
+        z: 0.0

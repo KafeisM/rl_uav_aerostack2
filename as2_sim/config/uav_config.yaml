@@ -1,0 +1,7 @@
+# UAV configuration - uses simulator defaults
+# Override specific parameters here as needed
+/**:
+  platform:
+    ros__parameters:
+      mass: 1.5          # kg
+      max_thrust: 30.0   # N

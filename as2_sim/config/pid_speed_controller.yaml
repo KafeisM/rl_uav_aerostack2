@@ -1,0 +1,41 @@
+# PID Speed Controller configuration
+/**:
+  controller_manager:
+    ros__parameters:
+      proportional_limitation: false
+      position_control:
+        reset_integral: false
+        proportional_gain:
+          x: 3.0
+          y: 3.0
+          z: 5.0
+        integral_gain:
+          x: 0.0
+          y: 0.0
+          z: 0.5
+        derivative_gain:
+          x: 0.0
+          y: 0.0
+          z: 0.0
+        antiwindup_cte:
+          x: 0.0
+          y: 0.0
+          z: 1.0
+      speed_control:
+        reset_integral: false
+        proportional_gain:
+          x: 3.0
+          y: 3.0
+          z: 5.0
+        integral_gain:
+          x: 0.0
+          y: 0.0
+          z: 0.5
+        derivative_gain:
+          x: 0.0
+          y: 0.0
+          z: 0.0
+        antiwindup_cte:
+          x: 0.0
+          y: 0.0
+          z: 1.0
