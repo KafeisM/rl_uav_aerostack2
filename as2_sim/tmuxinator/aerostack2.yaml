@@ -43,3 +43,12 @@ windows:
         - ros2 launch as2_behaviors_motion motion_behaviors_launch.py
             namespace:=<%= drone_namespace %>
             config_file:=config/config.yaml
+
+  # Visualization (RViz)
+  - visualization:
+      layout:
+      panes:
+        - ros2 launch as2_visualization as2_visualization.launch.py
+            namespace:=<%= drone_namespace %>
+            use_sim_time:=false
+            rviz:=true
