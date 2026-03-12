@@ -117,6 +117,12 @@ class AS2TestEnv(gym.Env):
             use_sim_time=self.use_sim_time,
             verbose=self.verbose
         )
+
+        # Create SpeedMotion handler directly (instead of load_module which
+        # fails because MotionReferenceHandlerModule.__call__ is abstract
+        # in the installed AS2 version)
+        from as2_motion_reference_handlers.speed_motion import SpeedMotion
+        self._speed_handler = SpeedMotion(self._drone)
         logger.info(f"DroneInterface created for '{self.drone_namespace}'")
 
     def _get_obs(self) -> np.ndarray:
@@ -237,10 +243,10 @@ class AS2TestEnv(gym.Env):
 
         # Send velocity command via DroneInterface
         try:
-            self._drone.motion_ref_handler.speed.send_speed_command_with_yaw(
-                [vx, vy, vz],
-                'earth',
-                0.0  # yaw = 0
+            self._speed_handler.send_speed_command_with_yaw_angle(
+                twist=[vx, vy, vz],
+                twist_frame_id='earth',
+                yaw_angle=0.0,
             )
         except Exception as e:
             logger.error(f"Error sending velocity command: {e}")
@@ -287,7 +293,10 @@ class AS2TestEnv(gym.Env):
 
         if self._rclpy_initialized:
             import rclpy
-            rclpy.shutdown()
+            try:
+                rclpy.shutdown()
+            except Exception:
+                pass  # Already shut down by DroneInterface.shutdown()
             self._rclpy_initialized = False
             logger.info("ROS2 shut down")
 
