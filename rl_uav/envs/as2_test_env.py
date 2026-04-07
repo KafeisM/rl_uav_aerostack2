@@ -7,12 +7,12 @@ This environment is NOT intended for RL training. Its purpose is to:
 2. Confirm that state information (position, velocity) is received properly.
 3. Validate that velocity commands are sent and executed by the drone.
 
-Observations:
-    - Position (x, y, z) in meters — from odometry
-    - Velocity (vx, vy, vz) in m/s — from odometry
+Observations (normalized to [-1, 1]):
+    - Position (x, y, z) — divided by pos_limit (boundary of the scenario)
+    - Velocity (vx, vy, vz) — divided by max_vel
 
 Actions:
-    - Velocity commands (vx, vy, vz) in m/s, bounded to [-2, 2]
+    - Velocity commands (vx, vy, vz) in m/s, bounded to [-max_vel, max_vel]
 
 Reward:
     - Always 0 (not meaningful, only for connectivity testing)
@@ -51,6 +51,7 @@ class AS2TestEnv(gym.Env):
         takeoff_speed: float = 0.5,
         land_speed: float = 0.5,
         max_vel: float = 2.0,
+        pos_limit: float = 5.0,
         step_duration: float = 0.1,
     ):
         """
@@ -63,7 +64,9 @@ class AS2TestEnv(gym.Env):
             takeoff_height: Height for takeoff in meters.
             takeoff_speed: Speed for takeoff in m/s.
             land_speed: Speed for landing in m/s.
-            max_vel: Maximum velocity command in m/s.
+            max_vel: Maximum velocity command in m/s. Used to normalize velocity observations.
+            pos_limit: Maximum absolute position in meters (scenario boundary).
+                       Used to normalize position observations to [-1, 1].
             step_duration: Duration to wait after sending command (seconds).
         """
         super().__init__()
@@ -75,16 +78,15 @@ class AS2TestEnv(gym.Env):
         self.takeoff_speed = takeoff_speed
         self.land_speed = land_speed
         self.max_vel = max_vel
+        self.pos_limit = pos_limit
         self.step_duration = step_duration
 
-        # Observation space: [x, y, z, vx, vy, vz]
-        obs_high = np.array(
-            [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf],
-            dtype=np.float32
-        )
+        # Observation space: [x, y, z, vx, vy, vz] — all normalized to [-1, 1]
+        # Position normalized by pos_limit; velocity normalized by max_vel.
         self.observation_space = spaces.Box(
-            low=-obs_high,
-            high=obs_high,
+            low=-1.0,
+            high=1.0,
+            shape=(6,),
             dtype=np.float32
         )
 
@@ -127,10 +129,13 @@ class AS2TestEnv(gym.Env):
 
     def _get_obs(self) -> np.ndarray:
         """
-        Read current state from the DroneInterface.
+        Read current state from the DroneInterface and normalize to [-1, 1].
+
+        Position is divided by pos_limit; velocity is divided by max_vel.
+        Values are clipped to [-1, 1] in case the drone exceeds scenario bounds.
 
         Returns:
-            Observation array [x, y, z, vx, vy, vz]
+            Normalized observation array [x, y, z, vx, vy, vz] ∈ [-1, 1]^6
         """
         try:
             # Position from drone pose
@@ -141,7 +146,18 @@ class AS2TestEnv(gym.Env):
             speed = self._drone.speed
             vx, vy, vz = speed[0], speed[1], speed[2]
 
-            obs = np.array([x, y, z, vx, vy, vz], dtype=np.float32)
+            obs = np.array([
+                x / self.pos_limit,
+                y / self.pos_limit,
+                z / self.pos_limit,
+                vx / self.max_vel,
+                vy / self.max_vel,
+                vz / self.max_vel,
+            ], dtype=np.float32)
+
+            # Clip in case the drone exceeds the defined boundaries
+            obs = np.clip(obs, -1.0, 1.0)
+
         except Exception as e:
             logger.warning(f"Error reading drone state: {e}")
             obs = np.zeros(6, dtype=np.float32)
