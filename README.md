@@ -42,9 +42,9 @@ cd as2_sim
 ./launch_sim.bash
 ```
 
-### 2. Run the connectivity test
+### 2. Run tests
 
-In another terminal (with ROS2 sourced):
+In another terminal (with ROS2 sourced) for example:
 
 ```bash
 python3 scripts/test_connection.py
