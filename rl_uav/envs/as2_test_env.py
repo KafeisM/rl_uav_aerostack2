@@ -22,6 +22,7 @@ __authors__ = 'Jordi'
 __license__ = 'BSD-3-Clause'
 
 import logging
+import threading
 from typing import Any, Optional
 
 import gymnasium as gym
@@ -38,9 +39,18 @@ class AS2TestEnv(gym.Env):
 
     The environment interfaces with the simulator through
     as2_python_api.DroneInterface, which communicates via ROS2 topics.
+
+    Supports vectorization via gymnasium.make_vec() or SyncVectorEnv.
+    Each instance should receive a unique drone_namespace (e.g. drone0,
+    drone1, ...) when used in a vectorized setup.
     """
 
     metadata = {'render_modes': []}
+
+    # Class-level ROS2 init guard — rclpy.init() must be called exactly
+    # once per process, even when SyncVectorEnv creates multiple instances.
+    _rclpy_initialized = False
+    _rclpy_lock = threading.Lock()
 
     def __init__(
         self,
@@ -100,19 +110,20 @@ class AS2TestEnv(gym.Env):
 
         # DroneInterface (initialized on first reset)
         self._drone = None
-        self._rclpy_initialized = False
         self._is_flying = False
         self._step_count = 0
 
     def _init_ros(self):
-        """Initialize ROS2 and create DroneInterface."""
+        """Initialize ROS2 (once per process) and create DroneInterface."""
         import rclpy
         from as2_python_api.drone_interface import DroneInterface
 
-        if not self._rclpy_initialized:
-            rclpy.init()
-            self._rclpy_initialized = True
-            logger.info("ROS2 initialized")
+        # Thread-safe, once-per-process rclpy initialization
+        with AS2TestEnv._rclpy_lock:
+            if not AS2TestEnv._rclpy_initialized:
+                rclpy.init()
+                AS2TestEnv._rclpy_initialized = True
+                logger.info("ROS2 initialized (process-wide)")
 
         self._drone = DroneInterface(
             drone_id=self.drone_namespace,
@@ -307,13 +318,8 @@ class AS2TestEnv(gym.Env):
             self._drone = None
             logger.info("DroneInterface shut down")
 
-        if self._rclpy_initialized:
-            import rclpy
-            try:
-                rclpy.shutdown()
-            except Exception:
-                pass  # Already shut down by DroneInterface.shutdown()
-            self._rclpy_initialized = False
-            logger.info("ROS2 shut down")
+        # NOTE: rclpy.shutdown() is NOT called here because other
+        # vectorized instances in the same process may still need it.
+        # rclpy is shut down automatically when the process exits.
 
         logger.info("Environment closed")
