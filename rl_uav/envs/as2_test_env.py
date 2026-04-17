@@ -12,7 +12,8 @@ Observations (normalized to [-1, 1]):
     - Velocity (vx, vy, vz) — divided by max_vel
 
 Actions:
-    - Velocity commands (vx, vy, vz) in m/s, bounded to [-max_vel, max_vel]
+    - Linear velocity commands (vx, vy, vz) in m/s, bounded to [-max_vel, max_vel]
+    - Angular yaw velocity (vyaw) in rad/s, bounded to [-max_yaw_vel, max_yaw_vel]
 
 Reward:
     - Always 0 (not meaningful, only for connectivity testing)
@@ -22,6 +23,7 @@ __authors__ = 'Jordi'
 __license__ = 'BSD-3-Clause'
 
 import logging
+import math
 import threading
 from typing import Any, Optional
 
@@ -61,6 +63,7 @@ class AS2TestEnv(gym.Env):
         takeoff_speed: float = 0.5,
         land_speed: float = 0.5,
         max_vel: float = 2.0,
+        max_yaw_vel: float = math.pi,
         pos_limit: float = 5.0,
         step_duration: float = 0.1,
     ):
@@ -75,6 +78,8 @@ class AS2TestEnv(gym.Env):
             takeoff_speed: Speed for takeoff in m/s.
             land_speed: Speed for landing in m/s.
             max_vel: Maximum velocity command in m/s. Used to normalize velocity observations.
+            max_yaw_vel: Maximum yaw angular velocity in rad/s (default: π ≈ 180°/s).
+                         Defines the bounds of the yaw action dimension.
             pos_limit: Maximum absolute position in meters (scenario boundary).
                        Used to normalize position observations to [-1, 1].
             step_duration: Duration to wait after sending command (seconds).
@@ -88,6 +93,7 @@ class AS2TestEnv(gym.Env):
         self.takeoff_speed = takeoff_speed
         self.land_speed = land_speed
         self.max_vel = max_vel
+        self.max_yaw_vel = max_yaw_vel
         self.pos_limit = pos_limit
         self.step_duration = step_duration
 
@@ -100,12 +106,11 @@ class AS2TestEnv(gym.Env):
             dtype=np.float32
         )
 
-        # Action space: velocity commands [vx, vy, vz]
+        # Action space: velocity commands [vx, vy, vz, vyaw]
+        # Linear velocities bounded by max_vel, yaw rate bounded by max_yaw_vel
         self.action_space = spaces.Box(
-            low=-max_vel,
-            high=max_vel,
-            shape=(3,),
-            dtype=np.float32
+            low=np.array([-max_vel, -max_vel, -max_vel, -max_yaw_vel], dtype=np.float32),
+            high=np.array([max_vel, max_vel, max_vel, max_yaw_vel], dtype=np.float32),
         )
 
         # DroneInterface (initialized on first reset)
@@ -255,7 +260,9 @@ class AS2TestEnv(gym.Env):
         Execute one step: send velocity command and read new state.
 
         Args:
-            action: Velocity command [vx, vy, vz] in m/s
+            action: Velocity command [vx, vy, vz, vyaw] where
+                    vx, vy, vz are linear velocities in m/s and
+                    vyaw is the yaw angular velocity in rad/s.
 
         Returns:
             Tuple of (observation, reward, terminated, truncated, info)
@@ -264,16 +271,17 @@ class AS2TestEnv(gym.Env):
 
         self._step_count += 1
 
-        # Clip action to valid range
-        action = np.clip(action, -self.max_vel, self.max_vel)
+        # Clip action to valid range (per-dimension bounds)
+        action = np.clip(action, self.action_space.low, self.action_space.high)
         vx, vy, vz = float(action[0]), float(action[1]), float(action[2])
+        vyaw = float(action[3])
 
-        # Send velocity command via DroneInterface
+        # Send velocity command with yaw rate via DroneInterface
         try:
-            self._speed_handler.send_speed_command_with_yaw_angle(
+            self._speed_handler.send_speed_command_with_yaw_speed(
                 twist=[vx, vy, vz],
                 twist_frame_id='earth',
-                yaw_angle=0.0,
+                yaw_speed=vyaw,
             )
         except Exception as e:
             logger.error(f"Error sending velocity command: {e}")
@@ -284,7 +292,7 @@ class AS2TestEnv(gym.Env):
         # Read new state
         obs = self._get_obs()
         info = self._get_info()
-        info['action_sent'] = [vx, vy, vz]
+        info['action_sent'] = [vx, vy, vz, vyaw]
 
         # Reward = 0 (connectivity test only)
         reward = 0.0

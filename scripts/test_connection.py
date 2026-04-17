@@ -113,7 +113,7 @@ def main():
                 f"Step {i+1:3d} | "
                 f"Pos: [{pos[0]:7.3f}, {pos[1]:7.3f}, {pos[2]:7.3f}] | "
                 f"Vel: [{vel[0]:7.3f}, {vel[1]:7.3f}, {vel[2]:7.3f}] | "
-                f"Action: [{action[0]:6.3f}, {action[1]:6.3f}, {action[2]:6.3f}]"
+                f"Action: [{action[0]:6.3f}, {action[1]:6.3f}, {action[2]:6.3f}, {action[3]:6.3f}]"
             )
 
             if terminated or truncated:

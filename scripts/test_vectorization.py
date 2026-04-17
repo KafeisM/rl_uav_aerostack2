@@ -87,7 +87,7 @@ def fake_drone(pos, vel):
 
 
 class FakeSpeedHandler:
-    def send_speed_command_with_yaw_angle(self, **kw): pass
+    def send_speed_command_with_yaw_speed(self, **kw): pass
 
 
 def inject_mocks(vec_env, positions, velocities):
@@ -152,7 +152,7 @@ vec_env = gymnasium.vector.SyncVectorEnv([
 ])
 check(f"num_envs == {NUM_ENVS}",                   vec_env.num_envs == NUM_ENVS)
 check("single_obs_space.shape == (6,)",            vec_env.single_observation_space.shape == (6,))
-check("single_action_space.shape == (3,)",         vec_env.single_action_space.shape == (3,))
+check("single_action_space.shape == (4,)",         vec_env.single_action_space.shape == (4,))
 check(f"batched obs_space.shape == ({NUM_ENVS},6)", vec_env.observation_space.shape == (NUM_ENVS, 6))
 for i in range(NUM_ENVS):
     ns = vec_env.envs[i].unwrapped.drone_namespace

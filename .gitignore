@@ -32,4 +32,5 @@ runs/
 models/
 
 AGENTS.md
-
+.atl/
+CLAUDE.md
