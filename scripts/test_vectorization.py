@@ -13,6 +13,8 @@ Tests:
   5. All observations are normalized to [-1, 1]
   6. Numerical normalization correctness per sub-environment
   7. Class-level _rclpy_initialized flag shared across instances
+  8. Reward correctness — continuous distance penalty value
+  9. Terminal conditions — success, out-of-bounds, max_steps
 
 Usage:
     conda run -n rl_uav python3 scripts/test_vectorization.py
@@ -269,6 +271,99 @@ check("e1, e2, e3 share _rclpy_initialized",
       (e1._rclpy_initialized is e2._rclpy_initialized
        and e2._rclpy_initialized is e3._rclpy_initialized))
 e1.close(); e2.close(); e3.close()
+
+# ===========================================================================
+# TEST 8 — Reward correctness: continuous distance penalty
+# ===========================================================================
+print("\n[8] Reward correctness — continuous distance penalty")
+# drone at [1.0, 2.0, 3.0], target = [0, 0, 1, 0]
+# d = sqrt((1-0)^2 + (2-0)^2 + (3-1)^2) = sqrt(9) = 3.0
+# d_max = 5.0 * sqrt(3) ≈ 8.660 → d_norm ≈ 0.3464 → reward ≈ -0.3464
+_env8 = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone0', step_duration=0.0)
+_inner8 = _env8.unwrapped
+_inner8._drone = fake_drone([1.0, 2.0, 3.0], [0.0, 0.0, 0.0])
+_inner8._speed_handler = FakeSpeedHandler()
+_inner8._is_flying = True
+_env8.reset()  # required by OrderEnforcing wrapper
+_inner8._drone = fake_drone([1.0, 2.0, 3.0], [0.0, 0.0, 0.0])  # re-inject after reset
+
+_, _rew8, _term8, _trunc8, _info8 = _env8.step(_env8.action_space.sample())
+
+_d8 = math.sqrt(1.0 + 4.0 + 4.0)
+_dmax8 = _inner8.pos_limit * math.sqrt(3.0)
+_exp_rew8 = -(_d8 / _dmax8)
+
+check("reward == -d_norm (exact)",              math.isclose(_rew8, _exp_rew8, rel_tol=1e-5))
+check("reward in [-1.0, 0.0]",                 -1.0 <= _rew8 <= 0.0)
+check("non-terminal: terminated=False",        not _term8)
+check("non-terminal: truncated=False",         not _trunc8)
+check("non-terminal: terminal_reason absent",  'terminal_reason' not in _info8)
+_env8.close()
+
+# ===========================================================================
+# TEST 9 — Terminal conditions: success, out-of-bounds, max_steps
+# ===========================================================================
+print("\n[9] Terminal conditions — success / out-of-bounds / max_steps")
+
+# 9a — Success: drone within distance_threshold of target
+# target=[0,0,1,0], drone at [0.1, 0.0, 1.0] → d=0.1 < threshold=0.5
+# yaw=0.0 == target_yaw → yaw_err=0 → no yaw penalty
+_env9a = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone0', step_duration=0.0)
+_inner9a = _env9a.unwrapped
+_inner9a._drone = fake_drone([0.1, 0.0, 1.0], [0.0, 0.0, 0.0], yaw=0.0)
+_inner9a._speed_handler = FakeSpeedHandler()
+_inner9a._is_flying = True
+_env9a.reset()
+_inner9a._drone = fake_drone([0.1, 0.0, 1.0], [0.0, 0.0, 0.0], yaw=0.0)  # re-inject
+
+_, _rew9a, _term9a, _trunc9a, _info9a = _env9a.step(_env9a.action_space.sample())
+
+_d9a = 0.1
+_dmax9a = _inner9a.pos_limit * math.sqrt(3.0)
+_exp_rew9a = -(_d9a / _dmax9a) + _inner9a.success_reward  # yaw_err=0
+
+check("success: terminated=True",              _term9a)
+check("success: truncated=False",              not _trunc9a)
+check("success: terminal_reason='success'",    _info9a.get('terminal_reason') == 'success')
+check("success: reward = -d_norm + bonus",     math.isclose(_rew9a, _exp_rew9a, rel_tol=1e-5))
+_env9a.close()
+
+# 9b — Out-of-bounds: drone at [6.0, 0.0, 0.0] → 6.0 > pos_limit=5.0
+# reward is OVERWRITTEN to -oob_penalty (not additive with -d_norm)
+_env9b = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone1', step_duration=0.0)
+_inner9b = _env9b.unwrapped
+_inner9b._drone = fake_drone([6.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+_inner9b._speed_handler = FakeSpeedHandler()
+_inner9b._is_flying = True
+_env9b.reset()
+_inner9b._drone = fake_drone([6.0, 0.0, 0.0], [0.0, 0.0, 0.0])  # re-inject
+
+_, _rew9b, _term9b, _trunc9b, _info9b = _env9b.step(_env9b.action_space.sample())
+
+check("oob: terminated=True",                     _term9b)
+check("oob: truncated=False",                     not _trunc9b)
+check("oob: terminal_reason='out_of_bounds'",     _info9b.get('terminal_reason') == 'out_of_bounds')
+check("oob: reward == -oob_penalty (overwritten)", math.isclose(_rew9b, -_inner9b.oob_penalty, rel_tol=1e-5))
+_env9b.close()
+
+# 9c — max_steps: step_count reaches max_steps → truncated, NOT terminated
+# drone at [1.0, 0.0, 1.0] — not at target, not OOB
+_env9c = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone2',
+                        step_duration=0.0, max_steps=5)
+_inner9c = _env9c.unwrapped
+_inner9c._drone = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner9c._speed_handler = FakeSpeedHandler()
+_inner9c._is_flying = True
+_env9c.reset()
+_inner9c._drone = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])  # re-inject
+_inner9c._step_count = _inner9c.max_steps - 1  # set AFTER reset (reset zeroes it)
+
+_, _, _term9c, _trunc9c, _info9c = _env9c.step(_env9c.action_space.sample())
+
+check("max_steps: truncated=True",               _trunc9c)
+check("max_steps: terminated=False",             not _term9c)
+check("max_steps: terminal_reason='max_steps'",  _info9c.get('terminal_reason') == 'max_steps')
+_env9c.close()
 
 # ===========================================================================
 # Summary

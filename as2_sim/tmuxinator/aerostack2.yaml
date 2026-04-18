@@ -14,11 +14,14 @@ windows:
   - platform:
       layout: tiled
       panes:
+        # base_launch:=false attaches only the namespaced platform node to the
+        # already-running physics simulator spawned by the first (base) drone.
         - ros2 launch as2_platform_multirotor_simulator as2_platform_multirotor_simulator.launch.py
             namespace:=<%= drone_namespace %>
             config_file:=config/config.yaml
             uav_config:=config/uav_config.yaml
             world_config:=<%= simulation_config_file %>
+            base_launch:=<%= base_launch %>
 
   # Basic Robotics Functions
   - basics_robotics_functions:
@@ -43,8 +46,10 @@ windows:
         - ros2 launch as2_behaviors_motion motion_behaviors_launch.py
             namespace:=<%= drone_namespace %>
             config_file:=config/config.yaml
+<% if base_launch %>
 
-  # Visualization (RViz)
+  # Visualization (RViz) — only on the base drone to avoid duplicate RViz windows
+  # fighting over the shared simulator's TF tree.
   - visualization:
       layout:
       panes:
@@ -52,3 +57,4 @@ windows:
             namespace:=<%= drone_namespace %>
             use_sim_time:=false
             rviz:=true
+<% end %>
