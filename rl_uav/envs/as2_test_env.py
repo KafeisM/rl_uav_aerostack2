@@ -10,7 +10,14 @@ Actions:
     - Angular yaw velocity (vyaw) in rad/s, bounded to [-max_yaw_vel, max_yaw_vel]
 
 Reward:
-    - Always 0 (not meaningful, only for connectivity testing)
+    - Continuous distance penalty: reward = -d_normalized (each step)
+    - Success terminal bonus: +success_reward (default 20.0) when d < distance_threshold
+    - Yaw alignment penalty at success: -abs(yaw_error) * yaw_penalty
+    - Out-of-bounds penalty: -oob_penalty (default 10.0) when exceeding pos_limit
+
+Termination:
+    - terminated=True: success (d < threshold) or out-of-bounds
+    - truncated=True: step count exceeds max_steps
 """
 
 __authors__ = 'Jordi'
@@ -61,6 +68,11 @@ class AS2TestEnv(gym.Env):
         pos_limit: float = 5.0,
         step_duration: float = 0.1,
         target_pose: list[float] | None = None,
+        distance_threshold: float = 0.5,
+        max_steps: int = 500,
+        success_reward: float = 20.0,
+        oob_penalty: float = 10.0,
+        yaw_penalty: float = 10.0,
     ):
         """
         Initialize the test environment.
@@ -81,6 +93,12 @@ class AS2TestEnv(gym.Env):
             target_pose: Target pose [x, y, z, yaw] for the drone to reach.
                          Defaults to [0, 0, 1, 0] (origin, 1m height, yaw=0).
                          The target is fixed across episodes.
+            distance_threshold: Distance in meters to consider target reached.
+            max_steps: Maximum steps per episode before truncation.
+            success_reward: Bonus reward for reaching the target.
+            oob_penalty: Penalty for going out of bounds (pos_limit exceeded).
+            yaw_penalty: Factor for yaw alignment penalty at success terminal.
+                         Penalty = abs(yaw_error_norm) * yaw_penalty.
         """
         super().__init__()
 
@@ -94,6 +112,11 @@ class AS2TestEnv(gym.Env):
         self.max_yaw_vel = max_yaw_vel
         self.pos_limit = pos_limit
         self.step_duration = step_duration
+        self.distance_threshold = distance_threshold
+        self.max_steps = max_steps
+        self.success_reward = success_reward
+        self.oob_penalty = oob_penalty
+        self.yaw_penalty = yaw_penalty
 
         # Target pose [x, y, z, yaw] — goal for the drone
         self._target_pose = (
@@ -191,6 +214,55 @@ class AS2TestEnv(gym.Env):
 
         return obs
 
+    def _compute_distance(self) -> tuple[float, float]:
+        """
+        Compute Euclidean distance from drone to target.
+
+        Uses raw (unclipped) positions for accurate distance even when
+        the drone exceeds the scenario boundaries.
+
+        Returns:
+            Tuple of (raw_distance_m, normalized_distance) where
+            normalized_distance ∈ [0, 1], clipped by pos_limit * √3.
+        """
+        try:
+            pose = self._drone.position
+            tx, ty, tz, _ = self._target_pose
+
+            d = math.sqrt(
+                (pose[0] - tx) ** 2
+                + (pose[1] - ty) ** 2
+                + (pose[2] - tz) ** 2
+            )
+
+            d_max = self.pos_limit * math.sqrt(3.0)
+            d_norm = min(d / d_max, 1.0)
+
+            return d, d_norm
+
+        except Exception as e:
+            logger.warning(f"Error computing distance: {e}")
+            return 0.0, 0.0
+
+    def _compute_yaw_error(self) -> float:
+        """
+        Compute normalized absolute yaw error between drone and target.
+
+        The yaw difference is wrapped to [-π, π] and then normalized
+        to [0, 1] where 0 = perfect alignment, 1 = 180° off.
+
+        Returns:
+            Absolute normalized yaw error ∈ [0, 1].
+        """
+        try:
+            yaw = self._drone.orientation[2]
+            _, _, _, tyaw = self._target_pose
+            dyaw = math.atan2(math.sin(yaw - tyaw), math.cos(yaw - tyaw))
+            return abs(dyaw) / math.pi
+        except Exception as e:
+            logger.warning(f"Error computing yaw error: {e}")
+            return 0.0
+
     def _get_info(self) -> dict[str, Any]:
         """
         Build info dict with detailed state for debugging.
@@ -209,6 +281,9 @@ class AS2TestEnv(gym.Env):
             info['position'] = list(self._drone.position)
             info['speed'] = list(self._drone.speed)
             info['orientation'] = list(self._drone.orientation)
+            d, d_norm = self._compute_distance()
+            info['distance'] = d
+            info['distance_norm'] = d_norm
         except Exception as e:
             info['state_error'] = str(e)
 
@@ -306,14 +381,44 @@ class AS2TestEnv(gym.Env):
         info = self._get_info()
         info['action_sent'] = [vx, vy, vz, vyaw]
 
-        # Reward = 0 (connectivity test only)
-        reward = 0.0
+        # Continuous distance penalty: closer to target → higher reward
+        d_raw, d_norm = self._compute_distance()
+        reward = -d_norm
 
-        # Never terminate (user stops manually)
         terminated = False
         truncated = False
 
+        # --- Terminal conditions ---
+
+        # Success: drone reached the target
+        if d_raw < self.distance_threshold:
+            terminated = True
+            yaw_err = self._compute_yaw_error()
+            reward += self.success_reward
+            reward -= yaw_err * self.yaw_penalty
+            info['terminal_reason'] = 'success'
+            info['yaw_error_norm'] = yaw_err
+
+        # Out-of-bounds: drone exceeded scenario limits
+        elif self._is_out_of_bounds():
+            terminated = True
+            reward = -self.oob_penalty
+            info['terminal_reason'] = 'out_of_bounds'
+
+        # Max steps: episode truncation (time limit)
+        if not terminated and self._step_count >= self.max_steps:
+            truncated = True
+            info['terminal_reason'] = 'max_steps'
+
         return obs, reward, terminated, truncated, info
+
+    def _is_out_of_bounds(self) -> bool:
+        """Check if the drone has exceeded the scenario boundaries."""
+        try:
+            pose = self._drone.position
+            return any(abs(p) > self.pos_limit for p in pose)
+        except Exception:
+            return False
 
     def close(self):
         """Land the drone and shut down ROS2."""
