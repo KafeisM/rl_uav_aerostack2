@@ -24,6 +24,7 @@ __license__ = 'BSD-3-Clause'
 import sys
 import types
 import logging
+import math
 
 logging.basicConfig(level=logging.WARNING)  # suppress environment logs
 
@@ -71,12 +72,12 @@ def check(label, condition):
         errors += 1
 
 
-def fake_drone(pos, vel):
-    """Mock drone with fixed position and velocity."""
+def fake_drone(pos, vel, yaw=0.0):
+    """Mock drone with fixed position, velocity and yaw."""
     class _Drone:
         position = list(pos)
         speed = list(vel)
-        orientation = [0.0, 0.0, 0.0, 1.0]
+        orientation = [0.0, 0.0, yaw]
         def arm(self, **kw): return True
         def offboard(self, **kw): return True
         def takeoff(self, **kw): return True
@@ -90,16 +91,18 @@ class FakeSpeedHandler:
     def send_speed_command_with_yaw_speed(self, **kw): pass
 
 
-def inject_mocks(vec_env, positions, velocities):
+def inject_mocks(vec_env, positions, velocities, yaws=None):
     """Inject mock drones into each sub-environment."""
+    if yaws is None:
+        yaws = [0.0] * len(positions)
     for i, env in enumerate(vec_env.envs):
         inner = env.unwrapped
-        inner._drone = fake_drone(positions[i], velocities[i])
+        inner._drone = fake_drone(positions[i], velocities[i], yaws[i])
         inner._speed_handler = FakeSpeedHandler()
         inner._is_flying = True
 
 
-# Test data: 4 drones with different positions and velocities
+# Test data: 4 drones with different positions, velocities, and yaw angles
 NUM_ENVS = 4
 POSITIONS = [
     [ 1.0,  2.0,  3.0],   # normal values, within boundary
@@ -113,6 +116,13 @@ VELOCITIES = [
     [ 0.0,  0.0,  0.0],
     [ 1.0,  1.0,  1.0],
 ]
+YAWS = [
+    0.5,           # small positive yaw
+    -1.0,          # negative yaw
+    0.0,           # zero yaw
+    3.0,           # near π — tests wrapping
+]
+# Default target_pose is [0, 0, 1, 0]
 
 
 # ===========================================================================
@@ -151,9 +161,9 @@ vec_env = gymnasium.vector.SyncVectorEnv([
     for i in range(NUM_ENVS)
 ])
 check(f"num_envs == {NUM_ENVS}",                   vec_env.num_envs == NUM_ENVS)
-check("single_obs_space.shape == (6,)",            vec_env.single_observation_space.shape == (6,))
+check("single_obs_space.shape == (4,)",            vec_env.single_observation_space.shape == (4,))
 check("single_action_space.shape == (4,)",         vec_env.single_action_space.shape == (4,))
-check(f"batched obs_space.shape == ({NUM_ENVS},6)", vec_env.observation_space.shape == (NUM_ENVS, 6))
+check(f"batched obs_space.shape == ({NUM_ENVS},4)", vec_env.observation_space.shape == (NUM_ENVS, 4))
 for i in range(NUM_ENVS):
     ns = vec_env.envs[i].unwrapped.drone_namespace
     check(f"  sub-env[{i}].drone_namespace == 'drone{i}'", ns == f'drone{i}')
@@ -167,17 +177,17 @@ vec_env = gymnasium.vector.SyncVectorEnv([
     (lambda ns=f'drone{i}': gymnasium.make('AS2TestEnv-v0', drone_namespace=ns))
     for i in range(NUM_ENVS)
 ])
-inject_mocks(vec_env, POSITIONS, VELOCITIES)
+inject_mocks(vec_env, POSITIONS, VELOCITIES, YAWS)
 
 obs_r, infos_r = vec_env.reset()
-check(f"reset: obs.shape == ({NUM_ENVS}, 6)", obs_r.shape == (NUM_ENVS, 6))
+check(f"reset: obs.shape == ({NUM_ENVS}, 4)", obs_r.shape == (NUM_ENVS, 4))
 check("reset: obs.dtype == float32",           obs_r.dtype == np.float32)
 check("reset: infos is not empty",             len(infos_r) > 0)
 
-inject_mocks(vec_env, POSITIONS, VELOCITIES)  # re-inject after reset
+inject_mocks(vec_env, POSITIONS, VELOCITIES, YAWS)  # re-inject after reset
 actions = vec_env.action_space.sample()
 obs_s, rews, terms, truncs, infos_s = vec_env.step(actions)
-check(f"step: obs.shape == ({NUM_ENVS}, 6)",      obs_s.shape == (NUM_ENVS, 6))
+check(f"step: obs.shape == ({NUM_ENVS}, 4)",      obs_s.shape == (NUM_ENVS, 4))
 check(f"step: rewards.shape == ({NUM_ENVS},)",    rews.shape == (NUM_ENVS,))
 check(f"step: terminated.shape == ({NUM_ENVS},)", terms.shape == (NUM_ENVS,))
 check(f"step: truncated.shape == ({NUM_ENVS},)",  truncs.shape == (NUM_ENVS,))
@@ -191,17 +201,22 @@ vec_env = gymnasium.vector.SyncVectorEnv([
     (lambda ns=f'drone{i}': gymnasium.make('AS2TestEnv-v0', drone_namespace=ns))
     for i in range(NUM_ENVS)
 ])
-inject_mocks(vec_env, POSITIONS, VELOCITIES)
+inject_mocks(vec_env, POSITIONS, VELOCITIES, YAWS)
 obs_r, _ = vec_env.reset()
 check("reset: all obs >= -1.0", np.all(obs_r >= -1.0))
 check("reset: all obs <=  1.0", np.all(obs_r <=  1.0))
 
 # Test clipping when drone exceeds boundaries (10 m with pos_limit=5)
+# Target is at [0, 0, 1, 0], so relative pos = [10, -10, 9] / 5 = [2, -2, 1.8]
+# All exceed ±1.0 and should be clipped
 out_pos  = [[10.0, -10.0, 10.0]] * NUM_ENVS
 out_vels = [[ 5.0,  -5.0,  5.0]] * NUM_ENVS
 inject_mocks(vec_env, out_pos, out_vels)
 obs_out, _ = vec_env.reset()
-check("out-of-bounds clipped to ±1.0", np.all(np.abs(obs_out) == 1.0))
+check("out-of-bounds: pos dims clipped to ±1.0",
+      np.all(np.abs(obs_out[:, :3]) == 1.0))
+check("out-of-bounds: all obs in [-1, 1]",
+      np.all(obs_out >= -1.0) and np.all(obs_out <= 1.0))
 vec_env.close()
 
 # ===========================================================================
@@ -212,22 +227,29 @@ vec_env = gymnasium.vector.SyncVectorEnv([
     (lambda ns=f'drone{i}': gymnasium.make('AS2TestEnv-v0', drone_namespace=ns))
     for i in range(NUM_ENVS)
 ])
-inject_mocks(vec_env, POSITIONS, VELOCITIES)
+inject_mocks(vec_env, POSITIONS, VELOCITIES, YAWS)
 vec_env.reset()
+
+# Default target_pose = [0, 0, 1, 0]
+tx, ty, tz, tyaw = 0.0, 0.0, 1.0, 0.0
 
 for i in range(NUM_ENVS):
     inner = vec_env.envs[i].unwrapped
-    inner._drone = fake_drone(POSITIONS[i], VELOCITIES[i])  # re-inject after reset
-    expected = np.clip(np.array([
-        POSITIONS[i][0]  / inner.pos_limit,
-        POSITIONS[i][1]  / inner.pos_limit,
-        POSITIONS[i][2]  / inner.pos_limit,
-        VELOCITIES[i][0] / inner.max_vel,
-        VELOCITIES[i][1] / inner.max_vel,
-        VELOCITIES[i][2] / inner.max_vel,
-    ], dtype=np.float32), -1.0, 1.0)
+    inner._drone = fake_drone(POSITIONS[i], VELOCITIES[i], YAWS[i])  # re-inject
+
+    # Relative position
+    dx = (POSITIONS[i][0] - tx) / inner.pos_limit
+    dy = (POSITIONS[i][1] - ty) / inner.pos_limit
+    dz = (POSITIONS[i][2] - tz) / inner.pos_limit
+
+    # Relative yaw with wrapping
+    dyaw_raw = YAWS[i] - tyaw
+    dyaw = math.atan2(math.sin(dyaw_raw), math.cos(dyaw_raw))
+    dyaw_norm = dyaw / math.pi
+
+    expected = np.clip(np.array([dx, dy, dz, dyaw_norm], dtype=np.float32), -1.0, 1.0)
     actual = inner._get_obs()
-    check(f"  sub-env[{i}] normalized obs is correct", np.allclose(actual, expected))
+    check(f"  sub-env[{i}] relative obs is correct", np.allclose(actual, expected))
 vec_env.close()
 
 # ===========================================================================

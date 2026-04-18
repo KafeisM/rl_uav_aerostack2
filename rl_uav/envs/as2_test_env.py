@@ -1,15 +1,9 @@
 """
-AS2TestEnv — Minimal Gymnasium environment for verifying connectivity
-with the Aerostack2 multirotor simulator.
-
-This environment is NOT intended for RL training. Its purpose is to:
-1. Verify that the DroneInterface connects correctly to the simulator.
-2. Confirm that state information (position, velocity) is received properly.
-3. Validate that velocity commands are sent and executed by the drone.
+AS2TestEnv — Gymnasium environment for the Aerostack2 multirotor simulator.
 
 Observations (normalized to [-1, 1]):
-    - Position (x, y, z) — divided by pos_limit (boundary of the scenario)
-    - Velocity (vx, vy, vz) — divided by max_vel
+    - Relative position (dx, dy, dz) — (drone - target) / pos_limit
+    - Relative yaw (dyaw) — angular difference wrapped to [-π, π], then / π
 
 Actions:
     - Linear velocity commands (vx, vy, vz) in m/s, bounded to [-max_vel, max_vel]
@@ -66,6 +60,7 @@ class AS2TestEnv(gym.Env):
         max_yaw_vel: float = math.pi,
         pos_limit: float = 5.0,
         step_duration: float = 0.1,
+        target_pose: list[float] | None = None,
     ):
         """
         Initialize the test environment.
@@ -77,12 +72,15 @@ class AS2TestEnv(gym.Env):
             takeoff_height: Height for takeoff in meters.
             takeoff_speed: Speed for takeoff in m/s.
             land_speed: Speed for landing in m/s.
-            max_vel: Maximum velocity command in m/s. Used to normalize velocity observations.
+            max_vel: Maximum velocity command in m/s.
             max_yaw_vel: Maximum yaw angular velocity in rad/s (default: π ≈ 180°/s).
                          Defines the bounds of the yaw action dimension.
             pos_limit: Maximum absolute position in meters (scenario boundary).
-                       Used to normalize position observations to [-1, 1].
+                       Used to normalize relative position observations to [-1, 1].
             step_duration: Duration to wait after sending command (seconds).
+            target_pose: Target pose [x, y, z, yaw] for the drone to reach.
+                         Defaults to [0, 0, 1, 0] (origin, 1m height, yaw=0).
+                         The target is fixed across episodes.
         """
         super().__init__()
 
@@ -97,12 +95,19 @@ class AS2TestEnv(gym.Env):
         self.pos_limit = pos_limit
         self.step_duration = step_duration
 
-        # Observation space: [x, y, z, vx, vy, vz] — all normalized to [-1, 1]
-        # Position normalized by pos_limit; velocity normalized by max_vel.
+        # Target pose [x, y, z, yaw] — goal for the drone
+        self._target_pose = (
+            list(target_pose) if target_pose is not None
+            else [0.0, 0.0, 1.0, 0.0]
+        )
+
+        # Observation space: [dx, dy, dz, dyaw] — relative to target,
+        # all normalized to [-1, 1].
+        # Position diff normalized by pos_limit; yaw diff normalized by π.
         self.observation_space = spaces.Box(
             low=-1.0,
             high=1.0,
-            shape=(6,),
+            shape=(4,),
             dtype=np.float32
         )
 
@@ -145,38 +150,44 @@ class AS2TestEnv(gym.Env):
 
     def _get_obs(self) -> np.ndarray:
         """
-        Read current state from the DroneInterface and normalize to [-1, 1].
+        Compute relative state between drone and target, normalized to [-1, 1].
 
-        Position is divided by pos_limit; velocity is divided by max_vel.
+        Position difference is divided by pos_limit.
+        Yaw difference is wrapped to [-π, π] via atan2 and divided by π.
         Values are clipped to [-1, 1] in case the drone exceeds scenario bounds.
 
         Returns:
-            Normalized observation array [x, y, z, vx, vy, vz] ∈ [-1, 1]^6
+            Normalized observation array [dx, dy, dz, dyaw] ∈ [-1, 1]^4
         """
         try:
-            # Position from drone pose
+            # Drone position
             pose = self._drone.position
             x, y, z = pose[0], pose[1], pose[2]
 
-            # Velocity from drone speed
-            speed = self._drone.speed
-            vx, vy, vz = speed[0], speed[1], speed[2]
+            # Drone yaw from orientation [roll, pitch, yaw]
+            yaw = self._drone.orientation[2]
 
-            obs = np.array([
-                x / self.pos_limit,
-                y / self.pos_limit,
-                z / self.pos_limit,
-                vx / self.max_vel,
-                vy / self.max_vel,
-                vz / self.max_vel,
-            ], dtype=np.float32)
+            # Target
+            tx, ty, tz, tyaw = self._target_pose
+
+            # Relative position (drone - target), normalized by pos_limit
+            dx = (x - tx) / self.pos_limit
+            dy = (y - ty) / self.pos_limit
+            dz = (z - tz) / self.pos_limit
+
+            # Relative yaw with angular wrapping to [-π, π], then / π
+            dyaw_raw = yaw - tyaw
+            dyaw = math.atan2(math.sin(dyaw_raw), math.cos(dyaw_raw))
+            dyaw_norm = dyaw / math.pi
+
+            obs = np.array([dx, dy, dz, dyaw_norm], dtype=np.float32)
 
             # Clip in case the drone exceeds the defined boundaries
             obs = np.clip(obs, -1.0, 1.0)
 
         except Exception as e:
             logger.warning(f"Error reading drone state: {e}")
-            obs = np.zeros(6, dtype=np.float32)
+            obs = np.zeros(4, dtype=np.float32)
 
         return obs
 
@@ -191,6 +202,7 @@ class AS2TestEnv(gym.Env):
             'step_count': self._step_count,
             'is_flying': self._is_flying,
             'drone_namespace': self.drone_namespace,
+            'target_pose': list(self._target_pose),
         }
 
         try:

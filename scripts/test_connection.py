@@ -107,12 +107,12 @@ def main():
             obs, reward, terminated, truncated, info = env.step(action)
 
             # Print state every step
-            pos = obs[:3]
-            vel = obs[3:6]
+            rel_pos = obs[:3]
+            rel_yaw = obs[3]
             logger.info(
                 f"Step {i+1:3d} | "
-                f"Pos: [{pos[0]:7.3f}, {pos[1]:7.3f}, {pos[2]:7.3f}] | "
-                f"Vel: [{vel[0]:7.3f}, {vel[1]:7.3f}, {vel[2]:7.3f}] | "
+                f"Rel: [{rel_pos[0]:7.3f}, {rel_pos[1]:7.3f}, {rel_pos[2]:7.3f}] | "
+                f"dYaw: {rel_yaw:7.3f} | "
                 f"Action: [{action[0]:6.3f}, {action[1]:6.3f}, {action[2]:6.3f}, {action[3]:6.3f}]"
             )
 
@@ -128,8 +128,7 @@ def main():
         logger.info("Test Summary")
         logger.info("=" * 60)
         logger.info(f"  Steps completed: {i+1}")
-        logger.info(f"  Final position: {obs[:3]}")
-        logger.info(f"  Final velocity: {obs[3:6]}")
+        logger.info(f"  Final relative state: {obs}")
         logger.info(f"  Final info: {info}")
         logger.info("")
         logger.info("Connectivity test PASSED ✓")
