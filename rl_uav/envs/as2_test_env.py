@@ -242,7 +242,7 @@ class AS2TestEnv(gym.Env):
 
         except Exception as e:
             logger.warning(f"Error computing distance: {e}")
-            return 0.0, 0.0
+            return float('inf'), 1.0
 
     def _compute_yaw_error(self) -> float:
         """
