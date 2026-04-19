@@ -31,6 +31,15 @@ checkpoints/
 runs/
 models/
 
+# Keep internal ATL artifacts ignored by default
+.atl/*
+
+# Local-only agent and governance docs
 AGENTS.md
-.atl/
 CLAUDE.md
+.atl/skill-registry.md
+docs/
+
+
+
+.docs/*
