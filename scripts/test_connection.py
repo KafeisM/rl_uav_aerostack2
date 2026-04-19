@@ -4,19 +4,22 @@ Test script for verifying connectivity with the AS2 multirotor simulator.
 
 Usage:
     1. Launch the AS2 simulator:
-       cd as2_sim && ./launch_sim.bash
+       ./as2_sim/launch_sim.bash
 
     2. Run this script:
-       python3 scripts/test_connection.py
+       conda run -n rl_uav python3 scripts/test_connection.py
 
     3. Stop the simulator:
-       cd as2_sim && ./stop_sim.bash
+       ./as2_sim/stop_sim.bash
 
 The script will:
-    - Create an AS2TestEnv
+    - Create one AS2TestEnv (single-drone smoke test)
     - Reset (arm, offboard, takeoff)
-    - Execute N random steps, printing observations at each step
+    - Execute N random steps, printing normalized relative state [dx, dy, dz, dyaw]
     - Close (land, shutdown)
+
+For 4-drone one-process real validation, use:
+    conda run -n rl_uav python3 scripts/validate_real_vectorized_sim.py
 """
 
 __authors__ = 'Jordi'
@@ -111,7 +114,7 @@ def main():
             rel_yaw = obs[3]
             logger.info(
                 f"Step {i+1:3d} | "
-                f"Rel: [{rel_pos[0]:7.3f}, {rel_pos[1]:7.3f}, {rel_pos[2]:7.3f}] | "
+                f"RelPos: [{rel_pos[0]:7.3f}, {rel_pos[1]:7.3f}, {rel_pos[2]:7.3f}] | "
                 f"dYaw: {rel_yaw:7.3f} | "
                 f"Action: [{action[0]:6.3f}, {action[1]:6.3f}, {action[2]:6.3f}, {action[3]:6.3f}]"
             )

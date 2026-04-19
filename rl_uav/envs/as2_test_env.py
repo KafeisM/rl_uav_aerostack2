@@ -10,9 +10,12 @@ Actions:
     - Angular yaw velocity (vyaw) in rad/s, bounded to [-max_yaw_vel, max_yaw_vel]
 
 Reward:
-    - Continuous distance penalty: reward = -d_normalized (each step)
+    - Continuous distance penalty: reward_distance = -d_normalized (each step)
+    - Continuous path-facing term: path_facing_weight * cos(yaw - path_yaw)
+      based on measured horizontal velocity direction
+    - Low-speed deadband neutrality: if speed_xy <= speed_deadband,
+      path-facing contribution is 0.0
     - Success terminal bonus: +success_reward (default 20.0) when d < distance_threshold
-    - Yaw alignment penalty at success: -abs(yaw_error) * yaw_penalty
     - Out-of-bounds penalty: -oob_penalty (default 10.0) when exceeding pos_limit
 
 Termination:
@@ -72,7 +75,8 @@ class AS2TestEnv(gym.Env):
         max_steps: int = 500,
         success_reward: float = 20.0,
         oob_penalty: float = 10.0,
-        yaw_penalty: float = 10.0,
+        path_facing_weight: float = 0.25,
+        speed_deadband: float = 0.05,
     ):
         """
         Initialize the test environment.
@@ -97,8 +101,9 @@ class AS2TestEnv(gym.Env):
             max_steps: Maximum steps per episode before truncation.
             success_reward: Bonus reward for reaching the target.
             oob_penalty: Penalty for going out of bounds (pos_limit exceeded).
-            yaw_penalty: Factor for yaw alignment penalty at success terminal.
-                         Penalty = abs(yaw_error_norm) * yaw_penalty.
+            path_facing_weight: Scale factor for continuous path-facing shaping term.
+            speed_deadband: Horizontal speed threshold (m/s) below which
+                            path-facing is considered undefined and neutral.
         """
         super().__init__()
 
@@ -116,7 +121,8 @@ class AS2TestEnv(gym.Env):
         self.max_steps = max_steps
         self.success_reward = success_reward
         self.oob_penalty = oob_penalty
-        self.yaw_penalty = yaw_penalty
+        self.path_facing_weight = path_facing_weight
+        self.speed_deadband = speed_deadband
 
         # Target pose [x, y, z, yaw] — goal for the drone
         self._target_pose = (
@@ -244,20 +250,47 @@ class AS2TestEnv(gym.Env):
             logger.warning(f"Error computing distance: {e}")
             return float('inf'), 1.0
 
-    def _compute_yaw_error(self) -> float:
-        """
-        Compute normalized absolute yaw error between drone and target.
+    def _wrap_angle(self, angle: float) -> float:
+        """Wrap angle to [-π, π]."""
+        return math.atan2(math.sin(angle), math.cos(angle))
 
-        The yaw difference is wrapped to [-π, π] and then normalized
-        to [0, 1] where 0 = perfect alignment, 1 = 180° off.
+    def _compute_reward_distance(self, d_norm: float) -> float:
+        """Distance contribution to reward."""
+        return -d_norm
+
+    def _compute_path_facing_term(self) -> tuple[float, float, float, float]:
+        """
+        Compute continuous path-facing reward from measured horizontal velocity.
 
         Returns:
-            Absolute normalized yaw error ∈ [0, 1].
+            Tuple (path_facing_reward, speed_xy, path_yaw, path_yaw_error)
         """
+        try:
+            yaw = float(self._drone.orientation[2])
+            speed = self._drone.speed
+            vx = float(speed[0])
+            vy = float(speed[1])
+            speed_xy = math.hypot(vx, vy)
+
+            if speed_xy <= self.speed_deadband:
+                return 0.0, speed_xy, yaw, 0.0
+
+            path_yaw = math.atan2(vy, vx)
+            path_yaw_error = self._wrap_angle(yaw - path_yaw)
+            path_facing_reward = self.path_facing_weight * math.cos(path_yaw_error)
+
+            return path_facing_reward, speed_xy, path_yaw, path_yaw_error
+
+        except Exception as e:
+            logger.warning(f"Error computing path-facing term: {e}")
+            return 0.0, 0.0, 0.0, 0.0
+
+    def _compute_yaw_error(self) -> float:
+        """Backward-compatible target yaw error helper (unused in reward)."""
         try:
             yaw = self._drone.orientation[2]
             _, _, _, tyaw = self._target_pose
-            dyaw = math.atan2(math.sin(yaw - tyaw), math.cos(yaw - tyaw))
+            dyaw = self._wrap_angle(yaw - tyaw)
             return abs(dyaw) / math.pi
         except Exception as e:
             logger.warning(f"Error computing yaw error: {e}")
@@ -381,9 +414,17 @@ class AS2TestEnv(gym.Env):
         info = self._get_info()
         info['action_sent'] = [vx, vy, vz, vyaw]
 
-        # Continuous distance penalty: closer to target → higher reward
+        # Continuous reward: distance penalty + path-facing shaping
         d_raw, d_norm = self._compute_distance()
-        reward = -d_norm
+        reward_distance = self._compute_reward_distance(d_norm)
+        path_facing_reward, speed_xy, path_yaw, path_yaw_error = self._compute_path_facing_term()
+        reward = reward_distance + path_facing_reward
+
+        info['reward_distance'] = reward_distance
+        info['path_facing_reward'] = path_facing_reward
+        info['speed_xy'] = speed_xy
+        info['path_yaw'] = path_yaw
+        info['path_yaw_error'] = path_yaw_error
 
         terminated = False
         truncated = False
@@ -393,11 +434,8 @@ class AS2TestEnv(gym.Env):
         # Success: drone reached the target
         if d_raw < self.distance_threshold:
             terminated = True
-            yaw_err = self._compute_yaw_error()
             reward += self.success_reward
-            reward -= yaw_err * self.yaw_penalty
             info['terminal_reason'] = 'success'
-            info['yaw_error_norm'] = yaw_err
 
         # Out-of-bounds: drone exceeded scenario limits
         elif self._is_out_of_bounds():

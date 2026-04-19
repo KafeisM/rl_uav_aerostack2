@@ -47,15 +47,21 @@ cd as2_sim
 In another terminal (with ROS2 sourced) for example:
 
 ```bash
-python3 scripts/test_connection.py
+conda run -n rl_uav python3 scripts/test_connection.py
 ```
 
-This will:
+This single-drone smoke test will:
 - Connect to the simulator via `DroneInterface`
 - Arm, set offboard mode, and take off
 - Execute random velocity commands for N steps
-- Print received observations (position, velocity) at each step
+- Print normalized relative observation `[dx, dy, dz, dyaw]` at each step
 - Land and shut down
+
+For the required real vectorized validation (4 drones, one Python process):
+
+```bash
+conda run -n rl_uav python3 scripts/validate_real_vectorized_sim.py
+```
 
 ### 3. Stop the simulator
 
@@ -79,7 +85,9 @@ rl_uav_aerostack2/
 │   │   └── as2_test_env.py     # Test Gymnasium environment
 │   └── __init__.py
 ├── scripts/
-│   └── test_connection.py      # Connectivity test script
+│   ├── test_connection.py              # Single-drone smoke connectivity test
+│   ├── test_vectorization.py           # Deterministic mocked vectorization tests
+│   └── validate_real_vectorized_sim.py # Real AS2 4-drone one-process validator
 ├── configs/                    # Training configs (future)
 ├── pyproject.toml
 └── README.md

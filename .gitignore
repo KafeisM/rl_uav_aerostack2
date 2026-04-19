@@ -33,6 +33,7 @@ models/
 
 # Keep internal ATL artifacts ignored by default
 .atl/*
+openspec/
 
 # Local-only agent and governance docs
 AGENTS.md

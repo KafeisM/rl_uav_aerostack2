@@ -13,8 +13,9 @@ Tests:
   5. All observations are normalized to [-1, 1]
   6. Numerical normalization correctness per sub-environment
   7. Class-level _rclpy_initialized flag shared across instances
-  8. Reward correctness — continuous distance penalty value
+  8. Reward correctness — distance + continuous path-facing term
   9. Terminal conditions — success, out-of-bounds, max_steps
+ 10. Deadband determinism and neutrality at threshold
 
 Usage:
     conda run -n rl_uav python3 scripts/test_vectorization.py
@@ -27,6 +28,8 @@ import sys
 import types
 import logging
 import math
+import importlib.util
+from pathlib import Path
 
 logging.basicConfig(level=logging.WARNING)  # suppress environment logs
 
@@ -102,6 +105,81 @@ def inject_mocks(vec_env, positions, velocities, yaws=None):
         inner._drone = fake_drone(positions[i], velocities[i], yaws[i])
         inner._speed_handler = FakeSpeedHandler()
         inner._is_flying = True
+
+
+def build_mocked_env(
+    namespace='drone0',
+    *,
+    pos=(1.0, 2.0, 3.0),
+    vel=(0.0, 0.0, 0.0),
+    yaw=0.0,
+    speed_deadband=0.05,
+    path_facing_weight=0.25,
+):
+    """Create a gym env with deterministic mocked drone state."""
+    env = gymnasium.make(
+        'AS2TestEnv-v0',
+        drone_namespace=namespace,
+        step_duration=0.0,
+        speed_deadband=speed_deadband,
+        path_facing_weight=path_facing_weight,
+    )
+    inner = env.unwrapped
+    inner._drone = fake_drone(pos, vel, yaw=yaw)
+    inner._speed_handler = FakeSpeedHandler()
+    inner._is_flying = True
+    env.reset()  # required by OrderEnforcing wrapper
+    inner._drone = fake_drone(pos, vel, yaw=yaw)  # re-inject after reset
+    return env, inner
+
+
+def expected_reward_components(inner, pos, vel, yaw):
+    """Expected reward decomposition from mocked state."""
+    tx, ty, tz, _ = inner._target_pose
+    d = math.sqrt((pos[0] - tx) ** 2 + (pos[1] - ty) ** 2 + (pos[2] - tz) ** 2)
+    d_max = inner.pos_limit * math.sqrt(3.0)
+    d_norm = min(d / d_max, 1.0)
+    reward_distance = -d_norm
+
+    speed_xy = math.hypot(vel[0], vel[1])
+    if speed_xy <= inner.speed_deadband:
+        path_yaw = yaw
+        path_yaw_error = 0.0
+        path_facing_reward = 0.0
+    else:
+        path_yaw = math.atan2(vel[1], vel[0])
+        path_yaw_error = math.atan2(math.sin(yaw - path_yaw), math.cos(yaw - path_yaw))
+        path_facing_reward = inner.path_facing_weight * math.cos(path_yaw_error)
+
+    return {
+        'distance_norm': d_norm,
+        'reward_distance': reward_distance,
+        'speed_xy': speed_xy,
+        'path_yaw': path_yaw,
+        'path_yaw_error': path_yaw_error,
+        'path_facing_reward': path_facing_reward,
+        'reward_total': reward_distance + path_facing_reward,
+    }
+
+
+def check_reward_info(info, expected):
+    """Validate deterministic reward diagnostics in info."""
+    check(
+        "info has reward diagnostics",
+        all(k in info for k in ['reward_distance', 'path_facing_reward', 'speed_xy', 'path_yaw', 'path_yaw_error'])
+    )
+    check(
+        "info.reward_distance is correct",
+        math.isclose(info['reward_distance'], expected['reward_distance'], rel_tol=1e-5),
+    )
+    check(
+        "info.path_facing_reward is correct",
+        math.isclose(info['path_facing_reward'], expected['path_facing_reward'], rel_tol=1e-5),
+    )
+    check(
+        "info.speed_xy is correct",
+        math.isclose(info['speed_xy'], expected['speed_xy'], rel_tol=1e-5),
+    )
 
 
 # Test data: 4 drones with different positions, velocities, and yaw angles
@@ -273,32 +351,36 @@ check("e1, e2, e3 share _rclpy_initialized",
 e1.close(); e2.close(); e3.close()
 
 # ===========================================================================
-# TEST 8 — Reward correctness: continuous distance penalty
+# TEST 8 — Reward correctness: distance + path-facing
 # ===========================================================================
-print("\n[8] Reward correctness — continuous distance penalty")
-# drone at [1.0, 2.0, 3.0], target = [0, 0, 1, 0]
-# d = sqrt((1-0)^2 + (2-0)^2 + (3-1)^2) = sqrt(9) = 3.0
-# d_max = 5.0 * sqrt(3) ≈ 8.660 → d_norm ≈ 0.3464 → reward ≈ -0.3464
-_env8 = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone0', step_duration=0.0)
-_inner8 = _env8.unwrapped
-_inner8._drone = fake_drone([1.0, 2.0, 3.0], [0.0, 0.0, 0.0])
-_inner8._speed_handler = FakeSpeedHandler()
-_inner8._is_flying = True
-_env8.reset()  # required by OrderEnforcing wrapper
-_inner8._drone = fake_drone([1.0, 2.0, 3.0], [0.0, 0.0, 0.0])  # re-inject after reset
+print("\n[8] Reward correctness — distance + continuous path-facing")
 
+# Alignment test: measured velocity along +x and yaw=0 should maximize path-facing.
+_pos8 = (1.0, 2.0, 3.0)
+_vel8 = (1.0, 0.0, 0.0)
+_yaw8 = 0.0
+_env8, _inner8 = build_mocked_env(pos=_pos8, vel=_vel8, yaw=_yaw8)
 _, _rew8, _term8, _trunc8, _info8 = _env8.step(_env8.action_space.sample())
+_expected8 = expected_reward_components(_inner8, _pos8, _vel8, _yaw8)
 
-_d8 = math.sqrt(1.0 + 4.0 + 4.0)
-_dmax8 = _inner8.pos_limit * math.sqrt(3.0)
-_exp_rew8 = -(_d8 / _dmax8)
-
-check("reward == -d_norm (exact)",              math.isclose(_rew8, _exp_rew8, rel_tol=1e-5))
-check("reward in [-1.0, 0.0]",                 -1.0 <= _rew8 <= 0.0)
+check("reward == distance + path-facing", math.isclose(_rew8, _expected8['reward_total'], rel_tol=1e-5))
+check("path-facing aligned is positive", _info8['path_facing_reward'] > 0.0)
 check("non-terminal: terminated=False",        not _term8)
 check("non-terminal: truncated=False",         not _trunc8)
 check("non-terminal: terminal_reason absent",  'terminal_reason' not in _info8)
+check_reward_info(_info8, _expected8)
 _env8.close()
+
+# Opposition test: same measured velocity, yaw opposite (pi) should be lower.
+_opposed_yaw8 = math.pi
+_env8b, _inner8b = build_mocked_env(namespace='drone1', pos=_pos8, vel=_vel8, yaw=_opposed_yaw8)
+_, _rew8b, _, _, _info8b = _env8b.step(_env8b.action_space.sample())
+_expected8b = expected_reward_components(_inner8b, _pos8, _vel8, _opposed_yaw8)
+
+check("opposed yaw lowers total reward", _rew8b < _rew8)
+check("opposed yaw has negative path-facing", _info8b['path_facing_reward'] < 0.0)
+check_reward_info(_info8b, _expected8b)
+_env8b.close()
 
 # ===========================================================================
 # TEST 9 — Terminal conditions: success, out-of-bounds, max_steps
@@ -307,25 +389,26 @@ print("\n[9] Terminal conditions — success / out-of-bounds / max_steps")
 
 # 9a — Success: drone within distance_threshold of target
 # target=[0,0,1,0], drone at [0.1, 0.0, 1.0] → d=0.1 < threshold=0.5
-# yaw=0.0 == target_yaw → yaw_err=0 → no yaw penalty
+# terminal success reward should not include obsolete target-yaw penalty
 _env9a = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone0', step_duration=0.0)
 _inner9a = _env9a.unwrapped
-_inner9a._drone = fake_drone([0.1, 0.0, 1.0], [0.0, 0.0, 0.0], yaw=0.0)
+_inner9a._drone = fake_drone([0.1, 0.0, 1.0], [0.0, 0.0, 0.0], yaw=math.pi)
 _inner9a._speed_handler = FakeSpeedHandler()
 _inner9a._is_flying = True
 _env9a.reset()
-_inner9a._drone = fake_drone([0.1, 0.0, 1.0], [0.0, 0.0, 0.0], yaw=0.0)  # re-inject
+_inner9a._drone = fake_drone([0.1, 0.0, 1.0], [0.0, 0.0, 0.0], yaw=math.pi)  # re-inject
 
 _, _rew9a, _term9a, _trunc9a, _info9a = _env9a.step(_env9a.action_space.sample())
 
 _d9a = 0.1
 _dmax9a = _inner9a.pos_limit * math.sqrt(3.0)
-_exp_rew9a = -(_d9a / _dmax9a) + _inner9a.success_reward  # yaw_err=0
+_exp_rew9a = -(_d9a / _dmax9a) + _inner9a.success_reward
 
 check("success: terminated=True",              _term9a)
 check("success: truncated=False",              not _trunc9a)
 check("success: terminal_reason='success'",    _info9a.get('terminal_reason') == 'success')
-check("success: reward = -d_norm + bonus",     math.isclose(_rew9a, _exp_rew9a, rel_tol=1e-5))
+check("success: reward = -d_norm + bonus (no target-yaw penalty)", math.isclose(_rew9a, _exp_rew9a, rel_tol=1e-5))
+check("success: yaw_error_norm removed from info", 'yaw_error_norm' not in _info9a)
 _env9a.close()
 
 # 9b — Out-of-bounds: drone at [6.0, 0.0, 0.0] → 6.0 > pos_limit=5.0
@@ -364,6 +447,63 @@ check("max_steps: truncated=True",               _trunc9c)
 check("max_steps: terminated=False",             not _term9c)
 check("max_steps: terminal_reason='max_steps'",  _info9c.get('terminal_reason') == 'max_steps')
 _env9c.close()
+
+# ===========================================================================
+# TEST 10 — Deadband neutrality and deterministic threshold behavior
+# ===========================================================================
+print("\n[10] Deadband neutrality and deterministic threshold behavior")
+
+_deadband = 0.05
+_pos10 = (1.0, 0.0, 1.0)
+_vel10 = (_deadband, 0.0, 0.0)  # exactly on threshold
+_yaw10 = 1.7  # arbitrary yaw should not matter in deadband
+
+_env10, _inner10 = build_mocked_env(
+    namespace='drone3',
+    pos=_pos10,
+    vel=_vel10,
+    yaw=_yaw10,
+    speed_deadband=_deadband,
+)
+
+_, _rew10a, _, _, _info10a = _env10.step(_env10.action_space.sample())
+_inner10._drone = fake_drone(_pos10, _vel10, yaw=_yaw10)  # same exact state
+_, _rew10b, _, _, _info10b = _env10.step(_env10.action_space.sample())
+
+check("deadband: path-facing is neutral at threshold", math.isclose(_info10a['path_facing_reward'], 0.0, abs_tol=1e-8))
+check("deadband: repeated threshold reward is deterministic", math.isclose(_rew10a, _rew10b, rel_tol=1e-9))
+check("deadband: repeated threshold path-facing deterministic", math.isclose(_info10a['path_facing_reward'], _info10b['path_facing_reward'], abs_tol=1e-9))
+
+_expected10 = expected_reward_components(_inner10, _pos10, _vel10, _yaw10)
+check_reward_info(_info10a, _expected10)
+_env10.close()
+
+# ===========================================================================
+# TEST 11 — Real validator helper contracts (deterministic)
+# ===========================================================================
+print("\n[11] Real validator helper contracts")
+
+_validator_path = Path(__file__).resolve().parent / 'validate_real_vectorized_sim.py'
+_validator_spec = importlib.util.spec_from_file_location('validate_real_vectorized_sim', _validator_path)
+_validator = importlib.util.module_from_spec(_validator_spec)
+assert _validator_spec is not None and _validator_spec.loader is not None
+_validator_spec.loader.exec_module(_validator)
+
+_action_space = gymnasium.spaces.Box(
+    low=np.array([-2.0, -2.0, -2.0, -math.pi], dtype=np.float32),
+    high=np.array([2.0, 2.0, 2.0, math.pi], dtype=np.float32),
+    dtype=np.float32,
+)
+_hold_actions = _validator.build_hold_actions(_action_space, num_envs=4)
+check("validator: hold actions shape is (4,4)", _hold_actions.shape == (4, 4))
+check("validator: hold actions are zeroed", np.allclose(_hold_actions, 0.0))
+
+_done_namespaces = _validator.namespaces_with_done(
+    np.array([False, True, False, False]),
+    np.array([False, False, False, True]),
+    ['drone0', 'drone1', 'drone2', 'drone3'],
+)
+check("validator: namespaces_with_done reports terminated/truncated envs", _done_namespaces == ['drone1', 'drone3'])
 
 # ===========================================================================
 # Summary
