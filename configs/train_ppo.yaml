@@ -1,0 +1,55 @@
+experiment:
+  name: ppo_as2_baseline
+  seed: 42
+  output_root: runs/ppo
+
+environment:
+  env_id: AS2TestEnv-v0
+  num_envs: 1
+  vec_env: dummy  # dummy | subproc
+  namespace_prefix: drone
+  use_sim_time: false
+  verbose: false
+
+  # Keep environment contract and normalization assumptions unchanged.
+  pos_limit: 5.0
+  max_vel: 2.0
+  max_yaw_vel: 3.141592653589793
+  step_duration: 0.1
+  target_pose: [0.0, 0.0, 1.0, 0.0]
+  distance_threshold: 0.5
+  max_steps: 500
+  success_reward: 20.0
+  oob_penalty: 10.0
+  path_facing_weight: 0.25
+  speed_deadband: 0.05
+
+training:
+  total_timesteps: 1000000
+  device: auto
+  tensorboard_log_subdir: tensorboard
+  monitor_subdir: monitor
+  checkpoints_subdir: checkpoints
+  checkpoint_freq: 10000
+  checkpoint_prefix: ppo_as2
+
+ppo:
+  policy: MlpPolicy
+  learning_rate: 3.0e-05
+  n_steps: 512
+  batch_size: 32
+  n_epochs: 5
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  normalize_advantage: true
+  use_sde: true
+  sde_sample_freq: 8
+  policy_kwargs:
+    activation_fn: ReLU
+    net_arch:
+      pi: [128, 128]
+      vf: [128, 128]

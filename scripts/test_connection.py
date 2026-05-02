@@ -120,7 +120,18 @@ def main():
             )
 
             if terminated or truncated:
-                logger.warning("Episode ended unexpectedly!")
+                terminal_reason = info.get('terminal_reason')
+                if terminal_reason == 'success':
+                    logger.info(
+                        "Episode ended early with successful termination "
+                        f"(reason: {terminal_reason})."
+                    )
+                else:
+                    reason_msg = terminal_reason if terminal_reason is not None else 'unknown'
+                    logger.warning(
+                        "Episode terminated/truncated before completing requested "
+                        f"steps (reason: {reason_msg})."
+                    )
                 break
 
         logger.info("-" * 60)

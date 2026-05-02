@@ -63,7 +63,47 @@ For the required real vectorized validation (4 drones, one Python process):
 conda run -n rl_uav python3 scripts/validate_real_vectorized_sim.py
 ```
 
-### 3. Stop the simulator
+### 3. PPO training infrastructure (minimal, reproducible)
+
+This repository now includes a minimal SB3 PPO pipeline scaffold without auto-launching the simulator.
+
+1. Ensure training extras are installed:
+
+```bash
+pip install -e .[train]
+```
+
+2. Review defaults in `configs/train_ppo.yaml` (includes tutor baseline hyperparameters):
+   - `n_steps=512`
+   - `batch_size=32`
+   - `n_epochs=5`
+   - `normalize_advantage=true`
+   - `learning_rate=3e-5`
+   - `use_sde=true`
+   - `sde_sample_freq=8`
+   - `policy_kwargs`: `ReLU`, `pi/vf=[128,128]`
+
+3. Dry-run (build config, SB3 vec env, model, callbacks; no `learn()`):
+
+```bash
+conda run -n rl_uav python3 scripts/train_ppo.py --config configs/train_ppo.yaml --dry-run
+```
+
+4. Training command (manual execution only, simulator must already be running):
+
+```bash
+conda run -n rl_uav python3 scripts/train_ppo.py --config configs/train_ppo.yaml
+```
+
+5. Scale from 1 to N drones by overriding env count:
+
+```bash
+conda run -n rl_uav python3 scripts/train_ppo.py --config configs/train_ppo.yaml --num-envs 4 --dry-run
+```
+
+`train_ppo.py` uses SB3 `DummyVecEnv`/`SubprocVecEnv` (configurable), wraps envs with `Monitor` + `VecMonitor`, and prepares a `CheckpointCallback`.
+
+### 4. Stop the simulator
 
 ```bash
 cd as2_sim
@@ -87,8 +127,12 @@ rl_uav_aerostack2/
 ├── scripts/
 │   ├── test_connection.py              # Single-drone smoke connectivity test
 │   ├── test_vectorization.py           # Deterministic mocked vectorization tests
-│   └── validate_real_vectorized_sim.py # Real AS2 4-drone one-process validator
-├── configs/                    # Training configs (future)
+│   ├── validate_real_vectorized_sim.py # Real AS2 4-drone one-process validator
+│   └── train_ppo.py                    # PPO entry point (dry-run or training)
+├── configs/
+│   └── train_ppo.yaml                  # Declarative PPO training defaults
+├── rl_uav/
+│   └── training/                       # Config/env/model setup helpers for SB3
 ├── pyproject.toml
 └── README.md
 ```
