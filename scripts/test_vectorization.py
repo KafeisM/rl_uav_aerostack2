@@ -29,6 +29,7 @@ import types
 import logging
 import math
 import importlib.util
+import time
 from pathlib import Path
 
 logging.basicConfig(level=logging.WARNING)  # suppress environment logs
@@ -506,8 +507,109 @@ _done_namespaces = _validator.namespaces_with_done(
 check("validator: namespaces_with_done reports terminated/truncated envs", _done_namespaces == ['drone1', 'drone3'])
 
 # ===========================================================================
+# TEST 12 — Randomized hover reset contracts
+# ===========================================================================
+print("\n[12] Randomized hover reset contracts")
+_env12 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone12',
+    step_duration=0.0,
+    randomize_hover_start=True,
+    scene_bounds_xy=5.0,
+    height_bounds=(0.1, 2.0),
+    min_start_target_distance=0.7,
+)
+_inner12 = _env12.unwrapped
+_inner12._drone = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner12._speed_handler = FakeSpeedHandler()
+_inner12._is_flying = True
+
+_start12, _target12, _attempts12 = _inner12._sample_randomized_episode()
+_d12 = math.dist(_start12[:3], _target12[:3])
+check("randomized start x in bounds", -5.0 <= _start12[0] <= 5.0)
+check("randomized target x in bounds", -5.0 <= _target12[0] <= 5.0)
+check("randomized start z in bounds", 0.1 <= _start12[2] <= 2.0)
+check("randomized target z in bounds", 0.1 <= _target12[2] <= 2.0)
+check("randomized start-target distance respects threshold", _d12 > max(_inner12.distance_threshold, _inner12.min_start_target_distance))
+check("randomization attempts >= 1", _attempts12 >= 1)
+_env12.close()
+
+# ===========================================================================
+# TEST 13 — Randomized reset calls controller reset hook
+# ===========================================================================
+print("\n[13] Randomized reset calls controller reset hook")
+_env13 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone13',
+    step_duration=0.0,
+    randomize_hover_start=True,
+)
+_inner13 = _env13.unwrapped
+_inner13._drone = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner13._is_flying = False
+_calls13 = {'controller_reset': 0}
+
+
+def _stub_wait_for_hover_settle():
+    return True
+
+
+def _stub_sample_randomized_episode():
+    return [1.0, 1.0, 1.0, 0.0], [2.0, 2.0, 1.2, 0.0], 1
+
+
+def _stub_apply_start_pose(start_pose):
+    _inner13._drone.position = [start_pose[0], start_pose[1], start_pose[2]]
+    _inner13._drone.orientation = [0.0, 0.0, start_pose[3]]
+
+
+def _stub_reset_velocity_controller():
+    _calls13['controller_reset'] += 1
+
+
+_inner13._wait_for_hover_settle = _stub_wait_for_hover_settle
+_inner13._sample_randomized_episode = _stub_sample_randomized_episode
+_inner13._apply_start_pose = _stub_apply_start_pose
+_inner13._reset_velocity_controller = _stub_reset_velocity_controller
+
+_obs13, _info13 = _env13.reset()
+check("controller reset called once per randomized reset", _calls13['controller_reset'] == 1)
+check("reset mode is randomized_hover_start", _info13.get('reset_mode') == 'randomized_hover_start')
+check("randomized reset emits normalized obs", np.all(_obs13 >= -1.0) and np.all(_obs13 <= 1.0))
+_env13.close()
+
+# ===========================================================================
+# TEST 14 — Single-drone smoke helper timeout contracts
+# ===========================================================================
+print("\n[14] Single-drone smoke helper timeout contracts")
+
+_connection_path = Path(__file__).resolve().parent / 'test_connection.py'
+_connection_spec = importlib.util.spec_from_file_location('test_connection', _connection_path)
+_connection = importlib.util.module_from_spec(_connection_spec)
+assert _connection_spec is not None and _connection_spec.loader is not None
+_connection_spec.loader.exec_module(_connection)
+
+_fast_result = _connection.run_with_timeout(lambda: 'ready', 0.5, 'fast-op')
+check("test_connection: bounded helper returns successful result", _fast_result == 'ready')
+
+try:
+    _connection.run_with_timeout(lambda: time.sleep(0.2), 0.01, 'slow-op')
+    _timeout_raised = False
+except _connection.OperationTimeout as _exc14:
+    _timeout_raised = 'slow-op exceeded 0.0s' in str(_exc14) or 'slow-op exceeded 0.01s' in str(_exc14)
+check("test_connection: bounded helper raises visible timeout", _timeout_raised)
+
+try:
+    _connection.run_with_timeout(lambda: (_ for _ in ()).throw(RuntimeError('boom')), 0.5, 'failing-op')
+    _error_propagated = False
+except RuntimeError as _exc14b:
+    _error_propagated = str(_exc14b) == 'boom'
+check("test_connection: bounded helper propagates operation errors", _error_propagated)
+
+# ===========================================================================
 # Summary
 # ===========================================================================
+
 print()
 if errors == 0:
     print("\033[92m═══ All vectorization tests passed ✓ ═══\033[0m\n")

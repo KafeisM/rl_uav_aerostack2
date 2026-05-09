@@ -21,13 +21,14 @@ import json
 import subprocess
 import sys
 import threading
-import time
 from pathlib import Path
 
 import gymnasium
 import numpy as np
 
 import rl_uav  # noqa: F401  # triggers env registration
+
+from as2_runtime import ensure_as2_simulator
 
 
 def run_with_timeout(func, timeout_s: float, *args, **kwargs):
@@ -59,25 +60,6 @@ def classify_failure(kind: str, reason: str, namespaces: list[str] | None = None
     }
     print(json.dumps(payload, indent=2))
     return 1
-
-
-def launch_simulator(launch_script: Path, num_drones: int, launch_wait_s: float):
-    if not launch_script.exists():
-        raise FileNotFoundError(f"Launch script not found: {launch_script}")
-
-    proc = subprocess.Popen(
-        ['bash', str(launch_script), '-n', str(num_drones)],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-    time.sleep(launch_wait_s)
-    if proc.poll() is not None and proc.returncode != 0:
-        raise RuntimeError(
-            f"Simulator launcher exited early with code {proc.returncode}"
-        )
-
-    return proc
 
 
 def stop_simulator(stop_script: Path, namespaces: list[str]) -> None:
@@ -130,15 +112,26 @@ def main() -> int:
     parser.add_argument('--steps', type=int, default=30)
     parser.add_argument('--launch-wait', type=float, default=8.0)
     parser.add_argument('--reset-timeout', type=float, default=35.0)
+    parser.add_argument('--reset-timeout-per-drone', type=float, default=8.0)
+    parser.add_argument('--reset-retries', type=int, default=1)
     parser.add_argument('--step-timeout', type=float, default=15.0)
     parser.add_argument('--close-timeout', type=float, default=5.0)
     parser.add_argument('--target-z', type=float, default=5.0)
     parser.add_argument('--launch-script', default='as2_sim/launch_sim.bash')
     parser.add_argument('--stop-script', default='as2_sim/stop_sim.bash')
+    parser.add_argument(
+        '--stop-after',
+        action='store_true',
+        default=False,
+        help='Stop AS2 tmux sessions after validation (default: leave running for later AS2 tests)',
+    )
     args = parser.parse_args()
 
     if args.num_drones != 4:
         print('Only num-drones=4 is supported by this acceptance validator.')
+        return 1
+    if args.reset_retries < 0:
+        print('--reset-retries must be >= 0')
         return 1
 
     project_root = Path(__file__).resolve().parents[1]
@@ -146,12 +139,17 @@ def main() -> int:
     stop_script = project_root / args.stop_script
 
     namespaces = [f'drone{i}' for i in range(args.num_drones)]
-    launch_proc = None
     vec_env = None
     cleanup_errors: list[str] = []
+    ensure_result = None
 
     try:
-        launch_proc = launch_simulator(launch_script, args.num_drones, args.launch_wait)
+        ensure_result = ensure_as2_simulator(
+            num_drones=args.num_drones,
+            launch_script=launch_script,
+            launch_wait_s=args.launch_wait,
+            readiness_timeout_s=30.0,
+        )
 
         vec_env = gymnasium.vector.SyncVectorEnv([
             (
@@ -161,6 +159,13 @@ def main() -> int:
                     target_pose=[0.0, 0.0, args.target_z, 0.0],
                     distance_threshold=0.1,
                     pos_limit=20.0,
+                    randomize_hover_start=True,
+                    scene_bounds_xy=10.0,
+                    height_bounds=(0.1, 2.0),
+                    min_start_target_distance=1.0,
+                    hover_speed_threshold=0.08,
+                    hover_settle_time=0.5,
+                    hover_timeout=10.0,
                     max_steps=max(500, args.steps + 50),
                 )
             )
@@ -175,16 +180,34 @@ def main() -> int:
                 configured_namespaces,
             )
 
-        try:
-            obs, _ = run_with_timeout(vec_env.reset, args.reset_timeout)
-        except TimeoutError:
-            return classify_failure(
-                'readiness_timeout',
-                f'reset() exceeded timeout of {args.reset_timeout}s',
-                namespaces,
+        effective_reset_timeout = args.reset_timeout + (args.reset_timeout_per_drone * args.num_drones)
+        obs = None
+        reset_infos = None
+        last_reset_error: Exception | None = None
+        total_attempts = args.reset_retries + 1
+        for attempt_idx in range(total_attempts):
+            try:
+                obs, reset_infos = run_with_timeout(vec_env.reset, effective_reset_timeout)
+                break
+            except TimeoutError as exc:
+                last_reset_error = exc
+                print(
+                    f'[warn] reset attempt {attempt_idx + 1}/{total_attempts} '
+                    f'timed out after {effective_reset_timeout:.1f}s',
+                    file=sys.stderr,
+                )
+            except Exception as exc:
+                return classify_failure('reset_failure', str(exc), namespaces)
+
+        if obs is None or reset_infos is None:
+            reason = (
+                f'reset() timed out after {total_attempts} attempt(s); '
+                f'effective_timeout={effective_reset_timeout:.1f}s '
+                f'(base={args.reset_timeout:.1f}s + per_drone={args.reset_timeout_per_drone:.1f}s*{args.num_drones})'
             )
-        except Exception as exc:
-            return classify_failure('reset_failure', str(exc), namespaces)
+            if last_reset_error is not None:
+                reason = f'{reason}; last_error={last_reset_error}'
+            return classify_failure('readiness_timeout', reason, namespaces)
 
         bad_namespaces = namespaces_with_out_of_range(obs, namespaces)
         if bad_namespaces:
@@ -192,6 +215,14 @@ def main() -> int:
                 'observation_range_failure',
                 'Reset observation outside [-1, 1]',
                 bad_namespaces,
+            )
+
+        reset_modes = reset_infos.get('reset_mode', []) if isinstance(reset_infos, dict) else []
+        if len(reset_modes) and any(mode != 'randomized_hover_start' for mode in reset_modes):
+            return classify_failure(
+                'reset_failure',
+                f'Expected randomized_hover_start reset mode, got {reset_modes}',
+                namespaces,
             )
 
         for step_idx in range(args.steps):
@@ -236,7 +267,12 @@ def main() -> int:
             'num_drones': args.num_drones,
             'namespaces': namespaces,
             'steps': args.steps,
+            'reset_timeout_effective_s': effective_reset_timeout,
+            'reset_attempts_allowed': total_attempts,
             'observation_range': '[-1, 1]',
+            'as2_ensure_launched': ensure_result.launched if ensure_result else None,
+            'as2_left_running': not args.stop_after,
+            'simulation_acceleration': 'not_validated',
         }, indent=2))
         return 0
 
@@ -255,17 +291,11 @@ def main() -> int:
             except Exception as exc:
                 cleanup_errors.append(f'vec_env.close failed: {exc}')
 
-        try:
-            stop_simulator(stop_script, namespaces)
-        except Exception as exc:
-            cleanup_errors.append(str(exc))
-
-        if launch_proc is not None and launch_proc.poll() is None:
-            launch_proc.terminate()
+        if args.stop_after:
             try:
-                launch_proc.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                launch_proc.kill()
+                stop_simulator(stop_script, namespaces)
+            except Exception as exc:
+                cleanup_errors.append(str(exc))
 
         if cleanup_errors:
             print(json.dumps({

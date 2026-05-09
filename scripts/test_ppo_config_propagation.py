@@ -8,12 +8,14 @@ Usage:
 from __future__ import annotations
 
 from pathlib import Path
+import warnings
 
 import gymnasium as gym
 import torch.nn as nn
 from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.monitor import Monitor
 
-from rl_uav.training import build_ppo_model, load_training_config
+from rl_uav.training import build_ppo_model, build_vec_env, load_training_config
 
 
 def _linear_out_features(module: nn.Module) -> list[int]:
@@ -23,9 +25,28 @@ def _linear_out_features(module: nn.Module) -> list[int]:
 def main() -> int:
     config = load_training_config(Path('configs/train_ppo.yaml'))
 
+    # New randomized-hover keys must be present in config defaults.
+    env_cfg = config['environment']
+    for key in [
+        'randomize_hover_start',
+        'scene_bounds_xy',
+        'height_bounds',
+        'min_start_target_distance',
+        'hover_speed_threshold',
+        'hover_settle_time',
+        'hover_timeout',
+        'max_reset_sample_attempts',
+    ]:
+        assert key in env_cfg, f"Missing environment key: {key}"
+
     vec_env = DummyVecEnv([lambda: gym.make('Pendulum-v1')])
     try:
-        model = build_ppo_model(config=config, vec_env=vec_env, tensorboard_dir=Path('/tmp'))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            model = build_ppo_model(config=config, vec_env=vec_env, tensorboard_dir=Path('/tmp'))
+
+        warning_text = '\n'.join(str(item.message) for item in caught)
+        assert 'You are trying to run PPO on the GPU' not in warning_text
 
         ppo_cfg = config['ppo']
 
@@ -35,6 +56,7 @@ def main() -> int:
         assert model.normalize_advantage is ppo_cfg['normalize_advantage']
         assert model.use_sde is ppo_cfg['use_sde']
         assert model.sde_sample_freq == ppo_cfg['sde_sample_freq']
+        assert model.device.type == 'cpu'
 
         # SB3 accepts constant LR as a float and exposes a schedule callable.
         assert float(model.learning_rate) == float(ppo_cfg['learning_rate'])
@@ -48,9 +70,30 @@ def main() -> int:
         assert vf_layers == ppo_cfg['policy_kwargs']['net_arch']['vf']
 
         print('✓ PASS: PPO config fields are propagated to the SB3 model')
-        return 0
     finally:
         vec_env.close()
+
+    vec_env2, namespaces = build_vec_env(config=config, monitor_dir=Path('/tmp'), num_envs_override=1)
+    try:
+        assert namespaces == ['drone0']
+        # VecMonitor -> DummyVecEnv -> AS2TestEnv. Individual envs are not
+        # Monitor-wrapped because VecMonitor owns episode metrics/logging.
+        assert type(vec_env2).__name__ == 'VecMonitor'
+        assert not isinstance(vec_env2.venv.envs[0], Monitor)
+        inner = vec_env2.venv.envs[0].unwrapped
+        assert inner.randomize_hover_start == env_cfg['randomize_hover_start']
+        assert inner.scene_bounds_xy == env_cfg['scene_bounds_xy']
+        assert tuple(inner.height_bounds) == tuple(env_cfg['height_bounds'])
+        assert inner.min_start_target_distance == env_cfg['min_start_target_distance']
+        assert inner.hover_speed_threshold == env_cfg['hover_speed_threshold']
+        assert inner.hover_settle_time == env_cfg['hover_settle_time']
+        assert inner.hover_timeout == env_cfg['hover_timeout']
+        assert inner.max_reset_sample_attempts == env_cfg['max_reset_sample_attempts']
+        print('✓ PASS: Randomized hover env config propagates to AS2TestEnv')
+    finally:
+        vec_env2.close()
+
+    return 0
 
 
 if __name__ == '__main__':

@@ -24,9 +24,20 @@ environment:
   path_facing_weight: 0.25
   speed_deadband: 0.05
 
+  # Randomized hover training (disabled by default for backward compatibility)
+  randomize_hover_start: false
+  scene_bounds_xy: 5.0
+  height_bounds: [0.1, 2.0]
+  min_start_target_distance: 1.0
+  hover_speed_threshold: 0.05
+  hover_settle_time: 1.0
+  hover_timeout: 10.0
+  max_reset_sample_attempts: 100
+
 training:
   total_timesteps: 1000000
-  device: auto
+  # SB3 recommends CPU for non-CNN/MLP PPO policies; avoids GPU warning and overhead.
+  device: cpu
   tensorboard_log_subdir: tensorboard
   monitor_subdir: monitor
   checkpoints_subdir: checkpoints

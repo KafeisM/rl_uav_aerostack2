@@ -29,6 +29,7 @@ __license__ = 'BSD-3-Clause'
 import logging
 import math
 import threading
+import time
 from typing import Any, Optional
 
 import gymnasium as gym
@@ -77,6 +78,15 @@ class AS2TestEnv(gym.Env):
         oob_penalty: float = 10.0,
         path_facing_weight: float = 0.25,
         speed_deadband: float = 0.05,
+        randomize_hover_start: bool = False,
+        scene_bounds_xy: float = 5.0,
+        height_bounds: tuple[float, float] = (0.1, 2.0),
+        min_start_target_distance: float | None = None,
+        hover_speed_threshold: float = 0.05,
+        hover_settle_time: float = 1.0,
+        hover_timeout: float = 10.0,
+        max_reset_sample_attempts: int = 100,
+        randomize_yaw: bool = True,
     ):
         """
         Initialize the test environment.
@@ -123,6 +133,18 @@ class AS2TestEnv(gym.Env):
         self.oob_penalty = oob_penalty
         self.path_facing_weight = path_facing_weight
         self.speed_deadband = speed_deadband
+        self.randomize_hover_start = randomize_hover_start
+        self.scene_bounds_xy = float(scene_bounds_xy)
+        self.height_bounds = (float(height_bounds[0]), float(height_bounds[1]))
+        self.min_start_target_distance = min_start_target_distance
+        self.hover_speed_threshold = float(hover_speed_threshold)
+        self.hover_settle_time = float(hover_settle_time)
+        self.hover_timeout = float(hover_timeout)
+        self.max_reset_sample_attempts = int(max_reset_sample_attempts)
+        self.randomize_yaw = bool(randomize_yaw)
+        self._last_sample_attempts = 0
+
+        self._validate_bounds()
 
         # Target pose [x, y, z, yaw] — goal for the drone
         self._target_pose = (
@@ -322,6 +344,98 @@ class AS2TestEnv(gym.Env):
 
         return info
 
+    def _validate_bounds(self) -> None:
+        if self.scene_bounds_xy <= 0.0:
+            raise ValueError('scene_bounds_xy must be > 0')
+        z_min, z_max = self.height_bounds
+        if z_min > z_max:
+            raise ValueError('height_bounds must satisfy z_min <= z_max')
+        if self.max_reset_sample_attempts < 1:
+            raise ValueError('max_reset_sample_attempts must be >= 1')
+        if self.pos_limit < self.scene_bounds_xy:
+            raise ValueError(
+                'pos_limit must be >= scene_bounds_xy to preserve normalization budget'
+            )
+        if self.pos_limit < max(abs(z_min), abs(z_max)):
+            raise ValueError(
+                'pos_limit must be >= max(abs(height_bounds)) to preserve normalization budget'
+            )
+
+    def _sample_randomized_episode(self) -> tuple[list[float], list[float], int]:
+        min_distance = max(
+            self.distance_threshold,
+            float(self.min_start_target_distance)
+            if self.min_start_target_distance is not None
+            else self.distance_threshold,
+        )
+
+        for attempt in range(1, self.max_reset_sample_attempts + 1):
+            start_yaw = float(self.np_random.uniform(-math.pi, math.pi)) if self.randomize_yaw else 0.0
+            start_pose = [
+                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
+                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
+                float(self.np_random.uniform(self.height_bounds[0], self.height_bounds[1])),
+                start_yaw,
+            ]
+            target_pose = [
+                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
+                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
+                float(self.np_random.uniform(self.height_bounds[0], self.height_bounds[1])),
+                0.0,
+            ]
+            distance = math.dist(start_pose[:3], target_pose[:3])
+            if distance > min_distance:
+                self._last_sample_attempts = attempt
+                return start_pose, target_pose, attempt
+
+        raise RuntimeError(
+            'Unable to sample valid randomized start/target pair '
+            f'after {self.max_reset_sample_attempts} attempts'
+        )
+
+    def _wait_for_hover_settle(self) -> bool:
+        if self.hover_settle_time <= 0.0:
+            return True
+        stable_elapsed = 0.0
+        started = time.time()
+        check_dt = max(0.05, self.step_duration)
+        while time.time() - started < self.hover_timeout:
+            speed = getattr(self._drone, 'speed', [0.0, 0.0, 0.0])
+            speed_xy = math.hypot(float(speed[0]), float(speed[1]))
+            speed_z = abs(float(speed[2]))
+            if speed_xy <= self.hover_speed_threshold and speed_z <= self.hover_speed_threshold:
+                stable_elapsed += check_dt
+                if stable_elapsed >= self.hover_settle_time:
+                    return True
+            else:
+                stable_elapsed = 0.0
+            time.sleep(check_dt)
+        return False
+
+    def _apply_start_pose(self, start_pose: list[float]) -> None:
+        if hasattr(self._drone, 'set_pose'):
+            self._drone.set_pose(start_pose[0], start_pose[1], start_pose[2], start_pose[3])
+            return
+        if hasattr(self._drone, 'go_to'):  # fallback motion-based reposition
+            self._drone.go_to(start_pose[0], start_pose[1], start_pose[2], speed=self.max_vel)
+            return
+        # Mock fallback for tests: directly mutate position/orientation if writable.
+        if hasattr(self._drone, 'position') and hasattr(self._drone, 'orientation'):
+            self._drone.position = [start_pose[0], start_pose[1], start_pose[2]]
+            self._drone.orientation = [0.0, 0.0, start_pose[3]]
+            return
+        raise RuntimeError('No supported simulator API for pose reset (set_pose/go_to unavailable)')
+
+    def _reset_velocity_controller(self) -> None:
+        from as2_motion_reference_handlers.speed_motion import SpeedMotion
+
+        self._speed_handler = SpeedMotion(self._drone)
+        self._speed_handler.send_speed_command_with_yaw_speed(
+            twist=[0.0, 0.0, 0.0],
+            twist_frame_id='earth',
+            yaw_speed=0.0,
+        )
+
     def reset(
         self,
         seed: Optional[int] = None,
@@ -365,9 +479,29 @@ class AS2TestEnv(gym.Env):
         logger.info(f"  Takeoff: {'OK' if success else 'FAILED'}")
         self._is_flying = success
 
+        hover_settled = True
+
+        reset_mode = 'fixed_takeoff'
+        start_pose = list(self._drone.position) + [float(self._drone.orientation[2])]
+        sample_attempts = 0
+        if self.randomize_hover_start:
+            hover_settled = self._wait_for_hover_settle()
+            sampled_start, sampled_target, sample_attempts = self._sample_randomized_episode()
+            self._apply_start_pose(sampled_start)
+            self._target_pose = sampled_target
+            self._reset_velocity_controller()
+            hover_settled = self._wait_for_hover_settle()
+            reset_mode = 'randomized_hover_start'
+            start_pose = sampled_start
+
         obs = self._get_obs()
         info = self._get_info()
         info['reset_success'] = self._is_flying
+        info['reset_mode'] = reset_mode
+        info['start_pose'] = list(start_pose)
+        info['target_pose'] = list(self._target_pose)
+        info['sample_attempts'] = sample_attempts
+        info['hover_settled'] = hover_settled
 
         logger.info(f"Reset complete. Initial obs: {obs}")
 

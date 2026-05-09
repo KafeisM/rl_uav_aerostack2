@@ -11,7 +11,6 @@ import gymnasium as gym
 import torch as th
 import yaml
 from stable_baselines3 import PPO
-from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecEnv, VecMonitor
 
 import rl_uav  # noqa: F401  # ensure env registration
@@ -98,13 +97,19 @@ def build_vec_env(
         'oob_penalty': env_cfg['oob_penalty'],
         'path_facing_weight': env_cfg['path_facing_weight'],
         'speed_deadband': env_cfg['speed_deadband'],
+        'randomize_hover_start': env_cfg.get('randomize_hover_start', False),
+        'scene_bounds_xy': env_cfg.get('scene_bounds_xy', 5.0),
+        'height_bounds': env_cfg.get('height_bounds', [0.1, 2.0]),
+        'min_start_target_distance': env_cfg.get('min_start_target_distance'),
+        'hover_speed_threshold': env_cfg.get('hover_speed_threshold', 0.05),
+        'hover_settle_time': env_cfg.get('hover_settle_time', 1.0),
+        'hover_timeout': env_cfg.get('hover_timeout', 10.0),
+        'max_reset_sample_attempts': env_cfg.get('max_reset_sample_attempts', 100),
     }
 
     def _make_env(ns: str, rank: int):
         def _thunk():
-            env = gym.make(env_cfg['env_id'], drone_namespace=ns, **env_kwargs)
-            monitor_file = str(monitor_dir / f'env_{rank}.monitor.csv')
-            return Monitor(env, filename=monitor_file)
+            return gym.make(env_cfg['env_id'], drone_namespace=ns, **env_kwargs)
 
         return _thunk
 
@@ -118,7 +123,7 @@ def build_vec_env(
     else:
         raise ValueError("environment.vec_env must be 'dummy' or 'subproc'")
 
-    return VecMonitor(vec_env), namespaces
+    return VecMonitor(vec_env, filename=str(monitor_dir / 'vec_monitor.csv')), namespaces
 
 
 def _resolve_policy_kwargs(config: dict[str, Any]) -> dict[str, Any]:
