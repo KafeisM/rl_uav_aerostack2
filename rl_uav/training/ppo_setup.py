@@ -96,7 +96,18 @@ def build_vec_env(
         'success_reward': env_cfg['success_reward'],
         'oob_penalty': env_cfg['oob_penalty'],
         'path_facing_weight': env_cfg['path_facing_weight'],
+        'progress_reward_weight': env_cfg.get('progress_reward_weight', 0.0),
         'speed_deadband': env_cfg['speed_deadband'],
+        'fixed_start_pose': env_cfg.get('fixed_start_pose'),
+        'fixed_start_tolerance': env_cfg.get('fixed_start_tolerance', 0.15),
+        'fixed_start_timeout': env_cfg.get('fixed_start_timeout', 20.0),
+        'reset_min_speed': env_cfg.get('reset_min_speed', 0.15),
+        'reset_ground_recovery_height': env_cfg.get('reset_ground_recovery_height', 0.35),
+        'publish_target_marker': env_cfg.get('publish_target_marker', False),
+        'target_marker_topic': env_cfg.get('target_marker_topic', 'visualization_marker'),
+        'target_marker_frame_id': env_cfg.get('target_marker_frame_id', 'earth'),
+        'target_marker_scale': env_cfg.get('target_marker_scale', 0.35),
+        'close_operation_timeout': env_cfg.get('close_operation_timeout', 10.0),
         'randomize_hover_start': env_cfg.get('randomize_hover_start', False),
         'scene_bounds_xy': env_cfg.get('scene_bounds_xy', 5.0),
         'height_bounds': env_cfg.get('height_bounds', [0.1, 2.0]),
@@ -123,7 +134,12 @@ def build_vec_env(
     else:
         raise ValueError("environment.vec_env must be 'dummy' or 'subproc'")
 
-    return VecMonitor(vec_env, filename=str(monitor_dir / 'vec_monitor.csv')), namespaces
+    info_keywords = tuple(env_cfg.get('monitor_info_keywords', []))
+    return VecMonitor(
+        vec_env,
+        filename=str(monitor_dir / 'vec_monitor.csv'),
+        info_keywords=info_keywords,
+    ), namespaces
 
 
 def _resolve_policy_kwargs(config: dict[str, Any]) -> dict[str, Any]:

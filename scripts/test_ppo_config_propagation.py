@@ -32,6 +32,18 @@ def main() -> int:
         'scene_bounds_xy',
         'height_bounds',
         'min_start_target_distance',
+        'progress_reward_weight',
+        'fixed_start_pose',
+        'fixed_start_tolerance',
+        'fixed_start_timeout',
+        'reset_min_speed',
+        'reset_ground_recovery_height',
+        'publish_target_marker',
+        'target_marker_topic',
+        'target_marker_frame_id',
+        'target_marker_scale',
+        'close_operation_timeout',
+        'monitor_info_keywords',
         'hover_speed_threshold',
         'hover_settle_time',
         'hover_timeout',
@@ -82,9 +94,20 @@ def main() -> int:
         assert not isinstance(vec_env2.venv.envs[0], Monitor)
         inner = vec_env2.venv.envs[0].unwrapped
         assert inner.randomize_hover_start == env_cfg['randomize_hover_start']
+        assert inner.progress_reward_weight == env_cfg['progress_reward_weight']
         assert inner.scene_bounds_xy == env_cfg['scene_bounds_xy']
         assert tuple(inner.height_bounds) == tuple(env_cfg['height_bounds'])
         assert inner.min_start_target_distance == env_cfg['min_start_target_distance']
+        assert inner.fixed_start_pose == env_cfg['fixed_start_pose']
+        assert inner.fixed_start_tolerance == env_cfg['fixed_start_tolerance']
+        assert inner.fixed_start_timeout == env_cfg['fixed_start_timeout']
+        assert inner.reset_min_speed == env_cfg['reset_min_speed']
+        assert inner.reset_ground_recovery_height == env_cfg['reset_ground_recovery_height']
+        assert inner.publish_target_marker == env_cfg['publish_target_marker']
+        assert inner.target_marker_topic == env_cfg['target_marker_topic']
+        assert inner.target_marker_frame_id == env_cfg['target_marker_frame_id']
+        assert inner.target_marker_scale == env_cfg['target_marker_scale']
+        assert inner.close_operation_timeout == env_cfg['close_operation_timeout']
         assert inner.hover_speed_threshold == env_cfg['hover_speed_threshold']
         assert inner.hover_settle_time == env_cfg['hover_settle_time']
         assert inner.hover_timeout == env_cfg['hover_timeout']

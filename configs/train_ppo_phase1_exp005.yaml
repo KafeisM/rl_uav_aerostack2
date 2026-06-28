@@ -1,42 +1,45 @@
 experiment:
-  name: ppo_as2_baseline
+  name: ppo_phase1_exp005_stable_2m_target
   seed: 42
   output_root: runs/ppo
 
 environment:
   env_id: AS2TestEnv-v0
   num_envs: 1
-  vec_env: dummy  # dummy | subproc
+  vec_env: dummy
   namespace_prefix: drone
   use_sim_time: false
   verbose: false
 
-  # Keep environment contract and normalization assumptions unchanged.
+  # Phase 1: stabilize point-reaching on a reachable fixed target.
   pos_limit: 5.0
   max_vel: 2.0
   max_yaw_vel: 3.141592653589793
   step_duration: 0.1
-  target_pose: [0.0, 0.0, 1.0, 0.0]
-  distance_threshold: 0.5
-  max_steps: 500
+  fixed_start_pose: [0.0, 0.0, 1.0, 0.0]
+  fixed_start_tolerance: 0.15
+  fixed_start_timeout: 20.0
+  target_pose: [2.0, 0.0, 1.0, 0.0]
+  distance_threshold: 0.3
+  max_steps: 200
   success_reward: 20.0
   oob_penalty: 10.0
   path_facing_weight: 0.25
-  progress_reward_weight: 0.0
   speed_deadband: 0.05
-  fixed_start_pose: null
-  fixed_start_tolerance: 0.15
-  fixed_start_timeout: 20.0
-  reset_min_speed: 0.15
-  reset_ground_recovery_height: 0.35
-  publish_target_marker: false
+
+  # Keep close bounded so train_ppo.py terminates after saving artifacts.
+  close_operation_timeout: 10.0
+
+  # RViz target reference.
+  publish_target_marker: true
   target_marker_topic: visualization_marker
   target_marker_frame_id: earth
   target_marker_scale: 0.35
-  close_operation_timeout: 10.0
+
+  # VecMonitor CSV extra diagnostics.
   monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, terminal_reason]
 
-  # Randomized hover training (disabled by default for backward compatibility)
+  # Keep randomization disabled until fixed-start baseline is stable.
   randomize_hover_start: false
   scene_bounds_xy: 5.0
   height_bounds: [0.1, 2.0]
@@ -47,19 +50,18 @@ environment:
   max_reset_sample_attempts: 100
 
 training:
-  total_timesteps: 1000000
-  # SB3 recommends CPU for non-CNN/MLP PPO policies; avoids GPU warning and overhead.
+  total_timesteps: 2048
   device: cpu
   tensorboard_log_subdir: tensorboard
   monitor_subdir: monitor
   checkpoints_subdir: checkpoints
-  checkpoint_freq: 10000
-  checkpoint_prefix: ppo_as2
+  checkpoint_freq: 512
+  checkpoint_prefix: ppo_phase1_exp005
 
 ppo:
   policy: MlpPolicy
   learning_rate: 3.0e-05
-  n_steps: 512
+  n_steps: 64
   batch_size: 32
   n_epochs: 5
   gamma: 0.99

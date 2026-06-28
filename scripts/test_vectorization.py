@@ -97,6 +97,23 @@ class FakeSpeedHandler:
     def send_speed_command_with_yaw_speed(self, **kw): pass
 
 
+class RecordingSpeedHandler:
+    def __init__(self, drone=None):
+        self.drone = drone
+        self.commands = []
+
+    def send_speed_command_with_yaw_speed(self, **kw):
+        twist = list(kw.get('twist', [0.0, 0.0, 0.0]))
+        yaw_speed = float(kw.get('yaw_speed', 0.0))
+        self.commands.append((twist, yaw_speed))
+        if self.drone is not None:
+            self.drone.position = [
+                self.drone.position[0] + twist[0] * 0.05,
+                self.drone.position[1] + twist[1] * 0.05,
+                self.drone.position[2] + twist[2] * 0.05,
+            ]
+
+
 def inject_mocks(vec_env, positions, velocities, yaws=None):
     """Inject mock drones into each sub-environment."""
     if yaws is None:
@@ -383,6 +400,28 @@ check("opposed yaw has negative path-facing", _info8b['path_facing_reward'] < 0.
 check_reward_info(_info8b, _expected8b)
 _env8b.close()
 
+# Progress shaping is opt-in and rewards distance reduction.
+_env8c = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone8c',
+    step_duration=0.0,
+    progress_reward_weight=2.0,
+)
+_inner8c = _env8c.unwrapped
+_inner8c._drone = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner8c._speed_handler = FakeSpeedHandler()
+_inner8c._is_flying = True
+_env8c.reset()
+_inner8c._drone = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner8c._previous_distance = 2.0
+_, _rew8c, _, _, _info8c = _env8c.step(np.zeros(4, dtype=np.float32))
+_d8c = 1.0
+_exp_progress8c = 2.0 * (2.0 - _d8c)
+_exp_rew8c = -(_d8c / (_inner8c.pos_limit * math.sqrt(3.0))) + _exp_progress8c
+check("progress reward is reported", math.isclose(_info8c['progress_reward'], _exp_progress8c, rel_tol=1e-5))
+check("progress reward contributes to total reward", math.isclose(_rew8c, _exp_rew8c, rel_tol=1e-5))
+_env8c.close()
+
 # ===========================================================================
 # TEST 9 — Terminal conditions: success, out-of-bounds, max_steps
 # ===========================================================================
@@ -429,6 +468,30 @@ check("oob: truncated=False",                     not _trunc9b)
 check("oob: terminal_reason='out_of_bounds'",     _info9b.get('terminal_reason') == 'out_of_bounds')
 check("oob: reward == -oob_penalty (overwritten)", math.isclose(_rew9b, -_inner9b.oob_penalty, rel_tol=1e-5))
 _env9b.close()
+
+# 9d — Episode terminal altitude uses height_bounds lower bound, not reset recovery height.
+_env9d = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone9d',
+    step_duration=0.0,
+    height_bounds=(0.1, 2.0),
+    reset_ground_recovery_height=0.35,
+)
+_inner9d = _env9d.unwrapped
+_inner9d._drone = fake_drone([0.0, 1.0, 1.0], [0.0, 0.0, 0.0])
+_inner9d._speed_handler = FakeSpeedHandler()
+_inner9d._is_flying = True
+_env9d.reset()
+_inner9d._drone = fake_drone([0.0, 1.0, 0.2], [0.0, 0.0, 0.0])
+_, _rew9d, _term9d, _trunc9d, _info9d = _env9d.step(np.zeros(4, dtype=np.float32))
+check("terminal altitude accepts z=0.2 when lower bound is 0.1", not _term9d and not _trunc9d)
+check("terminal altitude does not report out_of_bounds above lower bound", not _info9d.get('is_out_of_bounds', False))
+_inner9d._drone = fake_drone([0.0, 1.0, 0.05], [0.0, 0.0, 0.0])
+_, _rew9d_low, _term9d_low, _trunc9d_low, _info9d_low = _env9d.step(np.zeros(4, dtype=np.float32))
+check("terminal altitude terminates below height lower bound before ground", _term9d_low and not _trunc9d_low)
+check("terminal altitude below lower bound reports out_of_bounds", _info9d_low.get('terminal_reason') == 'out_of_bounds')
+check("terminal altitude below lower bound uses oob penalty", math.isclose(_rew9d_low, -_inner9d.oob_penalty, rel_tol=1e-5))
+_env9d.close()
 
 # 9c — max_steps: step_count reaches max_steps → truncated, NOT terminated
 # drone at [1.0, 0.0, 1.0] — not at target, not OOB
@@ -579,9 +642,466 @@ check("randomized reset emits normalized obs", np.all(_obs13 >= -1.0) and np.all
 _env13.close()
 
 # ===========================================================================
-# TEST 14 — Single-drone smoke helper timeout contracts
+# TEST 14 — Fixed start reset returns to safe pose
 # ===========================================================================
-print("\n[14] Single-drone smoke helper timeout contracts")
+print("\n[14] Fixed start reset returns to safe pose")
+_fixed_start14 = [0.0, 0.0, 1.0, 0.0]
+_env14 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone14',
+    step_duration=0.0,
+    target_pose=[2.0, 0.0, 1.0, 0.0],
+    fixed_start_pose=_fixed_start14,
+)
+_inner14 = _env14.unwrapped
+_inner14._drone = fake_drone([9.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner14._is_flying = False
+_calls14 = {'controller_reset': 0}
+
+
+def _stub_apply_fixed_start_pose(start_pose):
+    _inner14._drone.position = [start_pose[0], start_pose[1], start_pose[2]]
+    _inner14._drone.orientation = [0.0, 0.0, start_pose[3]]
+
+
+def _stub_reset_fixed_velocity_controller():
+    _calls14['controller_reset'] += 1
+
+
+_inner14._wait_for_hover_settle = _stub_wait_for_hover_settle
+_inner14._apply_start_pose = _stub_apply_fixed_start_pose
+_inner14._reset_velocity_controller = _stub_reset_fixed_velocity_controller
+
+_obs14, _info14 = _env14.reset()
+check("fixed reset controller reset called once", _calls14['controller_reset'] == 1)
+check("reset mode is fixed_start_pose", _info14.get('reset_mode') == 'fixed_start_pose')
+check("fixed reset start pose is reported", _info14.get('start_pose') == _fixed_start14)
+check("fixed reset drone position is safe", _inner14._drone.position == _fixed_start14[:3])
+check("fixed reset emits normalized obs", np.all(_obs14 >= -1.0) and np.all(_obs14 <= 1.0))
+_env14.close()
+
+# ===========================================================================
+# TEST 15 — Close operations are bounded
+# ===========================================================================
+print("\n[15] Close operations are bounded")
+_env15 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone15',
+    step_duration=0.0,
+    close_operation_timeout=0.01,
+)
+_inner15 = _env15.unwrapped
+_inner15._is_flying = True
+
+
+class _HangingCloseDrone:
+    position = [0.0, 0.0, 1.0]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+    def land(self, **kw): time.sleep(0.2)
+    def manual(self, **kw): pass
+    def shutdown(self, **kw): pass
+
+
+_inner15._drone = _HangingCloseDrone()
+_close15_started = time.time()
+_env15.close()
+_close15_elapsed = time.time() - _close15_started
+check("close returns despite hanging land", _close15_elapsed < 0.15)
+check("close clears drone reference", _inner15._drone is None)
+
+# ===========================================================================
+# TEST 16 — Fixed start reset stays airborne between episodes
+# ===========================================================================
+print("\n[16] Fixed start reset stays airborne between episodes")
+_env16 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16',
+    step_duration=0.0,
+    target_pose=[2.0, 0.0, 1.0, 0.0],
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+)
+_inner16 = _env16.unwrapped
+_calls16 = {'land': 0, 'controller_reset': 0}
+
+
+class _AlreadyFlyingDrone:
+    position = [1.0, 0.0, 1.0]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+    def arm(self, **kw): return True
+    def offboard(self, **kw): return True
+    def takeoff(self, **kw): return True
+    def land(self, **kw):
+        _calls16['land'] += 1
+        return True
+    def manual(self, **kw): pass
+    def shutdown(self, **kw): pass
+
+
+_inner16._drone = _AlreadyFlyingDrone()
+_inner16._is_flying = True
+_inner16._wait_for_hover_settle = _stub_wait_for_hover_settle
+_inner16._apply_start_pose = lambda start_pose: setattr(_inner16._drone, 'position', start_pose[:3])
+_inner16._reset_velocity_controller = lambda: _calls16.__setitem__('controller_reset', _calls16['controller_reset'] + 1)
+_obs16, _info16 = _env16.reset()
+check("fixed in-air reset does not land", _calls16['land'] == 0)
+check("fixed in-air reset resets controller", _calls16['controller_reset'] >= 1)
+check("fixed in-air reset mode is fixed_start_pose", _info16.get('reset_mode') == 'fixed_start_pose')
+check("fixed in-air reset emits normalized obs", np.all(_obs16 >= -1.0) and np.all(_obs16 <= 1.0))
+_env16.close()
+
+_env16b = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16b',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+)
+_inner16b = _env16b.unwrapped
+_calls16b = {'go_to': 0, 'velocity_reset': 0}
+
+
+class _DroneWithGoTo:
+    position = [0.0, 0.0, 1.0]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+    def go_to(self, *args, **kw):
+        _calls16b['go_to'] += 1
+    def manual(self, **kw): pass
+    def shutdown(self, **kw): pass
+
+
+_inner16b._drone = _DroneWithGoTo()
+_inner16b._speed_handler = FakeSpeedHandler()
+_inner16b._drive_to_start_pose_with_velocity = lambda start_pose: _calls16b.__setitem__('velocity_reset', 1) or True
+_inner16b._apply_start_pose([0.0, 0.0, 1.0, 0.0])
+check("fixed reset prefers velocity over go_to", _calls16b['velocity_reset'] == 1 and _calls16b['go_to'] == 0)
+_env16b.close()
+
+_env16c = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16c',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+)
+_inner16c = _env16c.unwrapped
+_calls16c = {'go_to': 0, 'velocity_reset': 0}
+
+
+class _DroneWithGoToAfterVelocityTimeout:
+    position = [4.0, 0.0, 1.0]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+    def go_to(self, *args, **kw):
+        _calls16c['go_to'] += 1
+    def manual(self, **kw): pass
+    def shutdown(self, **kw): pass
+
+
+_inner16c._drone = _DroneWithGoToAfterVelocityTimeout()
+_inner16c._speed_handler = FakeSpeedHandler()
+_inner16c._drive_to_start_pose_with_velocity = lambda start_pose: _calls16c.__setitem__('velocity_reset', 1) or False
+try:
+    _inner16c._apply_start_pose([0.0, 0.0, 1.0, 0.0])
+    _velocity_timeout_raised = False
+except RuntimeError as _exc16c:
+    _velocity_timeout_raised = 'refusing to fall back to blocking go_to' in str(_exc16c)
+check("fixed reset velocity timeout raises bounded failure", _velocity_timeout_raised)
+check("fixed reset velocity timeout does not call go_to", _calls16c['velocity_reset'] == 1 and _calls16c['go_to'] == 0)
+_env16c.close()
+
+_env16d = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16d',
+    step_duration=0.05,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    fixed_start_timeout=0.01,
+)
+_inner16d = _env16d.unwrapped
+_calls16d = {'go_to': 0}
+
+
+class _StaticDroneWithGoTo:
+    position = [4.0, -2.0, 0.0]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+    def go_to(self, *args, **kw):
+        _calls16d['go_to'] += 1
+    def manual(self, **kw): pass
+    def shutdown(self, **kw): pass
+
+
+_inner16d._drone = _StaticDroneWithGoTo()
+_inner16d._speed_handler = RecordingSpeedHandler()
+try:
+    _inner16d._apply_start_pose([0.0, 0.0, 1.0, 0.0])
+    _diagnostic_timeout_raised = False
+    _diagnostic_text = ''
+except RuntimeError as _exc16d:
+    _diagnostic_timeout_raised = True
+    _diagnostic_text = str(_exc16d)
+check("fixed reset timeout reports final pose", _diagnostic_timeout_raised and 'final_pose=' in _diagnostic_text)
+check("fixed reset timeout reports position error", 'position_error=' in _diagnostic_text)
+check("fixed reset diagnostic timeout does not call go_to", _calls16d['go_to'] == 0)
+_env16d.close()
+
+_env16e = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16e',
+    step_duration=0.05,
+    fixed_start_timeout=0.12,
+    reset_min_speed=0.15,
+    reset_ground_recovery_height=0.35,
+)
+_inner16e = _env16e.unwrapped
+_inner16e._drone = fake_drone([4.0, -2.0, 0.0], [0.0, 0.0, 0.0])
+_handler16e = RecordingSpeedHandler(_inner16e._drone)
+_inner16e._speed_handler = _handler16e
+_inner16e._drive_to_start_pose_with_velocity([0.0, 0.0, 1.0, 0.0])
+_first_twist16e = _handler16e.commands[0][0]
+check("grounded reset recovers vertically before lateral motion", _first_twist16e[0] == 0.0 and _first_twist16e[1] == 0.0 and _first_twist16e[2] >= 0.15)
+_env16e.close()
+
+_env16e2 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16e2',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    height_bounds=(0.1, 2.0),
+    reset_ground_recovery_height=0.35,
+)
+_inner16e2 = _env16e2.unwrapped
+_calls16e2 = {'go_to': 0}
+_events16e2 = []
+
+
+class _LowAltitudeResetDrone:
+    position = [0.3, -0.2, 0.2]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+    def arm(self, **kw):
+        _events16e2.append('arm')
+        return True
+    def offboard(self, **kw):
+        _events16e2.append('offboard')
+        return True
+    def takeoff(self, **kw):
+        _events16e2.append('takeoff')
+        self.position = [self.position[0], self.position[1], float(kw['height'])]
+        return True
+    def go_to(self, *args, **kw):
+        _calls16e2['go_to'] += 1
+    def land(self, **kw): return True
+    def manual(self, **kw): pass
+    def shutdown(self, **kw): pass
+
+
+_inner16e2._drone = _LowAltitudeResetDrone()
+_inner16e2._is_flying = True
+_inner16e2._wait_for_hover_settle = _stub_wait_for_hover_settle
+_inner16e2._reset_velocity_controller = lambda: _events16e2.append('controller_reset')
+
+
+def _apply_start_after_low_altitude_recovery(start_pose):
+    _events16e2.append(f'apply_start_from_z={_inner16e2._drone.position[2]:.1f}')
+    _inner16e2._drone.position = list(start_pose[:3])
+    _inner16e2._drone.orientation = [0.0, 0.0, start_pose[3]]
+
+
+_inner16e2._apply_start_pose = _apply_start_after_low_altitude_recovery
+_obs16e2, _info16e2 = _env16e2.reset()
+check("valid low-altitude in-air reset uses classical takeoff before velocity reset", _events16e2[:4] == ['arm', 'offboard', 'takeoff', 'controller_reset'])
+check("low-altitude recovery starts fixed reset from hover height", 'apply_start_from_z=1.0' in _events16e2)
+check("low-altitude recovery preserves no go_to fallback", _calls16e2['go_to'] == 0)
+check("low-altitude recovery emits normalized obs", np.all(_obs16e2 >= -1.0) and np.all(_obs16e2 <= 1.0))
+check("low-altitude recovery reports fixed reset mode", _info16e2.get('reset_mode') == 'fixed_start_pose')
+_env16e2.close()
+
+_env16f = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16f',
+    step_duration=0.05,
+    fixed_start_timeout=0.06,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.3,
+)
+_inner16f = _env16f.unwrapped
+_inner16f._drone = fake_drone([0.2, 0.0, 1.0], [0.0, 0.0, 0.0])
+_handler16f = RecordingSpeedHandler(_inner16f._drone)
+_inner16f._speed_handler = _handler16f
+_inner16f._drive_to_start_pose_with_velocity([0.0, 0.0, 1.0, 0.0])
+_first_twist16f = _handler16f.commands[0][0]
+check("reset applies configured minimum command above tolerance", math.isclose(_first_twist16f[0], -0.3, rel_tol=1e-6))
+_env16f.close()
+
+_env16g = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16g',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+)
+_inner16g = _env16g.unwrapped
+_calls16g = {'apply': 0, 'controller_reset': 0}
+_inner16g._drone = fake_drone([2.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+_inner16g._is_flying = True
+_inner16g._wait_for_hover_settle = _stub_wait_for_hover_settle
+
+
+def _apply_start_with_first_drift(start_pose):
+    _calls16g['apply'] += 1
+    _inner16g._drone.position = list(start_pose[:3])
+    _inner16g._drone.orientation = [0.0, 0.0, start_pose[3]]
+
+
+def _reset_controller_with_first_drift():
+    _calls16g['controller_reset'] += 1
+    if _calls16g['controller_reset'] == 2:
+        _inner16g._drone.position = [0.0, 0.0, 0.55]
+
+
+_inner16g._apply_start_pose = _apply_start_with_first_drift
+_inner16g._reset_velocity_controller = _reset_controller_with_first_drift
+_obs16g, _info16g = _env16g.reset()
+check("fixed reset retries when post-settle pose drifts", _calls16g['apply'] == 2)
+check("fixed reset retry finishes at requested start pose", _inner16g._drone.position == [0.0, 0.0, 1.0])
+check("fixed reset retry still emits normalized obs", np.all(_obs16g >= -1.0) and np.all(_obs16g <= 1.0))
+_env16g.close()
+
+_env16h = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h',
+    step_duration=0.01,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    fixed_start_tolerance=0.15,
+    hover_settle_time=0.11,
+    hover_timeout=0.5,
+    reset_min_speed=0.2,
+)
+_inner16h = _env16h.unwrapped
+_calls16h = {'apply': 0, 'commands': 0, 'corrections': 0}
+_inner16h._drone = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner16h._is_flying = True
+
+
+class _DriftThenCorrectHandler:
+    def __init__(self, drone):
+        self.drone = drone
+        self.zero_commands = 0
+
+    def send_speed_command_with_yaw_speed(self, **kw):
+        twist = list(kw.get('twist', [0.0, 0.0, 0.0]))
+        _calls16h['commands'] += 1
+        if all(abs(v) < 1e-9 for v in twist):
+            self.zero_commands += 1
+            if self.zero_commands == 1:
+                self.drone.position = [0.19, 0.0, 1.0]
+        else:
+            _calls16h['corrections'] += 1
+            self.drone.position = [0.0, 0.0, 1.0]
+
+
+def _apply_start_for_hold_reacquire(start_pose):
+    _calls16h['apply'] += 1
+    _inner16h._drone.position = list(start_pose[:3])
+    _inner16h._drone.orientation = [0.0, 0.0, start_pose[3]]
+
+
+_inner16h._apply_start_pose = _apply_start_for_hold_reacquire
+_inner16h._reset_velocity_controller = lambda: setattr(_inner16h, '_speed_handler', _DriftThenCorrectHandler(_inner16h._drone))
+_obs16h, _info16h = _env16h.reset()
+check("post-controller hold reacquires drift without full reset retry", _calls16h['apply'] == 1 and _calls16h['corrections'] >= 1)
+check("post-controller hold finishes at requested start pose", _inner16h._drone.position == [0.0, 0.0, 1.0])
+check("post-controller hold emits normalized obs", np.all(_obs16h >= -1.0) and np.all(_obs16h <= 1.0))
+_env16h.close()
+
+_env16i = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16i',
+    step_duration=0.01,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    fixed_start_tolerance=0.15,
+    hover_settle_time=0.11,
+    hover_timeout=0.16,
+    reset_min_speed=0.2,
+)
+_inner16i = _env16i.unwrapped
+_inner16i._drone = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner16i._is_flying = True
+
+
+class _PersistentDriftHandler:
+    def send_speed_command_with_yaw_speed(self, **kw):
+        _inner16i._drone.position = [0.19, 0.0, 1.0]
+
+
+_inner16i._apply_start_pose = lambda start_pose: setattr(_inner16i._drone, 'position', list(start_pose[:3]))
+_inner16i._reset_velocity_controller = lambda: setattr(_inner16i, '_speed_handler', _PersistentDriftHandler())
+try:
+    _env16i.reset()
+    _hold_timeout_raised = False
+    _hold_timeout_text = ''
+except RuntimeError as _exc16i:
+    _hold_timeout_raised = True
+    _hold_timeout_text = str(_exc16i)
+check("post-controller hold failure is bounded", _hold_timeout_raised)
+check("post-controller hold failure reports diagnostics", 'post_controller_hold_timeout' in _hold_timeout_text and 'last_command=' in _hold_timeout_text)
+_env16i.close()
+
+_env16j = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16j',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    fixed_start_tolerance=0.15,
+)
+_inner16j = _env16j.unwrapped
+_calls16j = {'apply': 0, 'hold': 0}
+_inner16j._drone = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner16j._is_flying = True
+_inner16j._wait_for_hover_settle = _stub_wait_for_hover_settle
+
+
+def _apply_start_for_timeout_at_pose(start_pose):
+    _calls16j['apply'] += 1
+    _inner16j._drone.position = list(start_pose[:3])
+    _inner16j._drone.orientation = [0.0, 0.0, start_pose[3]]
+
+
+def _hold_timeout_at_pose(start_pose, attempt):
+    _calls16j['hold'] += 1
+    _inner16j._drone.position = list(start_pose[:3])
+    _inner16j._drone.orientation = [0.0, 0.0, start_pose[3]]
+    _inner16j._last_reset_diagnostics = {
+        'reason': 'post_controller_hold_timeout',
+        'attempt': attempt,
+        'target_pose': [float(v) for v in start_pose],
+        'final_pose': [float(v) for v in start_pose],
+        'position_error': 0.0,
+        'yaw_error': 0.0,
+        'last_command': [0.0, 0.0, 0.0, 0.0],
+    }
+    return False
+
+
+_inner16j._apply_start_pose = _apply_start_for_timeout_at_pose
+_inner16j._reset_velocity_controller = lambda: None
+_inner16j._hold_start_pose_after_controller_reset = _hold_timeout_at_pose
+try:
+    _env16j.reset()
+    _timeout_at_pose_raised = False
+    _timeout_at_pose_text = ''
+except RuntimeError as _exc16j:
+    _timeout_at_pose_raised = True
+    _timeout_at_pose_text = str(_exc16j)
+check("post-controller hold timeout retries even when final pose is in tolerance", _calls16j['apply'] == 2 and _calls16j['hold'] == 2)
+check("post-controller hold timeout at pose does not pass reset", _timeout_at_pose_raised)
+check("post-controller hold timeout at pose reports diagnostics", 'post_controller_hold_timeout' in _timeout_at_pose_text)
+_env16j.close()
+
+# ===========================================================================
+# TEST 17 — Single-drone smoke helper timeout contracts
+# ===========================================================================
+print("\n[17] Single-drone smoke helper timeout contracts")
 
 _connection_path = Path(__file__).resolve().parent / 'test_connection.py'
 _connection_spec = importlib.util.spec_from_file_location('test_connection', _connection_path)
