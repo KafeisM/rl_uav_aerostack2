@@ -1,0 +1,94 @@
+experiment:
+  name: ppo_phase1_exp008a_stable_0p5m_5k
+  seed: 42
+  output_root: runs/ppo
+
+environment:
+  env_id: AS2TestEnv-v0
+  num_envs: 1
+  vec_env: dummy
+  namespace_prefix: drone
+  use_sim_time: false
+  verbose: false
+
+  # Exp008a: easier fixed-start curriculum before the full 2 m Exp008 target.
+  # Keep the same high hover band but reduce horizontal displacement and episode length
+  # so early PPO updates learn stable motion without repeatedly entering reset recovery.
+  pos_limit: 5.0
+  max_vel: 0.5
+  reset_max_vel: 1.0
+  reset_xy_kp: 1.0
+  reset_z_kp: 1.0
+  max_yaw_vel: 1.5707963267948966
+  step_duration: 0.1
+  fixed_start_pose: [0.0, 0.0, 1.6, 0.0]
+  fixed_start_tolerance: 0.22
+  fixed_start_timeout: 60.0
+  # Early curriculum: position reset is the hard gate; yaw is diagnostic only.
+  reset_yaw_tolerance: 1.2
+  reset_yaw_required: false
+  reset_min_speed: 0.20
+  reset_ground_recovery_height: 1.4
+  unsafe_low_altitude_threshold: 1.3
+  low_altitude_guard_margin: 0.60
+  low_altitude_guard_climb_speed: 0.5
+  vertical_safety_band: 0.30
+  vertical_safety_penalty_weight: 6.0
+  vertical_descent_penalty_weight: 8.0
+  target_pose: [0.5, 0.0, 1.6, 0.0]
+  distance_threshold: 0.4
+  max_steps: 80
+  success_reward: 20.0
+  oob_penalty: 15.0
+  # Keep path-facing present as a low-weight regularizer, not an early hard objective.
+  path_facing_weight: 0.05
+  progress_reward_weight: 2.0
+  speed_deadband: 0.05
+
+  close_operation_timeout: 10.0
+
+  publish_target_marker: true
+  target_marker_topic: visualization_marker
+  target_marker_frame_id: earth
+  target_marker_scale: 0.35
+
+  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active]
+
+  randomize_hover_start: false
+  scene_bounds_xy: 5.0
+  height_bounds: [0.8, 2.5]
+  min_start_target_distance: 0.5
+  hover_speed_threshold: 0.05
+  hover_settle_time: 1.0
+  hover_timeout: 20.0
+  max_reset_sample_attempts: 100
+
+training:
+  total_timesteps: 5000
+  device: cpu
+  tensorboard_log_subdir: tensorboard
+  monitor_subdir: monitor
+  checkpoints_subdir: checkpoints
+  checkpoint_freq: 1000
+  checkpoint_prefix: ppo_phase1_exp008a
+
+ppo:
+  policy: MlpPolicy
+  learning_rate: 1.0e-04
+  n_steps: 128
+  batch_size: 64
+  n_epochs: 5
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.005
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  normalize_advantage: true
+  use_sde: true
+  sde_sample_freq: 8
+  policy_kwargs:
+    activation_fn: ReLU
+    net_arch:
+      pi: [128, 128]
+      vf: [128, 128]

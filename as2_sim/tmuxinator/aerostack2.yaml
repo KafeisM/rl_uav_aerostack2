@@ -4,11 +4,14 @@ drone_namespace           = @settings["drone_namespace"]
 simulation_config_file    = @settings["simulation_config_file"]
 motion_controller_plugin  = @settings["motion_controller_plugin"]
 base_launch               = @settings["base_launch"] == "true"
+overlay_setup_file        = @settings["overlay_setup_file"]
+overlay_prefix_expected   = @settings["overlay_prefix_expected"]
 %>
 name: <%= drone_namespace %>
 attach: false
 root: ./
 startup_window: platform
+pre_window: 'source /opt/ros/humble/setup.bash && source <%= overlay_setup_file %> && simulator_prefix=$(ros2 pkg prefix as2_platform_multirotor_simulator) && case "${simulator_prefix}" in <%= overlay_prefix_expected %>*) ;; *) echo "Error - stale as2_platform_multirotor_simulator prefix ${simulator_prefix}" >&2; exit 1 ;; esac'
 windows:
   # Platform
   - platform:

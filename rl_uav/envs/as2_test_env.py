@@ -16,10 +16,11 @@ Reward:
     - Low-speed deadband neutrality: if speed_xy <= speed_deadband,
       path-facing contribution is 0.0
     - Success terminal bonus: +success_reward (default 20.0) when d < distance_threshold
-    - Out-of-bounds penalty: -oob_penalty (default 10.0) when exceeding pos_limit
+    - Safety penalty: -oob_penalty (default 10.0) when exceeding bounds
+      or crossing the training low-altitude safety threshold
 
 Termination:
-    - terminated=True: success (d < threshold) or out-of-bounds
+    - terminated=True: success (d < threshold), out-of-bounds, or unsafe low altitude
     - truncated=True: step count exceeds max_steps
 """
 
@@ -54,6 +55,12 @@ class AS2TestEnv(gym.Env):
 
     metadata = {'render_modes': []}
 
+    # AS2 DroneInterfaceBase owns and spins itself on a private executor/thread.
+    # Reset service clients therefore use an auxiliary per-env node/executor
+    # instead of adding the DroneInterface node to another executor.
+    _RESET_CLIENT_OWNERSHIP_MODEL = 'auxiliary_node'
+    _RESET_YAW_TOLERANCE = 0.38
+
     # Class-level ROS2 init guard — rclpy.init() must be called exactly
     # once per process, even when SyncVectorEnv creates multiple instances.
     _rclpy_initialized = False
@@ -68,6 +75,9 @@ class AS2TestEnv(gym.Env):
         takeoff_speed: float = 0.5,
         land_speed: float = 0.5,
         max_vel: float = 2.0,
+        reset_max_vel: float | None = None,
+        reset_xy_kp: float = 1.0,
+        reset_z_kp: float = 1.0,
         max_yaw_vel: float = math.pi,
         pos_limit: float = 5.0,
         step_duration: float = 0.1,
@@ -82,13 +92,23 @@ class AS2TestEnv(gym.Env):
         fixed_start_pose: list[float] | None = None,
         fixed_start_tolerance: float = 0.15,
         fixed_start_timeout: float = 20.0,
+        reset_yaw_tolerance: float | None = None,
+        reset_yaw_required: bool = True,
         reset_min_speed: float = 0.15,
         reset_ground_recovery_height: float = 0.35,
+        unsafe_low_altitude_threshold: float = 0.30,
+        low_altitude_guard_margin: float = 0.20,
+        low_altitude_guard_climb_speed: float = 0.15,
+        vertical_safety_band: float = 0.0,
+        vertical_safety_penalty_weight: float = 0.0,
+        vertical_descent_penalty_weight: float = 0.0,
         publish_target_marker: bool = False,
         target_marker_topic: str = 'visualization_marker',
         target_marker_frame_id: str = 'earth',
         target_marker_scale: float = 0.35,
         close_operation_timeout: float = 10.0,
+        reset_service_timeout: float = 2.0,
+        use_simulator_reset_service: bool = True,
         randomize_hover_start: bool = False,
         scene_bounds_xy: float = 5.0,
         height_bounds: tuple[float, float] = (0.1, 2.0),
@@ -110,6 +130,10 @@ class AS2TestEnv(gym.Env):
             takeoff_speed: Speed for takeoff in m/s.
             land_speed: Speed for landing in m/s.
             max_vel: Maximum velocity command in m/s.
+            reset_max_vel: Maximum linear velocity used only by reset controllers.
+                           Defaults to max_vel for backward compatibility.
+            reset_xy_kp: Proportional gain for reset XY velocity commands.
+            reset_z_kp: Proportional gain for reset Z velocity commands.
             max_yaw_vel: Maximum yaw angular velocity in rad/s (default: π ≈ 180°/s).
                          Defines the bounds of the yaw action dimension.
             pos_limit: Maximum absolute position in meters (scenario boundary).
@@ -129,6 +153,10 @@ class AS2TestEnv(gym.Env):
                               after takeoff on every reset. Useful for bounded
                               point-reaching experiments where out-of-bounds
                               episodes must not poison subsequent resets.
+            unsafe_low_altitude_threshold: Training safety cutoff in meters.
+                                           This is intentionally separate from
+                                           height_bounds[0], which remains the
+                                           physical scene lower bound.
         """
         super().__init__()
 
@@ -139,6 +167,9 @@ class AS2TestEnv(gym.Env):
         self.takeoff_speed = takeoff_speed
         self.land_speed = land_speed
         self.max_vel = max_vel
+        self.reset_max_vel = float(max_vel) if reset_max_vel is None else float(reset_max_vel)
+        self.reset_xy_kp = float(reset_xy_kp)
+        self.reset_z_kp = float(reset_z_kp)
         self.max_yaw_vel = max_yaw_vel
         self.pos_limit = pos_limit
         self.step_duration = step_duration
@@ -152,13 +183,27 @@ class AS2TestEnv(gym.Env):
         self.fixed_start_pose = list(fixed_start_pose) if fixed_start_pose is not None else None
         self.fixed_start_tolerance = float(fixed_start_tolerance)
         self.fixed_start_timeout = float(fixed_start_timeout)
+        self.reset_yaw_tolerance = (
+            float(reset_yaw_tolerance)
+            if reset_yaw_tolerance is not None
+            else float(self._RESET_YAW_TOLERANCE)
+        )
+        self.reset_yaw_required = bool(reset_yaw_required)
         self.reset_min_speed = float(reset_min_speed)
         self.reset_ground_recovery_height = float(reset_ground_recovery_height)
+        self.unsafe_low_altitude_threshold = float(unsafe_low_altitude_threshold)
+        self.low_altitude_guard_margin = float(low_altitude_guard_margin)
+        self.low_altitude_guard_climb_speed = float(low_altitude_guard_climb_speed)
+        self.vertical_safety_band = float(vertical_safety_band)
+        self.vertical_safety_penalty_weight = float(vertical_safety_penalty_weight)
+        self.vertical_descent_penalty_weight = float(vertical_descent_penalty_weight)
         self.publish_target_marker = bool(publish_target_marker)
         self.target_marker_topic = target_marker_topic
         self.target_marker_frame_id = target_marker_frame_id
         self.target_marker_scale = float(target_marker_scale)
         self.close_operation_timeout = float(close_operation_timeout)
+        self.reset_service_timeout = float(reset_service_timeout)
+        self.use_simulator_reset_service = bool(use_simulator_reset_service)
         self.randomize_hover_start = randomize_hover_start
         self.scene_bounds_xy = float(scene_bounds_xy)
         self.height_bounds = (float(height_bounds[0]), float(height_bounds[1]))
@@ -203,10 +248,26 @@ class AS2TestEnv(gym.Env):
         self._speed_handler = None
         self._marker_node = None
         self._target_marker_pub = None
+        self._reset_service_client = None
+        self._reset_service_type = None
+        self._reset_aux_node = None
+        self._reset_aux_executor = None
         self._is_flying = False
         self._step_count = 0
         self._previous_distance: float | None = None
         self._last_reset_diagnostics: dict[str, Any] = {}
+        self._episode_start_position: list[float] | None = None
+        self._episode_last_position: list[float] | None = None
+        self._episode_path_length = 0.0
+        self._episode_max_physical_displacement = 0.0
+        self._episode_min_altitude = float('nan')
+        self._episode_motion_command_steps = 0
+        self._episode_motion_command_accepted_steps = 0
+        self._last_reset_method = 'unknown'
+        self._last_reset_path = 'unknown'
+        self._last_reset_service_attempted = False
+        self._last_reset_service_status = 'not_attempted'
+        self._last_low_altitude_guard_active = False
 
     def _init_ros(self):
         """Initialize ROS2 (once per process) and create DroneInterface."""
@@ -427,20 +488,123 @@ class AS2TestEnv(gym.Env):
             'target_pose': list(self._target_pose),
             'is_success': False,
             'is_out_of_bounds': False,
+            'is_unsafe_low_altitude': False,
         }
 
         try:
             info['position'] = list(self._drone.position)
+            info['altitude'] = float(self._drone.position[2])
             info['speed'] = list(self._drone.speed)
             info['orientation'] = list(self._drone.orientation)
             d, d_norm = self._compute_distance()
             info['distance'] = d
             info['final_distance'] = d
             info['distance_norm'] = d_norm
+            info['is_unsafe_low_altitude'] = self._is_unsafe_low_altitude()
         except Exception as e:
             info['state_error'] = str(e)
 
+        self._add_episode_monitor_info(info)
         return info
+
+    def _current_position_xyz(self) -> list[float] | None:
+        try:
+            position = list(self._drone.position[:3])
+            if len(position) != 3:
+                return None
+            xyz = [float(value) for value in position]
+            return xyz if all(math.isfinite(value) for value in xyz) else None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _reset_service_attempted_from_reason(reason: str) -> bool:
+        return (
+            reason != 'service_disabled'
+            and (
+                reason.startswith('service_')
+                or reason in {'post_reset_arm_failed', 'post_reset_offboard_failed'}
+            )
+        )
+
+    def _classify_reset_method(self, supports_in_air_reset: bool, reason: str) -> str:
+        if self._reset_service_attempted_from_reason(reason) and reason == 'service_success':
+            return 'simulator_service'
+        if supports_in_air_reset:
+            return 'velocity'
+        return 'takeoff'
+
+    def _initialize_episode_monitoring(self, start_position: list[float] | None) -> None:
+        self._episode_start_position = list(start_position) if start_position is not None else None
+        self._episode_last_position = list(start_position) if start_position is not None else None
+        self._episode_path_length = 0.0
+        self._episode_max_physical_displacement = 0.0
+        self._episode_min_altitude = (
+            float(start_position[2]) if start_position is not None else float('nan')
+        )
+        self._episode_motion_command_steps = 0
+        self._episode_motion_command_accepted_steps = 0
+
+    def _update_episode_monitoring(
+        self,
+        current_position: list[float] | None,
+        motion_command_accepted: bool,
+    ) -> None:
+        self._episode_motion_command_steps += 1
+        if motion_command_accepted:
+            self._episode_motion_command_accepted_steps += 1
+
+        if current_position is None:
+            return
+
+        if self._episode_start_position is None:
+            self._initialize_episode_monitoring(current_position)
+            return
+
+        if self._episode_last_position is not None:
+            self._episode_path_length += math.dist(self._episode_last_position, current_position)
+        self._episode_last_position = list(current_position)
+        self._episode_max_physical_displacement = max(
+            self._episode_max_physical_displacement,
+            math.dist(self._episode_start_position, current_position),
+        )
+        altitude = float(current_position[2])
+        if not math.isfinite(self._episode_min_altitude):
+            self._episode_min_altitude = altitude
+        else:
+            self._episode_min_altitude = min(self._episode_min_altitude, altitude)
+
+    def _add_episode_monitor_info(self, info: dict[str, Any]) -> None:
+        physical_displacement = 0.0
+        current_position = self._current_position_xyz()
+        if self._episode_start_position is not None and current_position is not None:
+            physical_displacement = math.dist(self._episode_start_position, current_position)
+
+        command_steps = int(self._episode_motion_command_steps)
+        accepted_steps = int(self._episode_motion_command_accepted_steps)
+        acceptance_rate = float(accepted_steps / command_steps) if command_steps > 0 else 0.0
+
+        info['physical_displacement'] = float(physical_displacement)
+        info['path_length'] = float(self._episode_path_length)
+        info['max_physical_displacement'] = float(self._episode_max_physical_displacement)
+        info['min_altitude'] = float(self._episode_min_altitude)
+        info['motion_command_steps'] = command_steps
+        info['motion_command_accepted_steps'] = accepted_steps
+        info['motion_command_acceptance_rate'] = acceptance_rate
+        info['reset_method'] = self._last_reset_method
+        info['reset_path'] = self._last_reset_path
+        info['reset_service_attempted'] = bool(self._last_reset_service_attempted)
+        info['reset_failure_class'] = str(self._last_reset_diagnostics.get('failure_class', ''))
+        info['reset_position_error'] = self._reset_diagnostic_float('position_error')
+        info['reset_yaw_error'] = self._reset_diagnostic_float('yaw_error')
+        info['reset_service_status'] = self._last_reset_service_status
+
+    def _reset_diagnostic_float(self, key: str) -> float:
+        value = self._last_reset_diagnostics.get(key)
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return float('nan')
 
     def _validate_bounds(self) -> None:
         if self.scene_bounds_xy <= 0.0:
@@ -450,16 +614,33 @@ class AS2TestEnv(gym.Env):
             raise ValueError('height_bounds must satisfy z_min <= z_max')
         if self.max_reset_sample_attempts < 1:
             raise ValueError('max_reset_sample_attempts must be >= 1')
+        if self.reset_max_vel <= 0.0:
+            raise ValueError('reset_max_vel must be > 0')
+        if self.reset_xy_kp <= 0.0:
+            raise ValueError('reset_xy_kp must be > 0')
+        if self.reset_z_kp <= 0.0:
+            raise ValueError('reset_z_kp must be > 0')
         if self.fixed_start_tolerance <= 0.0:
             raise ValueError('fixed_start_tolerance must be > 0')
         if self.fixed_start_timeout <= 0.0:
             raise ValueError('fixed_start_timeout must be > 0')
+        if self.reset_yaw_tolerance <= 0.0 or self.reset_yaw_tolerance > math.pi:
+            raise ValueError('reset_yaw_tolerance must be in (0, pi]')
         if self.reset_min_speed < 0.0:
             raise ValueError('reset_min_speed must be >= 0')
         if self.reset_ground_recovery_height < 0.0:
             raise ValueError('reset_ground_recovery_height must be >= 0')
+        if self.unsafe_low_altitude_threshold <= z_min:
+            raise ValueError(
+                'unsafe_low_altitude_threshold must be greater than height_bounds[0] '
+                'so training terminates before the physical lower bound'
+            )
+        if self.unsafe_low_altitude_threshold > z_max:
+            raise ValueError('unsafe_low_altitude_threshold must be <= height_bounds[1]')
         if self.close_operation_timeout <= 0.0:
             raise ValueError('close_operation_timeout must be > 0')
+        if self.reset_service_timeout <= 0.0:
+            raise ValueError('reset_service_timeout must be > 0')
         if self.pos_limit < self.scene_bounds_xy:
             raise ValueError(
                 'pos_limit must be >= scene_bounds_xy to preserve normalization budget'
@@ -571,17 +752,45 @@ class AS2TestEnv(gym.Env):
         parts = []
         for key in [
             'reason',
+            'failure_class',
             'elapsed',
+            'recovery_timeout',
+            'reacquire_timeout',
+            'hold_timeout',
             'target_pose',
             'final_pose',
             'position_error',
+            'initial_position_error',
+            'best_position_error',
+            'error_reduction',
+            'dominant_axis',
             'yaw_error',
+            'service_name',
+            'message',
+            'linear_speed_norm',
+            'angular_speed_norm',
             'last_command',
+            'control_available',
             'state_error',
         ]:
             if key in self._last_reset_diagnostics:
                 parts.append(f'{key}={self._last_reset_diagnostics[key]}')
         return 'Reset diagnostics: ' + ', '.join(parts)
+
+    def _reset_velocity_limit(self) -> float:
+        return float(self.reset_max_vel)
+
+    def _clip_reset_velocity(self, command_xyz: np.ndarray) -> np.ndarray:
+        reset_limit = self._reset_velocity_limit()
+        return np.clip(command_xyz, -reset_limit, reset_limit)
+
+    def _reset_position_command(self, error: np.ndarray) -> np.ndarray:
+        gains = np.array([self.reset_xy_kp, self.reset_xy_kp, self.reset_z_kp], dtype=np.float32)
+        return self._clip_reset_velocity(gains * error)
+
+    def _dominant_reset_axis(self, error: np.ndarray) -> str:
+        axis_names = ('x', 'y', 'z')
+        return axis_names[int(np.argmax(np.abs(error)))]
 
     def _apply_reset_min_speed(self, command_xyz: np.ndarray, error: np.ndarray) -> np.ndarray:
         if self.reset_min_speed <= 0.0:
@@ -593,7 +802,47 @@ class AS2TestEnv(gym.Env):
                 continue
             if abs(float(adjusted[idx])) < self.reset_min_speed:
                 adjusted[idx] = math.copysign(self.reset_min_speed, float(error[idx]))
-        return np.clip(adjusted, -self.max_vel, self.max_vel)
+        return self._clip_reset_velocity(adjusted)
+
+    def _apply_low_altitude_action_guard(self, vz: float) -> float:
+        """Prevent policy actions from driving the vehicle into terminal ground contact."""
+        self._last_low_altitude_guard_active = False
+        if vz >= 0.0:
+            return vz
+        try:
+            current_z = float(self._drone.position[2])
+        except Exception:
+            return vz
+        dynamic_margin = float(self.max_vel) * max(float(self.step_duration), 0.1) * 2.0
+        guard_margin = max(float(self.low_altitude_guard_margin), dynamic_margin)
+        guard_height = float(self.unsafe_low_altitude_threshold) + guard_margin
+        if current_z <= guard_height:
+            self._last_low_altitude_guard_active = True
+            climb_speed = max(float(self.low_altitude_guard_climb_speed), float(self.reset_min_speed), 0.0)
+            return min(float(self.max_vel), climb_speed)
+        return vz
+
+    def _compute_vertical_safety_penalty(self, raw_vz: float) -> float:
+        """Penalize unsafe altitude and downward commands only near the unsafe band."""
+        band = float(self.vertical_safety_band)
+        altitude_weight = float(self.vertical_safety_penalty_weight)
+        descent_weight = float(self.vertical_descent_penalty_weight)
+        if band <= 0.0 or (altitude_weight <= 0.0 and descent_weight <= 0.0):
+            return 0.0
+        try:
+            current_z = float(self._drone.position[2])
+        except Exception:
+            return 0.0
+        band_top = float(self.unsafe_low_altitude_threshold) + band
+        if current_z >= band_top:
+            return 0.0
+
+        severity = float(np.clip((band_top - current_z) / band, 0.0, 1.0))
+        penalty = -altitude_weight * severity
+        if raw_vz < 0.0:
+            normalized_descent = min(abs(float(raw_vz)) / max(float(self.max_vel), 1e-6), 1.0)
+            penalty -= descent_weight * severity * normalized_descent
+        return float(penalty)
 
     def _start_pose_error(self, start_pose: list[float]) -> tuple[float, float, list[float] | None]:
         pose = self._read_reset_pose()
@@ -605,9 +854,42 @@ class AS2TestEnv(gym.Env):
         yaw_error = abs(self._wrap_angle(float(start_pose[3]) - yaw))
         return distance, yaw_error, [float(current_xyz[0]), float(current_xyz[1]), float(current_xyz[2]), float(yaw)]
 
+    def _reset_yaw_tolerance(self) -> float:
+        """Yaw tolerance for velocity-based reset convergence."""
+        return float(self.reset_yaw_tolerance)
+
+    def _reset_service_yaw_tolerance(self) -> float:
+        """Yaw tolerance sent to the simulator reset service."""
+        if not self.reset_yaw_required:
+            return math.pi
+        return self._reset_yaw_tolerance()
+
+    def _reset_yaw_converged(self, yaw_error: float) -> bool:
+        """Whether yaw may block reset convergence."""
+        return (not self.reset_yaw_required) or yaw_error <= self._reset_yaw_tolerance()
+
+    def _reset_yaw_command(self, yaw_error: float) -> float:
+        """Yaw command for reset convergence; disabled for position-only curricula."""
+        if not self.reset_yaw_required:
+            return 0.0
+        return float(np.clip(yaw_error, -self.max_yaw_vel, self.max_yaw_vel))
+
+    def _reset_position_tolerance(self) -> float:
+        """Position tolerance for velocity-based reset convergence."""
+        return float(self.fixed_start_tolerance) + max(0.01, 0.1 * float(self.fixed_start_tolerance))
+
     def _is_at_start_pose(self, start_pose: list[float]) -> bool:
         distance, yaw_error, _ = self._start_pose_error(start_pose)
-        return distance <= self.fixed_start_tolerance and yaw_error <= 0.2
+        return distance <= self._reset_position_tolerance() and self._reset_yaw_converged(yaw_error)
+
+    def _reset_vertical_recovery_floor(self, target_z: float) -> float:
+        """Minimum altitude considered safe while confirming a reset hold."""
+        if self.vertical_safety_band > 0.0:
+            return min(
+                float(target_z),
+                float(self.unsafe_low_altitude_threshold) + float(self.vertical_safety_band),
+            )
+        return min(float(target_z), float(self.reset_ground_recovery_height))
 
     def _apply_and_confirm_start_pose(self, start_pose: list[float]) -> bool:
         """Apply a start pose and verify it still holds after controller reset."""
@@ -620,7 +902,10 @@ class AS2TestEnv(gym.Env):
                 return True
 
             distance, yaw_error, pose = self._start_pose_error(start_pose)
-            if self._last_reset_diagnostics.get('reason') != 'post_controller_hold_timeout':
+            if self._last_reset_diagnostics.get('reason') not in {
+                'post_controller_hold_timeout',
+                'post_controller_reacquire_timeout',
+            }:
                 self._last_reset_diagnostics = {
                     'reason': 'post_settle_drift',
                     'attempt': attempt,
@@ -639,6 +924,18 @@ class AS2TestEnv(gym.Env):
             f'{self._format_reset_diagnostics()}'
         )
 
+    def _prepare_in_air_velocity_reset(self) -> None:
+        """Prepare the bounded velocity fallback path for an already-flying reset."""
+        self._recover_low_altitude_hover_before_velocity_reset(
+            self._reset_recovery_hover_height()
+        )
+        if not self._ensure_offboard_after_reset():
+            raise RuntimeError(
+                'Unable to reassert offboard command path before in-air reset. '
+                f'{self._format_reset_diagnostics()}'
+            )
+        self._reset_velocity_controller()
+
     def _reset_recovery_hover_height(self) -> float:
         """Return the safe hover height to recover before velocity-based reset."""
         fixed_start_height = float(self.fixed_start_pose[2]) if self.fixed_start_pose is not None else 0.0
@@ -650,183 +947,230 @@ class AS2TestEnv(gym.Env):
 
     def _recover_low_altitude_hover_before_velocity_reset(self, hover_height: float) -> bool:
         """
-        Recover with the classical takeoff controller if reset starts too low.
+        Recover a valid low-altitude in-air reset with bounded velocity control.
 
-        Velocity commands may be ignored while the vehicle is grounded or nearly
-        grounded. In that state, bounded velocity reset can keep sending upward
-        commands without ever reaching a valid hover. Before recreating the
-        velocity controller for an in-air reset, use the classical controller to
-        re-establish a safe hover state.
+        Reset must not perform an internal land/takeoff cycle here: AS2 can stay
+        in LANDING after a previous failure and reject TAKE_OFF, leaving training
+        stuck. If altitude is still inside the episode contract and velocity
+        control is available, climb vertically to a safe hover height. If the
+        vehicle is on/near the ground or control is unavailable, fail fast so the
+        caller can restart AS2 instead of looping inside reset.
         """
         pose = self._read_reset_pose()
         if pose is None:
-            return True
+            self._last_reset_diagnostics = {
+                'reason': 'hard_reset_required',
+                'failure_class': 'state_unreadable',
+                'control_available': self._speed_handler is not None,
+            }
+            raise RuntimeError(
+                'Low-altitude reset recovery cannot read simulator state; hard AS2 reset required. '
+                f'{self._format_reset_diagnostics()}'
+            )
 
         current_xyz, yaw = pose
         current_z = float(current_xyz[2])
         recovery_threshold = float(self.reset_ground_recovery_height)
-        if current_z > recovery_threshold:
+        target_height = max(float(hover_height), recovery_threshold)
+        start_height_tolerance = self._reset_position_tolerance()
+        if current_z >= target_height - start_height_tolerance:
             return True
 
-        target_height = max(float(hover_height), recovery_threshold)
+        terminal_min_height = float(self.height_bounds[0])
+        ground_epsilon = 0.05
+
+        if current_z <= ground_epsilon or current_z < terminal_min_height:
+            self._last_reset_diagnostics = {
+                'reason': 'hard_reset_required',
+                'failure_class': 'ground_or_terminal_altitude',
+                'target_pose': [float(current_xyz[0]), float(current_xyz[1]), target_height, float(yaw)],
+                'final_pose': [float(current_xyz[0]), float(current_xyz[1]), current_z, float(yaw)],
+                'control_available': self._speed_handler is not None,
+                'state_error': (
+                    f'z={current_z:.3f} is on/near ground or below terminal lower bound '
+                    f'{terminal_min_height:.3f}'
+                ),
+            }
+            raise RuntimeError(
+                'Low-altitude reset recovery found an unrecoverable ground/terminal altitude; '
+                f'hard AS2 reset required. {self._format_reset_diagnostics()}'
+            )
+
+        if self._speed_handler is None or not hasattr(self._speed_handler, 'send_speed_command_with_yaw_speed'):
+            self._last_reset_diagnostics = {
+                'reason': 'hard_reset_required',
+                'failure_class': 'velocity_control_unavailable',
+                'target_pose': [float(current_xyz[0]), float(current_xyz[1]), target_height, float(yaw)],
+                'final_pose': [float(current_xyz[0]), float(current_xyz[1]), current_z, float(yaw)],
+                'control_available': False,
+            }
+            raise RuntimeError(
+                'Low-altitude reset recovery requires velocity control, but no speed handler is available; '
+                f'hard AS2 reset required. {self._format_reset_diagnostics()}'
+            )
+
         logger.warning(
-            'Reset started at low altitude z=%.3f; recovering to hover %.3fm before velocity reset',
+            'Reset started at valid low altitude z=%.3f; climbing to hover %.3fm with bounded velocity recovery',
             current_z,
             target_height,
         )
 
-        if self._speed_handler is not None:
-            try:
-                for _ in range(3):
+        started = time.time()
+        check_dt = max(0.05, self.step_duration)
+        recovery_timeout = max(self.hover_timeout, check_dt)
+        last_command = [0.0, 0.0, 0.0, 0.0]
+        last_pose = [float(current_xyz[0]), float(current_xyz[1]), current_z, float(yaw)]
+        position_error = abs(target_height - current_z)
+        initial_position_error = position_error
+        best_position_error = position_error
+
+        try:
+            while time.time() - started < recovery_timeout:
+                pose = self._read_reset_pose()
+                if pose is None:
+                    time.sleep(check_dt)
+                    continue
+
+                current_xyz, yaw = pose
+                current_z = float(current_xyz[2])
+                last_pose = [float(current_xyz[0]), float(current_xyz[1]), current_z, float(yaw)]
+                position_error = abs(target_height - current_z)
+                best_position_error = min(best_position_error, position_error)
+
+                if current_z >= target_height - self.fixed_start_tolerance:
                     self._speed_handler.send_speed_command_with_yaw_speed(
                         twist=[0.0, 0.0, 0.0],
                         twist_frame_id='earth',
                         yaw_speed=0.0,
                     )
-                    time.sleep(max(0.05, self.step_duration))
-            except Exception as e:
-                logger.warning('Unable to zero stale velocity command before low-altitude recovery: %s', e)
+                    last_command = [0.0, 0.0, 0.0, 0.0]
+                    hover_settled = self._wait_for_hover_settle()
+                    if hover_settled:
+                        recovered_pose = self._read_reset_pose()
+                        if recovered_pose is not None:
+                            recovered_xyz, recovered_yaw = recovered_pose
+                            last_pose = [
+                                float(recovered_xyz[0]),
+                                float(recovered_xyz[1]),
+                                float(recovered_xyz[2]),
+                                float(recovered_yaw),
+                            ]
+                            position_error = abs(target_height - float(recovered_xyz[2]))
 
-        if hasattr(self._drone, 'land'):
-            landed = self._run_close_operation(
-                'low-altitude recovery landing',
-                lambda: self._drone.land(speed=self.land_speed),
-            )
-            if not landed:
-                logger.warning(
-                    'Low-altitude landing handoff did not complete; recreating DroneInterface before takeoff recovery'
-                )
-                if hasattr(self._drone, 'shutdown'):
-                    shutdown_ok = self._run_close_operation(
-                        'low-altitude recovery DroneInterface shutdown',
-                        self._drone.shutdown,
-                    )
-                    if not shutdown_ok:
+                        self._is_flying = True
                         self._last_reset_diagnostics = {
-                            'reason': 'low_altitude_interface_recreation_failed',
+                            'reason': 'low_altitude_velocity_recovery',
+                            'elapsed': round(time.time() - started, 3),
                             'target_pose': [float(current_xyz[0]), float(current_xyz[1]), target_height, float(yaw)],
-                            'final_pose': [float(current_xyz[0]), float(current_xyz[1]), current_z, float(yaw)],
+                            'final_pose': last_pose,
+                            'position_error': round(position_error, 4),
+                            'last_command': last_command,
+                            'control_available': True,
                         }
-                        raise RuntimeError(
-                            'Low-altitude interface recreation failed before hover recovery. '
-                            f'{self._format_reset_diagnostics()}'
-                        )
-                self._drone = None
-                self._speed_handler = None
-                self._is_flying = False
-                self._init_ros()
-            else:
-                self._is_flying = False
-            time.sleep(max(0.1, self.step_duration))
+                        return True
 
-        if hasattr(self._drone, 'manual'):
-            try:
-                self._drone.manual()
-                time.sleep(max(0.1, self.step_duration))
-            except Exception as e:
-                logger.warning('Unable to switch to manual before low-altitude recovery: %s', e)
-
-        arm_success = True
-        offboard_success = True
-        takeoff_success = False
-        try:
-            if hasattr(self._drone, 'arm'):
-                arm_success = bool(self._drone.arm())
-            if hasattr(self._drone, 'offboard'):
-                offboard_success = bool(self._drone.offboard())
-            if hasattr(self._drone, 'takeoff'):
-                takeoff_success = bool(self._drone.takeoff(
-                    height=target_height,
-                    speed=self.takeoff_speed,
-                ))
-            else:
-                takeoff_success = False
+                vertical_error = target_height - current_z
+                vz = float(np.clip(vertical_error * self.reset_z_kp, -self.reset_max_vel, self.reset_max_vel))
+                if abs(vz) < self.reset_min_speed:
+                    vz = math.copysign(self.reset_min_speed, vertical_error)
+                vz = float(np.clip(vz, -self.reset_max_vel, self.reset_max_vel))
+                last_command = [0.0, 0.0, vz, 0.0]
+                self._speed_handler.send_speed_command_with_yaw_speed(
+                    twist=last_command[:3],
+                    twist_frame_id='earth',
+                    yaw_speed=0.0,
+                )
+                time.sleep(check_dt)
         except Exception as e:
             self._last_reset_diagnostics = {
-                'reason': 'low_altitude_recovery_error',
+                'reason': 'hard_reset_required',
+                'failure_class': 'low_altitude_velocity_recovery_error',
+                'elapsed': round(time.time() - started, 3),
                 'target_pose': [float(current_xyz[0]), float(current_xyz[1]), target_height, float(yaw)],
-                'final_pose': [float(current_xyz[0]), float(current_xyz[1]), current_z, float(yaw)],
+                'final_pose': last_pose,
+                'position_error': round(position_error, 4),
+                'initial_position_error': round(initial_position_error, 4),
+                'best_position_error': round(best_position_error, 4),
+                'error_reduction': round(initial_position_error - best_position_error, 4),
+                'dominant_axis': 'z',
+                'last_command': [round(v, 4) for v in last_command],
+                'control_available': True,
                 'state_error': str(e),
             }
             raise RuntimeError(
-                'Low-altitude hover recovery failed before velocity reset. '
+                'Low-altitude velocity hover recovery failed; hard AS2 reset required. '
                 f'{self._format_reset_diagnostics()}'
             ) from e
 
-        self._is_flying = bool(takeoff_success)
-        hover_settled = self._wait_for_hover_settle() if self._is_flying else False
-        recovered_pose = self._read_reset_pose()
-        recovered_xyz = current_xyz
-        recovered_yaw = yaw
-        if recovered_pose is not None:
-            recovered_xyz, recovered_yaw = recovered_pose
-
-        if not (takeoff_success and hover_settled):
-            self._last_reset_diagnostics = {
-                'reason': 'low_altitude_recovery_failed',
-                'target_pose': [float(current_xyz[0]), float(current_xyz[1]), target_height, float(yaw)],
-                'final_pose': [
-                    float(recovered_xyz[0]),
-                    float(recovered_xyz[1]),
-                    float(recovered_xyz[2]),
-                    float(recovered_yaw),
-                ],
-                'state_error': {
-                    'arm_success': arm_success,
-                    'offboard_success': offboard_success,
-                    'takeoff_success': takeoff_success,
-                    'hover_settled': hover_settled,
-                },
-            }
-            raise RuntimeError(
-                'Low-altitude hover recovery did not reach a stable flying state before velocity reset. '
-                f'{self._format_reset_diagnostics()}'
-            )
-
         self._last_reset_diagnostics = {
-            'reason': 'low_altitude_recovery',
+            'reason': 'hard_reset_required',
+            'failure_class': 'low_altitude_velocity_recovery_timeout',
+            'elapsed': round(time.time() - started, 3),
+            'recovery_timeout': round(recovery_timeout, 3),
             'target_pose': [float(current_xyz[0]), float(current_xyz[1]), target_height, float(yaw)],
-            'final_pose': [
-                float(recovered_xyz[0]),
-                float(recovered_xyz[1]),
-                float(recovered_xyz[2]),
-                float(recovered_yaw),
-            ],
-            'position_error': round(abs(target_height - float(recovered_xyz[2])), 4),
+            'final_pose': last_pose,
+            'position_error': round(position_error, 4),
+            'initial_position_error': round(initial_position_error, 4),
+            'best_position_error': round(best_position_error, 4),
+            'error_reduction': round(initial_position_error - best_position_error, 4),
+            'dominant_axis': 'z',
+            'last_command': [round(v, 4) for v in last_command],
+            'control_available': True,
         }
-        return True
+        raise RuntimeError(
+            'Low-altitude velocity hover recovery timed out; hard AS2 reset required. '
+            f'{self._format_reset_diagnostics()}'
+        )
 
     def _hold_start_pose_after_controller_reset(self, start_pose: list[float], attempt: int) -> bool:
         """
         Keep a bounded pose hold active after recreating the speed controller.
 
         AS2 can briefly report the requested pose immediately after the velocity
-        reset, then drift while the new controller settles. A speed-only hover
-        wait can miss that handoff drift, so this loop only counts settle time
-        while the vehicle remains within the fixed-start pose tolerance. If it
-        drifts out, the same bounded velocity controller reacquires the pose.
+        reset, then drift while the new controller settles. If that happens,
+        this method first gives the bounded velocity controller up to the fixed
+        start deadline to reacquire XYZ, then starts the shorter hover hold
+        deadline only after the pose is inside tolerance.
         """
         if self._speed_handler is None:
             return self._wait_for_hover_settle()
 
         target_xyz = np.array(start_pose[:3], dtype=np.float32)
         target_yaw = float(start_pose[3])
+        vertical_recovery_floor = self._reset_vertical_recovery_floor(float(target_xyz[2]))
+        vertical_floor_tolerance = min(0.05, float(self.fixed_start_tolerance))
         required_stable_time = max(0.0, float(self.hover_settle_time))
-        if required_stable_time <= 0.0:
-            return self._is_at_start_pose(start_pose)
-
         started = time.time()
-        stable_elapsed = 0.0
+        reacquire_started = started
         check_dt = max(0.05, self.step_duration)
+        reacquire_timeout = max(float(self.fixed_start_timeout), check_dt)
+        hold_timeout = max(float(self.hover_timeout), check_dt)
+        acquired_at: float | None = None
+        hold_started_at: float | None = None
+        stable_elapsed = 0.0
         last_command = [0.0, 0.0, 0.0, 0.0]
         last_pose: list[float] | None = None
         last_distance = float('inf')
         last_yaw_error = float('inf')
+        initial_position_error = float('inf')
+        best_position_error = float('inf')
+        dominant_axis = 'unknown'
 
-        while time.time() - started < self.hover_timeout:
+        while True:
+            now = time.time()
+            if acquired_at is None:
+                if now - reacquire_started >= reacquire_timeout:
+                    timeout_reason = 'post_controller_reacquire_timeout'
+                    timeout_elapsed = now - reacquire_started
+                    break
+
             pose = self._read_reset_pose()
             if pose is None:
                 stable_elapsed = 0.0
+                if acquired_at is not None and hold_started_at is not None and now - hold_started_at >= hold_timeout:
+                    timeout_reason = 'post_controller_hold_timeout'
+                    timeout_elapsed = now - hold_started_at
+                    break
                 time.sleep(check_dt)
                 continue
 
@@ -837,23 +1181,46 @@ class AS2TestEnv(gym.Env):
             last_distance = distance
             last_yaw_error = abs(yaw_error)
             last_pose = [float(current_xyz[0]), float(current_xyz[1]), float(current_xyz[2]), float(yaw)]
+            if not math.isfinite(initial_position_error):
+                initial_position_error = distance
+            best_position_error = min(best_position_error, distance)
+            dominant_axis = self._dominant_reset_axis(error)
+            altitude_ready = float(current_xyz[2]) >= vertical_recovery_floor - vertical_floor_tolerance
 
-            if distance <= self.fixed_start_tolerance and abs(yaw_error) <= 0.2:
+            if (
+                altitude_ready
+                and distance <= self._reset_position_tolerance()
+                and self._reset_yaw_converged(abs(yaw_error))
+            ):
+                if acquired_at is None:
+                    acquired_at = now
+                    if hold_started_at is None:
+                        hold_started_at = now
                 command_xyz = np.zeros(3, dtype=np.float32)
                 yaw_speed = 0.0
                 stable_elapsed += check_dt
             else:
-                command_xyz = np.clip(error, -self.max_vel, self.max_vel)
-                command_xyz = self._apply_reset_min_speed(command_xyz, error)
-                yaw_speed = float(np.clip(yaw_error, -self.max_yaw_vel, self.max_yaw_vel))
+                if acquired_at is not None:
+                    acquired_at = None
+                    reacquire_started = now
+                    initial_position_error = distance
+                    best_position_error = distance
+                if not altitude_ready:
+                    recovery_error = np.array(
+                        [0.0, 0.0, float(target_xyz[2] - current_xyz[2])],
+                        dtype=np.float32,
+                    )
+                    command_xyz = self._reset_position_command(recovery_error)
+                    command_xyz = self._apply_reset_min_speed(command_xyz, recovery_error)
+                    yaw_speed = 0.0
+                else:
+                    command_xyz = self._reset_position_command(error)
+                    command_xyz = self._apply_reset_min_speed(command_xyz, error)
+                    yaw_speed = self._reset_yaw_command(yaw_error)
                 stable_elapsed = 0.0
 
             last_command = [float(command_xyz[0]), float(command_xyz[1]), float(command_xyz[2]), yaw_speed]
-            self._speed_handler.send_speed_command_with_yaw_speed(
-                twist=last_command[:3],
-                twist_frame_id='earth',
-                yaw_speed=yaw_speed,
-            )
+            self._send_reset_speed_command(last_command[:3], yaw_speed)
 
             if stable_elapsed >= required_stable_time:
                 time.sleep(check_dt)
@@ -864,7 +1231,14 @@ class AS2TestEnv(gym.Env):
                 confirmed_xyz, confirmed_yaw = confirmed_pose
                 confirmed_distance = float(np.linalg.norm(target_xyz - confirmed_xyz))
                 confirmed_yaw_error = abs(self._wrap_angle(target_yaw - confirmed_yaw))
-                if confirmed_distance > self.fixed_start_tolerance or confirmed_yaw_error > 0.2:
+                confirmed_altitude_ready = (
+                    float(confirmed_xyz[2]) >= vertical_recovery_floor - vertical_floor_tolerance
+                )
+                if (
+                    not confirmed_altitude_ready
+                    or confirmed_distance > self._reset_position_tolerance()
+                    or not self._reset_yaw_converged(confirmed_yaw_error)
+                ):
                     last_pose = [
                         float(confirmed_xyz[0]),
                         float(confirmed_xyz[1]),
@@ -893,22 +1267,43 @@ class AS2TestEnv(gym.Env):
                 }
                 return True
 
+            if acquired_at is not None and hold_started_at is not None and now - hold_started_at >= hold_timeout:
+                timeout_reason = 'post_controller_hold_timeout'
+                timeout_elapsed = now - hold_started_at
+                break
+
             time.sleep(check_dt)
 
         self._last_reset_diagnostics = {
-            'reason': 'post_controller_hold_timeout',
+            'reason': timeout_reason,
             'attempt': attempt,
-            'elapsed': round(time.time() - started, 3),
+            'elapsed': round(timeout_elapsed, 3),
+            'reacquire_timeout': round(reacquire_timeout, 3),
+            'hold_timeout': round(hold_timeout, 3),
             'target_pose': [float(v) for v in start_pose],
             'final_pose': last_pose,
             'position_error': round(last_distance, 4) if math.isfinite(last_distance) else 'inf',
+            'initial_position_error': round(initial_position_error, 4) if math.isfinite(initial_position_error) else 'inf',
+            'best_position_error': round(best_position_error, 4) if math.isfinite(best_position_error) else 'inf',
+            'error_reduction': (
+                round(initial_position_error - best_position_error, 4)
+                if math.isfinite(initial_position_error) and math.isfinite(best_position_error)
+                else 'inf'
+            ),
+            'dominant_axis': dominant_axis,
             'yaw_error': round(last_yaw_error, 4) if math.isfinite(last_yaw_error) else 'inf',
             'last_command': [round(v, 4) for v in last_command],
         }
-        logger.warning(
-            'Start pose did not remain stable during post-controller hold. %s',
-            self._format_reset_diagnostics(),
-        )
+        if timeout_reason == 'post_controller_reacquire_timeout':
+            logger.warning(
+                'Start pose was not reacquired after controller reset. %s',
+                self._format_reset_diagnostics(),
+            )
+        else:
+            logger.warning(
+                'Start pose did not remain stable during post-controller hold. %s',
+                self._format_reset_diagnostics(),
+            )
         return False
 
     def _drive_to_start_pose_with_velocity(self, start_pose: list[float]) -> bool:
@@ -921,6 +1316,9 @@ class AS2TestEnv(gym.Env):
         started = time.time()
         check_dt = max(0.05, self.step_duration)
         last_command = [0.0, 0.0, 0.0, 0.0]
+        initial_position_error = float('inf')
+        best_position_error = float('inf')
+        dominant_axis = 'unknown'
 
         while time.time() - started < self.fixed_start_timeout:
             pose = self._read_reset_pose()
@@ -932,13 +1330,13 @@ class AS2TestEnv(gym.Env):
             error = target_xyz - current_xyz
             distance = float(np.linalg.norm(error))
             yaw_error = self._wrap_angle(target_yaw - yaw)
+            if not math.isfinite(initial_position_error):
+                initial_position_error = distance
+            best_position_error = min(best_position_error, distance)
+            dominant_axis = self._dominant_reset_axis(error)
 
-            if distance <= self.fixed_start_tolerance and abs(yaw_error) <= 0.2:
-                self._speed_handler.send_speed_command_with_yaw_speed(
-                    twist=[0.0, 0.0, 0.0],
-                    twist_frame_id='earth',
-                    yaw_speed=0.0,
-                )
+            if distance <= self._reset_position_tolerance() and self._reset_yaw_converged(abs(yaw_error)):
+                self._send_reset_speed_command([0.0, 0.0, 0.0], 0.0)
                 time.sleep(check_dt)
                 confirmed_pose = self._read_reset_pose()
                 if confirmed_pose is None:
@@ -946,7 +1344,7 @@ class AS2TestEnv(gym.Env):
                 confirmed_xyz, confirmed_yaw = confirmed_pose
                 confirmed_distance = float(np.linalg.norm(target_xyz - confirmed_xyz))
                 confirmed_yaw_error = self._wrap_angle(target_yaw - confirmed_yaw)
-                if confirmed_distance > self.fixed_start_tolerance or abs(confirmed_yaw_error) > 0.2:
+                if confirmed_distance > self._reset_position_tolerance() or not self._reset_yaw_converged(abs(confirmed_yaw_error)):
                     continue
                 self._last_reset_diagnostics = {
                     'reason': 'reached',
@@ -968,15 +1366,11 @@ class AS2TestEnv(gym.Env):
                 control_error[1] = 0.0
                 control_error[2] = max(float(target_xyz[2]), recovery_height) - current_xyz[2]
 
-            command_xyz = np.clip(1.0 * control_error, -self.max_vel, self.max_vel)
+            command_xyz = self._reset_position_command(control_error)
             command_xyz = self._apply_reset_min_speed(command_xyz, control_error)
-            yaw_speed = float(np.clip(1.0 * yaw_error, -self.max_yaw_vel, self.max_yaw_vel))
+            yaw_speed = self._reset_yaw_command(1.0 * yaw_error)
             last_command = [float(command_xyz[0]), float(command_xyz[1]), float(command_xyz[2]), yaw_speed]
-            self._speed_handler.send_speed_command_with_yaw_speed(
-                twist=last_command[:3],
-                twist_frame_id='earth',
-                yaw_speed=yaw_speed,
-            )
+            self._send_reset_speed_command(last_command[:3], yaw_speed)
             time.sleep(check_dt)
 
         final_pose = self._read_reset_pose()
@@ -988,12 +1382,10 @@ class AS2TestEnv(gym.Env):
             final_xyz, final_yaw = final_pose
             final_distance = float(np.linalg.norm(target_xyz - final_xyz))
             final_yaw_error = abs(self._wrap_angle(target_yaw - final_yaw))
+            best_position_error = min(best_position_error, final_distance)
+            dominant_axis = self._dominant_reset_axis(target_xyz - final_xyz)
 
-        self._speed_handler.send_speed_command_with_yaw_speed(
-            twist=[0.0, 0.0, 0.0],
-            twist_frame_id='earth',
-            yaw_speed=0.0,
-        )
+        self._send_reset_speed_command([0.0, 0.0, 0.0], 0.0)
         self._last_reset_diagnostics = {
             'reason': 'timeout',
             'elapsed': round(time.time() - started, 3),
@@ -1003,21 +1395,384 @@ class AS2TestEnv(gym.Env):
                 if final_xyz is not None else None
             ),
             'position_error': round(final_distance, 4) if math.isfinite(final_distance) else 'inf',
+            'initial_position_error': round(initial_position_error, 4) if math.isfinite(initial_position_error) else 'inf',
+            'best_position_error': round(best_position_error, 4) if math.isfinite(best_position_error) else 'inf',
+            'error_reduction': (
+                round(initial_position_error - best_position_error, 4)
+                if math.isfinite(initial_position_error) and math.isfinite(best_position_error)
+                else 'inf'
+            ),
+            'dominant_axis': dominant_axis,
             'yaw_error': round(final_yaw_error, 4) if math.isfinite(final_yaw_error) else 'inf',
             'last_command': [round(v, 4) for v in last_command],
         }
         logger.warning('Timed out while driving to fixed_start_pose. %s', self._format_reset_diagnostics())
         return False
 
-    def _reset_velocity_controller(self) -> None:
+    def _send_reset_speed_command(self, twist: list[float], yaw_speed: float) -> bool:
+        """Send a reset motion reference, recovering the command path once if rejected."""
+        if self._send_speed_command(twist, yaw_speed):
+            return True
+        if not self._recover_motion_reference_path():
+            return False
+        return self._send_speed_command(twist, yaw_speed)
+
+    def _send_speed_command(self, twist: list[float], yaw_speed: float) -> bool:
+        """Send one speed/yaw-rate motion reference and report API acceptance."""
+        if self._speed_handler is None or not hasattr(
+            self._speed_handler,
+            'send_speed_command_with_yaw_speed',
+        ):
+            logger.error('Speed motion handler is not available; cannot publish motion reference')
+            return False
+
+        try:
+            accepted = self._speed_handler.send_speed_command_with_yaw_speed(
+                twist=twist,
+                twist_frame_id='earth',
+                yaw_speed=float(yaw_speed),
+            )
+            return bool(accepted) if accepted is not None else True
+        except Exception as e:
+            logger.error(f"Error sending velocity command: {e}")
+            return False
+
+    def _ensure_offboard_after_reset(self) -> bool:
+        """Reassert AS2 arm/offboard mode after simulator-backed state reset."""
+        def _info_flag(flag: str) -> bool:
+            try:
+                info = getattr(self._drone, 'info', {})
+                return bool(info.get(flag, False)) if isinstance(info, dict) else False
+            except Exception:
+                return False
+
+        arm = getattr(self._drone, 'arm', None)
+        if arm is not None:
+            try:
+                if not bool(arm()) and not _info_flag('armed'):
+                    self._last_reset_diagnostics = {
+                        'reason': 'post_reset_arm_failed',
+                    }
+                    logger.error('Unable to reassert arm state after simulator reset')
+                    return False
+            except Exception as e:
+                self._last_reset_diagnostics = {
+                    'reason': 'post_reset_arm_failed',
+                    'state_error': str(e),
+                }
+                logger.error('Unable to reassert arm state after simulator reset: %s', e)
+                return False
+
+        offboard = getattr(self._drone, 'offboard', None)
+        if offboard is None:
+            return True
+        try:
+            return bool(offboard()) or _info_flag('offboard')
+        except Exception as e:
+            self._last_reset_diagnostics = {
+                'reason': 'post_reset_offboard_failed',
+                'state_error': str(e),
+            }
+            logger.error('Unable to reassert offboard mode after simulator reset: %s', e)
+            return False
+
+    def _reset_velocity_controller(self) -> bool:
         from as2_motion_reference_handlers.speed_motion import SpeedMotion
 
         self._speed_handler = SpeedMotion(self._drone)
-        self._speed_handler.send_speed_command_with_yaw_speed(
-            twist=[0.0, 0.0, 0.0],
-            twist_frame_id='earth',
-            yaw_speed=0.0,
+        return self._send_speed_command([0.0, 0.0, 0.0], 0.0)
+
+    def _recover_motion_reference_path(self) -> bool:
+        """Best-effort recovery when AS2 rejects a speed motion reference."""
+        offboard_ready = self._ensure_offboard_after_reset()
+        controller_ready = self._reset_velocity_controller()
+        self._is_flying = self._is_flying or (offboard_ready and controller_ready)
+        return offboard_ready and controller_ready
+
+    def _reset_service_name(self) -> str:
+        """Return the absolute per-namespace simulator reset service name."""
+        namespace = self.drone_namespace.strip().strip('/')
+        return f'/{namespace}/platform/reset_simulator_state'
+
+    def _reset_client_ownership_model(self) -> str:
+        """Return the reset client ROS node ownership model selected for AS2."""
+        return self._RESET_CLIENT_OWNERSHIP_MODEL
+
+    def _ensure_reset_service_client(self) -> bool:
+        """Create the simulator reset service client on an auxiliary node."""
+        if self._reset_service_client is not None:
+            return True
+
+        service_name = self._reset_service_name()
+        try:
+            import rclpy
+            from rclpy.executors import SingleThreadedExecutor
+            from as2_platform_multirotor_simulator.srv import ResetSimulatorState
+
+            namespace = self.drone_namespace.strip().strip('/').replace('/', '_')
+            node_name = f'{namespace}_reset_client'
+            self._reset_aux_node = rclpy.create_node(node_name)
+            self._reset_aux_executor = SingleThreadedExecutor()
+            self._reset_aux_executor.add_node(self._reset_aux_node)
+            self._reset_service_type = ResetSimulatorState
+            self._reset_service_client = self._reset_aux_node.create_client(
+                ResetSimulatorState,
+                service_name,
+            )
+            return True
+        except Exception as e:
+            self._last_reset_diagnostics = {
+                'reason': 'service_client_create_failed',
+                'failure_class': 'service_client_unavailable',
+                'service_name': service_name,
+                'state_error': str(e),
+            }
+            self._last_reset_service_status = 'service_client_create_failed'
+            self._destroy_reset_client_resources()
+            return False
+
+    def _sync_reset_service_status_from_diagnostics(self) -> None:
+        """Preserve service-attempt diagnostics when a fallback later succeeds."""
+        if self._last_reset_service_status != 'not_attempted':
+            return
+        reason = str(self._last_reset_diagnostics.get('reason', 'unknown'))
+        if self._reset_service_attempted_from_reason(reason):
+            self._last_reset_service_status = reason
+
+    def _mark_service_reset_success_if_unreported(self, start_pose: list[float]) -> None:
+        """Keep reset diagnostics coherent when tests stub the service helper."""
+        if self._last_reset_service_status == 'not_attempted':
+            self._last_reset_service_status = 'service_success'
+        if str(self._last_reset_diagnostics.get('reason', 'unknown')) == 'unknown':
+            self._last_reset_diagnostics = {
+                'reason': 'service_success',
+                'failure_class': '',
+                'target_pose': [float(v) for v in start_pose],
+            }
+
+    def _build_reset_service_request(self, start_pose: list[float]):
+        """Build a ResetSimulatorState request from an env start pose."""
+        if self._reset_service_type is None:
+            from as2_platform_multirotor_simulator.srv import ResetSimulatorState
+            self._reset_service_type = ResetSimulatorState
+
+        request = self._reset_service_type.Request()
+        request.x = float(start_pose[0])
+        request.y = float(start_pose[1])
+        request.z = float(start_pose[2])
+        request.yaw = float(start_pose[3])
+        request.position_tolerance = float(self.fixed_start_tolerance)
+        request.yaw_tolerance = self._reset_service_yaw_tolerance()
+        request.linear_speed_tolerance = float(self.hover_speed_threshold)
+        request.angular_speed_tolerance = float(self.hover_speed_threshold)
+        return request
+
+    def _stop_motion_before_service_reset(self) -> bool:
+        """Drain env-side motion references before simulator state reset.
+
+        Do not call AS2 behavior ``stop()`` here. In live AS2, stopping idle or
+        already-completed behavior modules can push the platform FSM to
+        EMERGENCY, which leaves speed references accepted but physically ignored.
+        The simulator reset service clears simulator-side references atomically,
+        and the env recreates/zeros the speed controller after success. Sending
+        a pre-service zero speed reference was observed to keep AS2 in a stale
+        no-motion path after reset, so pre-service cleanup is intentionally a
+        no-op at the env layer.
+        """
+        return True
+
+    def _spin_reset_future_until_complete(self, future, timeout_sec: float | None = None) -> bool:
+        """Wait for a reset service future with a hard timeout."""
+        timeout = self.reset_service_timeout if timeout_sec is None else float(timeout_sec)
+        started = time.time()
+        while time.time() - started < timeout:
+            if future.done():
+                return True
+            if self._reset_aux_executor is not None and hasattr(self._reset_aux_executor, 'spin_once'):
+                self._reset_aux_executor.spin_once(timeout_sec=min(0.01, timeout))
+            else:
+                time.sleep(min(0.01, timeout))
+        return bool(future.done())
+
+    def _try_service_backed_reset(self, start_pose: list[float]) -> bool:
+        """
+        Try the simulator reset service, returning False for fallback-safe failures.
+
+        Until the simulator service is built and validated, any unavailable or
+        incomplete service path must fall back to the existing bounded velocity
+        reset instead of failing the episode reset outright.
+        """
+        if not self.use_simulator_reset_service:
+            self._last_reset_diagnostics = {
+                'reason': 'service_disabled',
+                'failure_class': 'service_disabled',
+            }
+            self._last_reset_service_status = 'service_disabled'
+            return False
+
+        self._last_reset_service_status = 'service_attempted'
+        service_name = self._reset_service_name()
+        if not self._ensure_reset_service_client():
+            self._sync_reset_service_status_from_diagnostics()
+            return False
+
+        client = self._reset_service_client
+
+        try:
+            if not self._stop_motion_before_service_reset():
+                return False
+
+            if hasattr(client, 'wait_for_service') and not client.wait_for_service(
+                timeout_sec=self.reset_service_timeout,
+            ):
+                self._last_reset_diagnostics = {
+                    'reason': 'service_unavailable',
+                    'failure_class': 'service_unavailable',
+                    'service_name': service_name,
+                    'target_pose': [float(v) for v in start_pose],
+                }
+                self._last_reset_service_status = 'service_unavailable'
+                return False
+
+            if not hasattr(client, 'call_async'):
+                self._last_reset_diagnostics = {
+                    'reason': 'service_call_unavailable',
+                    'failure_class': 'service_call_unavailable',
+                    'service_name': service_name,
+                    'target_pose': [float(v) for v in start_pose],
+                }
+                self._last_reset_service_status = 'service_call_unavailable'
+                return False
+
+            request = self._build_reset_service_request(start_pose)
+            future = client.call_async(request)
+            if not self._spin_reset_future_until_complete(future):
+                self._last_reset_diagnostics = {
+                    'reason': 'service_future_timeout',
+                    'failure_class': 'service_timeout',
+                    'service_name': service_name,
+                    'target_pose': [float(v) for v in start_pose],
+                    'elapsed': round(float(self.reset_service_timeout), 3),
+                }
+                self._last_reset_service_status = 'service_future_timeout'
+                return False
+
+            response = future.result()
+            self._last_reset_diagnostics = {
+                'reason': 'service_success' if bool(response.success) else 'service_rejected',
+                'failure_class': '' if bool(response.success) else 'service_response_failure',
+                'service_name': service_name,
+                'target_pose': [float(v) for v in start_pose],
+                'message': getattr(response, 'message', ''),
+                'position_error': getattr(response, 'position_error', None),
+                'yaw_error': getattr(response, 'yaw_error', None),
+                'linear_speed_norm': getattr(response, 'linear_speed_norm', None),
+                'angular_speed_norm': getattr(response, 'angular_speed_norm', None),
+            }
+            self._last_reset_service_status = str(self._last_reset_diagnostics['reason'])
+            if bool(response.success):
+                offboard_ready = self._ensure_offboard_after_reset()
+                controller_ready = self._reset_velocity_controller()
+                self._is_flying = offboard_ready and controller_ready
+                if not self._is_flying:
+                    self._last_reset_diagnostics.update({
+                        'reason': 'service_post_reset_command_path_failed',
+                        'failure_class': 'post_reset_command_path_failed',
+                        'offboard_ready': offboard_ready,
+                        'controller_ready': controller_ready,
+                    })
+                    self._last_reset_service_status = 'service_post_reset_command_path_failed'
+                    return False
+            return bool(response.success)
+        except Exception as e:
+            self._last_reset_diagnostics = {
+                'reason': 'service_error',
+                'failure_class': 'service_exception',
+                'service_name': service_name,
+                'target_pose': [float(v) for v in start_pose],
+                'state_error': str(e),
+            }
+            self._last_reset_service_status = 'service_error'
+            return False
+
+    def _raise_fresh_service_reset_failure(self) -> None:
+        """Fail fast when a fresh service-backed reset cannot prove command readiness."""
+        raise RuntimeError(
+            'Fresh service-backed reset failed before command path readiness; '
+            'refusing velocity fallback to avoid accepted-but-ignored actions. '
+            f'{self._format_reset_diagnostics()}'
         )
+
+    def _set_platform_flying_after_service_reset(self) -> bool:
+        """Advance AS2 platform FSM to FLYING after direct simulator state reset."""
+        if self._reset_aux_node is None:
+            return False
+
+        client = None
+        try:
+            from as2_msgs.msg import PlatformStateMachineEvent
+            from as2_msgs.srv import SetPlatformStateMachineEvent
+
+            namespace = self.drone_namespace.strip().strip('/')
+            service_name = f'/{namespace}/platform/state_machine_event'
+            client = self._reset_aux_node.create_client(SetPlatformStateMachineEvent, service_name)
+            if hasattr(client, 'wait_for_service') and not client.wait_for_service(
+                timeout_sec=self.reset_service_timeout,
+            ):
+                return False
+
+            ok = True
+            for event in (
+                PlatformStateMachineEvent.ARM,
+                PlatformStateMachineEvent.TAKE_OFF,
+                PlatformStateMachineEvent.TOOK_OFF,
+            ):
+                request = SetPlatformStateMachineEvent.Request()
+                request.event.event = event
+                future = client.call_async(request)
+                if not self._spin_reset_future_until_complete(future):
+                    ok = False
+                    continue
+                result = future.result()
+                ok = ok and bool(getattr(result, 'success', False))
+
+            return ok
+        except Exception as e:
+            logger.warning('Unable to set AS2 platform FSM after simulator reset: %s', e)
+            return False
+        finally:
+            if client is not None and hasattr(self._reset_aux_node, 'destroy_client'):
+                try:
+                    self._reset_aux_node.destroy_client(client)
+                except Exception as e:
+                    logger.warning('Unable to destroy AS2 platform FSM client: %s', e)
+
+    def _destroy_reset_client_resources(self) -> None:
+        """Destroy only reset-client-owned ROS resources."""
+        reset_client = self._reset_service_client
+        reset_node = self._reset_aux_node
+        if reset_client is not None and reset_node is not None:
+            try:
+                if hasattr(reset_node, 'destroy_client'):
+                    reset_node.destroy_client(reset_client)
+            except Exception as e:
+                logger.error(f"Error destroying reset service client: {e}")
+        self._reset_service_client = None
+        self._reset_service_type = None
+        if self._reset_aux_executor is not None:
+            try:
+                if hasattr(self._reset_aux_executor, 'shutdown'):
+                    self._reset_aux_executor.shutdown()
+            except Exception as e:
+                logger.error(f"Error shutting down reset auxiliary executor: {e}")
+            self._reset_aux_executor = None
+        if self._reset_aux_node is not None:
+            try:
+                if hasattr(self._reset_aux_node, 'destroy_node'):
+                    self._reset_aux_node.destroy_node()
+            except Exception as e:
+                logger.error(f"Error destroying reset auxiliary node: {e}")
+            self._reset_aux_node = None
 
     def reset(
         self,
@@ -1038,17 +1793,23 @@ class AS2TestEnv(gym.Env):
             self._init_ros()
 
         supports_in_air_reset = self.fixed_start_pose is not None or self.randomize_hover_start
+        was_flying_at_reset_start = self._is_flying
+        self._last_reset_diagnostics = {}
+        use_service_for_this_reset = (
+            supports_in_air_reset
+            and self.use_simulator_reset_service
+            and not was_flying_at_reset_start
+        )
+        defer_takeoff_for_service_reset = use_service_for_this_reset
+        self._last_reset_service_status = 'not_attempted'
 
         # If already flying, keep the episode reset in-air for training modes
         # that explicitly manage their own safe start pose. Landing/takeoff on
         # every episode is slow and can block AS2 land behavior indefinitely.
         if self._is_flying:
             if supports_in_air_reset:
-                logger.info("Keeping drone airborne for reset...")
-                self._recover_low_altitude_hover_before_velocity_reset(
-                    self._reset_recovery_hover_height()
-                )
-                self._reset_velocity_controller()
+                logger.info("Keeping drone airborne for velocity reset...")
+                self._prepare_in_air_velocity_reset()
             else:
                 logger.info("Landing before reset...")
                 self._run_close_operation(
@@ -1068,14 +1829,19 @@ class AS2TestEnv(gym.Env):
             success = self._drone.offboard()
             logger.info(f"  Offboard: {'OK' if success else 'FAILED'}")
 
-            # Takeoff
-            logger.info(f"Taking off to {self.takeoff_height}m...")
-            success = self._drone.takeoff(
-                height=self.takeoff_height,
-                speed=self.takeoff_speed
-            )
-            logger.info(f"  Takeoff: {'OK' if success else 'FAILED'}")
-            self._is_flying = success
+            if defer_takeoff_for_service_reset:
+                logger.info(
+                    "Deferring takeoff behavior; simulator reset service will establish flying state"
+                )
+            else:
+                # Takeoff
+                logger.info(f"Taking off to {self.takeoff_height}m...")
+                success = self._drone.takeoff(
+                    height=self.takeoff_height,
+                    speed=self.takeoff_speed
+                )
+                logger.info(f"  Takeoff: {'OK' if success else 'FAILED'}")
+                self._is_flying = success
 
         hover_settled = True
 
@@ -1083,15 +1849,29 @@ class AS2TestEnv(gym.Env):
         start_pose = list(self._drone.position) + [float(self._drone.orientation[2])]
         sample_attempts = 0
         if self.fixed_start_pose is not None:
-            hover_settled = self._wait_for_hover_settle()
-            hover_settled = self._apply_and_confirm_start_pose(self.fixed_start_pose)
+            if use_service_for_this_reset and self._try_service_backed_reset(self.fixed_start_pose):
+                self._mark_service_reset_success_if_unreported(self.fixed_start_pose)
+                hover_settled = True
+            elif defer_takeoff_for_service_reset and not was_flying_at_reset_start:
+                self._raise_fresh_service_reset_failure()
+            else:
+                self._sync_reset_service_status_from_diagnostics()
+                hover_settled = self._wait_for_hover_settle()
+                hover_settled = self._apply_and_confirm_start_pose(self.fixed_start_pose)
             reset_mode = 'fixed_start_pose'
             start_pose = list(self.fixed_start_pose)
 
         if self.randomize_hover_start:
-            hover_settled = self._wait_for_hover_settle()
             sampled_start, sampled_target, sample_attempts = self._sample_randomized_episode()
-            hover_settled = self._apply_and_confirm_start_pose(sampled_start)
+            if use_service_for_this_reset and self._try_service_backed_reset(sampled_start):
+                self._mark_service_reset_success_if_unreported(sampled_start)
+                hover_settled = True
+            elif defer_takeoff_for_service_reset and not was_flying_at_reset_start:
+                self._raise_fresh_service_reset_failure()
+            else:
+                self._sync_reset_service_status_from_diagnostics()
+                hover_settled = self._wait_for_hover_settle()
+                hover_settled = self._apply_and_confirm_start_pose(sampled_start)
             self._target_pose = sampled_target
             reset_mode = 'randomized_hover_start'
             start_pose = sampled_start
@@ -1107,6 +1887,16 @@ class AS2TestEnv(gym.Env):
         info['target_pose'] = list(self._target_pose)
         info['sample_attempts'] = sample_attempts
         info['hover_settled'] = hover_settled
+        reset_reason = str(self._last_reset_diagnostics.get('reason', 'unknown'))
+        self._last_reset_path = reset_reason
+        self._sync_reset_service_status_from_diagnostics()
+        self._last_reset_service_attempted = (
+            self._last_reset_service_status not in {'not_attempted', 'service_disabled'}
+            or self._reset_service_attempted_from_reason(reset_reason)
+        )
+        self._last_reset_method = self._classify_reset_method(supports_in_air_reset, reset_reason)
+        self._initialize_episode_monitoring(self._current_position_xyz())
+        self._add_episode_monitor_info(info)
 
         logger.info(f"Reset complete. Initial obs: {obs}")
 
@@ -1132,27 +1922,50 @@ class AS2TestEnv(gym.Env):
 
         # Clip action to valid range (per-dimension bounds)
         action = np.clip(action, self.action_space.low, self.action_space.high)
-        vx, vy, vz = float(action[0]), float(action[1]), float(action[2])
+        vx, vy, raw_vz = float(action[0]), float(action[1]), float(action[2])
+        vertical_safety_penalty = self._compute_vertical_safety_penalty(raw_vz)
+        vz = raw_vz
+        vz = self._apply_low_altitude_action_guard(vz)
         vyaw = float(action[3])
 
-        # Send velocity command with yaw rate via DroneInterface
-        try:
-            self._speed_handler.send_speed_command_with_yaw_speed(
-                twist=[vx, vy, vz],
-                twist_frame_id='earth',
-                yaw_speed=vyaw,
-            )
-        except Exception as e:
-            logger.error(f"Error sending velocity command: {e}")
+        # Send velocity command with yaw rate via DroneInterface. If AS2 rejects
+        # the command path after a simulator reset, reassert offboard and rebuild
+        # the speed handler once so the first policy action is not silently lost.
+        motion_command_accepted = self._send_speed_command([vx, vy, vz], vyaw)
+        motion_command_recovered = False
+        if not motion_command_accepted:
+            motion_command_recovered = self._recover_motion_reference_path()
+            if motion_command_recovered:
+                motion_command_accepted = self._send_speed_command([vx, vy, vz], vyaw)
 
-        # Wait for the command to take effect
-        time.sleep(self.step_duration)
+        # Keep the motion reference fresh while the simulator advances. AS2's
+        # controller treats motion references as live setpoints, not durable
+        # commands, so one-shot publishes can be missed around reset/mode
+        # transitions and leave the controller waiting for a reference.
+        elapsed = 0.0
+        publish_period = min(0.05, self.step_duration) if self.step_duration > 0.0 else 0.0
+        while elapsed < self.step_duration:
+            sleep_dt = min(publish_period, self.step_duration - elapsed)
+            if sleep_dt > 0.0:
+                time.sleep(sleep_dt)
+                elapsed += sleep_dt
+            if elapsed < self.step_duration:
+                self._send_speed_command([vx, vy, vz], vyaw)
 
         # Read new state
         obs = self._get_obs()
         info = self._get_info()
         self._publish_target_marker()
         info['action_sent'] = [vx, vy, vz, vyaw]
+        info['raw_action'] = [vx, vy, raw_vz, vyaw]
+        info['motion_command_accepted'] = motion_command_accepted
+        info['motion_command_recovered'] = motion_command_recovered
+        info['low_altitude_guard_active'] = self._last_low_altitude_guard_active
+        self._update_episode_monitoring(
+            self._current_position_xyz(),
+            motion_command_accepted,
+        )
+        self._add_episode_monitor_info(info)
 
         # Continuous reward: distance penalty + path-facing shaping
         d_raw, d_norm = self._compute_distance()
@@ -1162,11 +1975,12 @@ class AS2TestEnv(gym.Env):
         if self._previous_distance is not None and math.isfinite(d_raw):
             progress_reward = self.progress_reward_weight * (self._previous_distance - d_raw)
         self._previous_distance = d_raw if math.isfinite(d_raw) else self._previous_distance
-        reward = reward_distance + path_facing_reward + progress_reward
+        reward = reward_distance + path_facing_reward + progress_reward + vertical_safety_penalty
 
         info['reward_distance'] = reward_distance
         info['path_facing_reward'] = path_facing_reward
         info['progress_reward'] = progress_reward
+        info['vertical_safety_penalty'] = vertical_safety_penalty
         info['speed_xy'] = speed_xy
         info['path_yaw'] = path_yaw
         info['path_yaw_error'] = path_yaw_error
@@ -1176,21 +1990,36 @@ class AS2TestEnv(gym.Env):
 
         # --- Terminal conditions ---
 
-        # Success: drone reached the target
-        if d_raw < self.distance_threshold:
-            terminated = True
-            reward += self.success_reward
-            info['terminal_reason'] = 'success'
-            info['is_success'] = True
-            info['is_out_of_bounds'] = False
-
-        # Out-of-bounds: drone exceeded scenario limits
-        elif self._is_out_of_bounds():
+        # Out-of-bounds: drone exceeded physical scenario limits.
+        if self._is_out_of_bounds():
             terminated = True
             reward = -self.oob_penalty
             info['terminal_reason'] = 'out_of_bounds'
             info['is_success'] = False
             info['is_out_of_bounds'] = True
+            info['is_unsafe_low_altitude'] = False
+
+        # Unsafe low altitude: terminate training before physical ground/lower bound.
+        elif self._is_unsafe_low_altitude():
+            terminated = True
+            reward = -self.oob_penalty
+            info['terminal_reason'] = 'unsafe_low_altitude'
+            info['is_success'] = False
+            info['is_out_of_bounds'] = False
+            info['is_unsafe_low_altitude'] = True
+            if self.fixed_start_pose is not None or self.randomize_hover_start:
+                self._recover_low_altitude_hover_before_velocity_reset(
+                    self._reset_recovery_hover_height()
+                )
+
+        # Success: drone reached the target
+        elif d_raw < self.distance_threshold:
+            terminated = True
+            reward += self.success_reward
+            info['terminal_reason'] = 'success'
+            info['is_success'] = True
+            info['is_out_of_bounds'] = False
+            info['is_unsafe_low_altitude'] = False
 
         # Max steps: episode truncation (time limit)
         if not terminated and self._step_count >= self.max_steps:
@@ -1198,6 +2027,7 @@ class AS2TestEnv(gym.Env):
             info['terminal_reason'] = 'max_steps'
             info['is_success'] = False
             info['is_out_of_bounds'] = False
+            info['is_unsafe_low_altitude'] = False
 
         return obs, reward, terminated, truncated, info
 
@@ -1207,6 +2037,14 @@ class AS2TestEnv(gym.Env):
             pose = self._drone.position
             terminal_min_height = float(self.height_bounds[0])
             return any(abs(p) > self.pos_limit for p in pose) or float(pose[2]) < terminal_min_height
+        except Exception:
+            return False
+
+    def _is_unsafe_low_altitude(self) -> bool:
+        """Check if altitude is still physically valid but unsafe for training."""
+        try:
+            z = float(self._drone.position[2])
+            return float(self.height_bounds[0]) <= z < self.unsafe_low_altitude_threshold
         except Exception:
             return False
 
@@ -1236,8 +2074,10 @@ class AS2TestEnv(gym.Env):
         return True
 
     def close(self):
-        """Land the drone and shut down ROS2."""
+        """Land the drone and release only this environment's ROS resources."""
         logger.info("Closing environment...")
+
+        self._destroy_reset_client_resources()
 
         if self._drone is not None:
             if self._is_flying:

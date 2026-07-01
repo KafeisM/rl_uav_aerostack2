@@ -33,11 +33,22 @@ def main() -> int:
         'height_bounds',
         'min_start_target_distance',
         'progress_reward_weight',
+        'reset_max_vel',
+        'reset_xy_kp',
+        'reset_z_kp',
         'fixed_start_pose',
         'fixed_start_tolerance',
         'fixed_start_timeout',
+        'reset_yaw_tolerance',
+        'reset_yaw_required',
         'reset_min_speed',
         'reset_ground_recovery_height',
+        'unsafe_low_altitude_threshold',
+        'low_altitude_guard_margin',
+        'low_altitude_guard_climb_speed',
+        'vertical_safety_band',
+        'vertical_safety_penalty_weight',
+        'vertical_descent_penalty_weight',
         'publish_target_marker',
         'target_marker_topic',
         'target_marker_frame_id',
@@ -95,14 +106,25 @@ def main() -> int:
         inner = vec_env2.venv.envs[0].unwrapped
         assert inner.randomize_hover_start == env_cfg['randomize_hover_start']
         assert inner.progress_reward_weight == env_cfg['progress_reward_weight']
+        assert inner.reset_max_vel == env_cfg['max_vel']
+        assert inner.reset_xy_kp == env_cfg['reset_xy_kp']
+        assert inner.reset_z_kp == env_cfg['reset_z_kp']
         assert inner.scene_bounds_xy == env_cfg['scene_bounds_xy']
         assert tuple(inner.height_bounds) == tuple(env_cfg['height_bounds'])
         assert inner.min_start_target_distance == env_cfg['min_start_target_distance']
         assert inner.fixed_start_pose == env_cfg['fixed_start_pose']
         assert inner.fixed_start_tolerance == env_cfg['fixed_start_tolerance']
         assert inner.fixed_start_timeout == env_cfg['fixed_start_timeout']
+        assert inner.reset_yaw_tolerance == env_cfg['reset_yaw_tolerance']
+        assert inner.reset_yaw_required == env_cfg['reset_yaw_required']
         assert inner.reset_min_speed == env_cfg['reset_min_speed']
         assert inner.reset_ground_recovery_height == env_cfg['reset_ground_recovery_height']
+        assert inner.unsafe_low_altitude_threshold == env_cfg['unsafe_low_altitude_threshold']
+        assert inner.low_altitude_guard_margin == env_cfg['low_altitude_guard_margin']
+        assert inner.low_altitude_guard_climb_speed == env_cfg['low_altitude_guard_climb_speed']
+        assert inner.vertical_safety_band == env_cfg['vertical_safety_band']
+        assert inner.vertical_safety_penalty_weight == env_cfg['vertical_safety_penalty_weight']
+        assert inner.vertical_descent_penalty_weight == env_cfg['vertical_descent_penalty_weight']
         assert inner.publish_target_marker == env_cfg['publish_target_marker']
         assert inner.target_marker_topic == env_cfg['target_marker_topic']
         assert inner.target_marker_frame_id == env_cfg['target_marker_frame_id']
@@ -112,9 +134,73 @@ def main() -> int:
         assert inner.hover_settle_time == env_cfg['hover_settle_time']
         assert inner.hover_timeout == env_cfg['hover_timeout']
         assert inner.max_reset_sample_attempts == env_cfg['max_reset_sample_attempts']
+        monitor_keywords = set(env_cfg['monitor_info_keywords'])
+        for keyword in [
+            'physical_displacement',
+            'path_length',
+            'max_physical_displacement',
+            'min_altitude',
+            'motion_command_steps',
+            'motion_command_accepted_steps',
+            'motion_command_acceptance_rate',
+            'reset_method',
+            'reset_path',
+            'reset_service_attempted',
+            'reset_failure_class',
+            'reset_position_error',
+            'reset_yaw_error',
+            'reset_service_status',
+            'vertical_safety_penalty',
+            'low_altitude_guard_active',
+        ]:
+            assert keyword in monitor_keywords, f'Missing PPO monitor diagnostic keyword: {keyword}'
         print('✓ PASS: Randomized hover env config propagates to AS2TestEnv')
     finally:
         vec_env2.close()
+
+    exp008_config = load_training_config(Path('configs/train_ppo_phase1_exp008.yaml'))
+    exp008_env_cfg = exp008_config['environment']
+    exp008_ppo_cfg = exp008_config['ppo']
+    assert exp008_env_cfg['fixed_start_tolerance'] >= 0.22
+    assert exp008_env_cfg['fixed_start_timeout'] >= 30.0
+    print('✓ PASS: Exp008 reset tolerance covers live post-controller settle slack')
+
+    exp008a_config = load_training_config(Path('configs/train_ppo_phase1_exp008a.yaml'))
+    exp008a_env_cfg = exp008a_config['environment']
+    exp008a_training_cfg = exp008a_config['training']
+    exp008a_ppo_cfg = exp008a_config['ppo']
+    assert exp008a_config['experiment']['name'].startswith('ppo_phase1_exp008a')
+    assert exp008a_training_cfg['total_timesteps'] <= exp008_config['training']['total_timesteps']
+    assert exp008a_training_cfg['checkpoint_prefix'] == 'ppo_phase1_exp008a'
+    assert exp008a_env_cfg['fixed_start_pose'][2] == exp008_env_cfg['fixed_start_pose'][2]
+    assert exp008a_env_cfg['target_pose'][2] == exp008_env_cfg['target_pose'][2]
+    assert exp008a_env_cfg['target_pose'][0] < exp008_env_cfg['target_pose'][0]
+    assert exp008a_env_cfg['target_pose'][0] <= 0.6
+    assert exp008a_env_cfg['distance_threshold'] >= exp008_env_cfg['distance_threshold']
+    assert exp008a_env_cfg['distance_threshold'] >= 0.4
+    assert 0.0 < exp008a_env_cfg['path_facing_weight'] < exp008_env_cfg['path_facing_weight']
+    assert exp008_env_cfg['reset_yaw_required'] is True
+    assert exp008a_env_cfg['reset_yaw_required'] is False
+    assert exp008a_env_cfg['reset_yaw_tolerance'] > exp008_env_cfg['reset_yaw_tolerance']
+    assert exp008a_env_cfg['reset_yaw_tolerance'] >= 1.0
+    assert exp008a_env_cfg['fixed_start_timeout'] > exp008_env_cfg['fixed_start_timeout']
+    assert exp008a_env_cfg['hover_timeout'] > exp008_env_cfg['hover_timeout']
+    assert exp008a_env_cfg['max_steps'] < exp008_env_cfg['max_steps']
+    assert exp008a_env_cfg['max_steps'] <= 80
+    assert exp008a_env_cfg['max_vel'] <= exp008_env_cfg['max_vel']
+    assert exp008a_env_cfg['max_vel'] <= 0.5
+    assert exp008a_env_cfg['reset_max_vel'] > exp008a_env_cfg['max_vel']
+    assert exp008a_env_cfg['reset_max_vel'] >= 1.0
+    assert exp008a_env_cfg['unsafe_low_altitude_threshold'] >= exp008_env_cfg['unsafe_low_altitude_threshold']
+    assert exp008a_env_cfg['unsafe_low_altitude_threshold'] >= 1.3
+    assert exp008a_env_cfg['unsafe_low_altitude_threshold'] < exp008a_env_cfg['reset_ground_recovery_height']
+    assert exp008a_env_cfg['reset_ground_recovery_height'] < exp008a_env_cfg['fixed_start_pose'][2]
+    assert exp008a_env_cfg['low_altitude_guard_margin'] >= exp008_env_cfg['low_altitude_guard_margin']
+    assert exp008a_env_cfg['vertical_safety_penalty_weight'] >= exp008_env_cfg['vertical_safety_penalty_weight']
+    assert exp008a_env_cfg['vertical_descent_penalty_weight'] >= exp008_env_cfg['vertical_descent_penalty_weight']
+    assert exp008a_env_cfg['randomize_hover_start'] is False
+    assert exp008a_ppo_cfg['n_steps'] <= exp008_ppo_cfg['n_steps']
+    print('✓ PASS: Exp008a easier curriculum config is bounded and propagated')
 
     return 0
 

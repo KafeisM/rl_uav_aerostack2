@@ -23,6 +23,8 @@ usage() {
 # Default values
 num_drones=1
 motion_controller_plugin="pid"
+: "${AS2_OVERLAY_SETUP:="/home/jordi/as2_rl_ws/install/setup.bash"}"
+: "${AS2_OVERLAY_PREFIX_EXPECTED:="/home/jordi/as2_rl_ws"}"
 
 # Parse arguments
 while getopts "n:c:h" opt; do
@@ -65,6 +67,24 @@ case ${motion_controller_plugin} in
     ;;
 esac
 
+source "/opt/ros/humble/setup.bash"
+
+if [[ ! -f "${AS2_OVERLAY_SETUP}" ]]; then
+    echo "Error: AS2 overlay setup not found: ${AS2_OVERLAY_SETUP}" >&2
+    echo "Build the overlay first so the forked as2_platform_multirotor_simulator is installed." >&2
+    exit 1
+fi
+
+source "${AS2_OVERLAY_SETUP}"
+
+simulator_prefix=$(ros2 pkg prefix as2_platform_multirotor_simulator || true)
+if [[ -z "${simulator_prefix}" || "${simulator_prefix}" != "${AS2_OVERLAY_PREFIX_EXPECTED}"* ]]; then
+    echo "Error: as2_platform_multirotor_simulator resolves outside the expected overlay." >&2
+    echo "  expected prefix under: ${AS2_OVERLAY_PREFIX_EXPECTED}" >&2
+    echo "  actual prefix: ${simulator_prefix:-<not found>}" >&2
+    exit 1
+fi
+
 # Resolve world config + drone namespaces based on -n
 if [[ "${num_drones}" -eq 1 ]]; then
     simulation_config="config/world.yaml"
@@ -91,6 +111,7 @@ echo "=== Launching AS2 Multirotor Simulator ==="
 echo "  Drones (${num_drones}): ${namespaces[*]}"
 echo "  Controller: ${motion_controller_plugin}"
 echo "  World config: ${simulation_config}"
+echo "  Simulator package prefix: ${simulator_prefix}"
 
 for i in "${!namespaces[@]}"; do
     ns="${namespaces[$i]}"
@@ -105,7 +126,9 @@ for i in "${!namespaces[@]}"; do
         drone_namespace="${ns}" \
         simulation_config_file="${simulation_config}" \
         motion_controller_plugin="${motion_controller_plugin}" \
-        base_launch="${base_launch}"
+        base_launch="${base_launch}" \
+        overlay_setup_file="${AS2_OVERLAY_SETUP}" \
+        overlay_prefix_expected="${AS2_OVERLAY_PREFIX_EXPECTED}"
 
     # Give the base simulator time to spawn physics/world before attaching
     # extra namespaced platform nodes; otherwise they race the shared sim bring-up.

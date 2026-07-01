@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Real one-drone AS2 smoke for low-altitude fixed-start reset recovery."""
+"""Real one-drone AS2 smoke for unsafe-altitude termination and reset recovery."""
 
 from __future__ import annotations
 
@@ -48,6 +48,7 @@ def main() -> int:
     parser.add_argument('--close-timeout', type=float, default=20.0)
     parser.add_argument('--max-descent-steps', type=int, default=80)
     parser.add_argument('--descent-speed', type=float, default=-0.3)
+    parser.add_argument('--unsafe-low-altitude-threshold', type=float, default=0.35)
     args = parser.parse_args()
 
     project_root = Path(__file__).resolve().parents[1]
@@ -69,6 +70,7 @@ def main() -> int:
             step_duration=0.1,
             fixed_start_timeout=25.0,
             reset_ground_recovery_height=0.35,
+            unsafe_low_altitude_threshold=args.unsafe_low_altitude_threshold,
             hover_settle_time=0.5,
             hover_timeout=8.0,
             close_operation_timeout=5.0,
@@ -88,12 +90,18 @@ def main() -> int:
             _, _, terminated, truncated, descent_info = env.step(descent_action)
             low_altitude_pose = list(env._drone.position)
             descent_done = bool(terminated or truncated)
-            if descent_done or float(low_altitude_pose[2]) <= env.reset_ground_recovery_height:
+            if descent_done or float(low_altitude_pose[2]) <= env.unsafe_low_altitude_threshold:
                 break
-        if float(low_altitude_pose[2]) > env.reset_ground_recovery_height:
+        if not descent_done:
             return fail(
                 'descent_failure',
-                f'could not reach low altitude <= {env.reset_ground_recovery_height}: pose={low_altitude_pose}',
+                'descent did not trigger unsafe low-altitude termination before reset: '
+                f'pose={low_altitude_pose}, threshold={env.unsafe_low_altitude_threshold}',
+            )
+        if descent_info.get('terminal_reason') != 'unsafe_low_altitude':
+            return fail(
+                'descent_failure',
+                f"expected unsafe_low_altitude, got {descent_info.get('terminal_reason')}: pose={low_altitude_pose}",
             )
 
         obs_after, info_after = run_with_timeout(

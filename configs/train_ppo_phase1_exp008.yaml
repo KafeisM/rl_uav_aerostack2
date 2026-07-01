@@ -1,5 +1,5 @@
 experiment:
-  name: ppo_phase1_exp007_progress_stable_2m_20k
+  name: ppo_phase1_exp008_sim_reset_stable_2m_20k
   seed: 42
   output_root: runs/ppo
 
@@ -11,19 +11,25 @@ environment:
   use_sim_time: false
   verbose: false
 
-  # Phase 1 stable single-drone baseline, matching Exp006 for a longer rollout.
+  # Phase 1 controlled trial using the simulator-backed reset path.
   pos_limit: 5.0
   max_vel: 1.0
   max_yaw_vel: 1.5707963267948966
   step_duration: 0.1
-  fixed_start_pose: [0.0, 0.0, 1.0, 0.0]
-  fixed_start_tolerance: 0.15
-  fixed_start_timeout: 20.0
+  fixed_start_pose: [0.0, 0.0, 1.6, 0.0]
+  fixed_start_tolerance: 0.22
+  fixed_start_timeout: 30.0
+  reset_yaw_tolerance: 0.38
+  reset_yaw_required: true
   reset_min_speed: 0.15
-  reset_ground_recovery_height: 0.35
-  # Exp007 safety gate: stop before AS2 reaches the physical lower scene bound.
-  unsafe_low_altitude_threshold: 0.75
-  target_pose: [2.0, 0.0, 1.0, 0.0]
+  reset_ground_recovery_height: 1.2
+  unsafe_low_altitude_threshold: 1.0
+  low_altitude_guard_margin: 0.6
+  low_altitude_guard_climb_speed: 0.5
+  vertical_safety_band: 0.6
+  vertical_safety_penalty_weight: 3.0
+  vertical_descent_penalty_weight: 4.0
+  target_pose: [2.0, 0.0, 1.6, 0.0]
   distance_threshold: 0.3
   max_steps: 200
   success_reward: 20.0
@@ -39,11 +45,11 @@ environment:
   target_marker_frame_id: earth
   target_marker_scale: 0.35
 
-  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason]
+  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active]
 
   randomize_hover_start: false
   scene_bounds_xy: 5.0
-  height_bounds: [0.1, 2.0]
+  height_bounds: [0.1, 2.5]
   min_start_target_distance: 1.0
   hover_speed_threshold: 0.05
   hover_settle_time: 1.0
@@ -57,7 +63,7 @@ training:
   monitor_subdir: monitor
   checkpoints_subdir: checkpoints
   checkpoint_freq: 2000
-  checkpoint_prefix: ppo_phase1_exp007
+  checkpoint_prefix: ppo_phase1_exp008
 
 ppo:
   policy: MlpPolicy

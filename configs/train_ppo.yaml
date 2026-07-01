@@ -14,6 +14,9 @@ environment:
   # Keep environment contract and normalization assumptions unchanged.
   pos_limit: 5.0
   max_vel: 2.0
+  reset_max_vel: null
+  reset_xy_kp: 1.0
+  reset_z_kp: 1.0
   max_yaw_vel: 3.141592653589793
   step_duration: 0.1
   target_pose: [0.0, 0.0, 1.0, 0.0]
@@ -27,14 +30,23 @@ environment:
   fixed_start_pose: null
   fixed_start_tolerance: 0.15
   fixed_start_timeout: 20.0
+  reset_yaw_tolerance: 0.38
+  reset_yaw_required: true
   reset_min_speed: 0.15
   reset_ground_recovery_height: 0.35
+  # Training safety threshold: terminates before the physical lower scene bound.
+  unsafe_low_altitude_threshold: 0.30
+  low_altitude_guard_margin: 0.20
+  low_altitude_guard_climb_speed: 0.15
+  vertical_safety_band: 0.0
+  vertical_safety_penalty_weight: 0.0
+  vertical_descent_penalty_weight: 0.0
   publish_target_marker: false
   target_marker_topic: visualization_marker
   target_marker_frame_id: earth
   target_marker_scale: 0.35
   close_operation_timeout: 10.0
-  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, terminal_reason]
+  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active]
 
   # Randomized hover training (disabled by default for backward compatibility)
   randomize_hover_start: false
