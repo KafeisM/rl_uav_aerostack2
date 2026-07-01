@@ -119,6 +119,7 @@ def build_vec_env(
         'target_marker_frame_id': env_cfg.get('target_marker_frame_id', 'earth'),
         'target_marker_scale': env_cfg.get('target_marker_scale', 0.35),
         'close_operation_timeout': env_cfg.get('close_operation_timeout', 10.0),
+        'use_service_reset_after_velocity_timeout': env_cfg.get('use_service_reset_after_velocity_timeout', False),
         'randomize_hover_start': env_cfg.get('randomize_hover_start', False),
         'scene_bounds_xy': env_cfg.get('scene_bounds_xy', 5.0),
         'height_bounds': env_cfg.get('height_bounds', [0.1, 2.0]),

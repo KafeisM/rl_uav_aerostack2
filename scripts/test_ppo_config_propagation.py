@@ -54,6 +54,7 @@ def main() -> int:
         'target_marker_frame_id',
         'target_marker_scale',
         'close_operation_timeout',
+        'use_service_reset_after_velocity_timeout',
         'monitor_info_keywords',
         'hover_speed_threshold',
         'hover_settle_time',
@@ -130,6 +131,7 @@ def main() -> int:
         assert inner.target_marker_frame_id == env_cfg['target_marker_frame_id']
         assert inner.target_marker_scale == env_cfg['target_marker_scale']
         assert inner.close_operation_timeout == env_cfg['close_operation_timeout']
+        assert inner.use_service_reset_after_velocity_timeout == env_cfg['use_service_reset_after_velocity_timeout']
         assert inner.hover_speed_threshold == env_cfg['hover_speed_threshold']
         assert inner.hover_settle_time == env_cfg['hover_settle_time']
         assert inner.hover_timeout == env_cfg['hover_timeout']
@@ -199,6 +201,7 @@ def main() -> int:
     assert exp008a_env_cfg['vertical_safety_penalty_weight'] >= exp008_env_cfg['vertical_safety_penalty_weight']
     assert exp008a_env_cfg['vertical_descent_penalty_weight'] >= exp008_env_cfg['vertical_descent_penalty_weight']
     assert exp008a_env_cfg['randomize_hover_start'] is False
+    assert exp008a_env_cfg['use_service_reset_after_velocity_timeout'] is True
     assert exp008a_ppo_cfg['n_steps'] <= exp008_ppo_cfg['n_steps']
     print('✓ PASS: Exp008a easier curriculum config is bounded and propagated')
 

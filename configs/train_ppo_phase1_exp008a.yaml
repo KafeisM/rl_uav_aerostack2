@@ -46,6 +46,8 @@ environment:
   speed_deadband: 0.05
 
   close_operation_timeout: 10.0
+  # Last-resort stabilization for live gates: velocity reset remains primary.
+  use_service_reset_after_velocity_timeout: true
 
   publish_target_marker: true
   target_marker_topic: visualization_marker

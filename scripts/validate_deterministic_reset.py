@@ -5,6 +5,13 @@ This script is intentionally RED before the reset service exists: it fails
 closed when the generated service type or the namespaced service endpoint is
 unavailable. Once the simulator service is implemented, the same checks become
 the Exp008 reset gate.
+
+Run from the project environment, for example:
+
+    conda run -n rl_uav python3 scripts/validate_deterministic_reset.py --namespace drone0
+
+Acceptance is limited to the ROS-integrated AS2 Multirotor Simulator overlay.
+Gazebo is not an acceptance path for this validator.
 """
 
 __authors__ = 'Jordi'
@@ -25,10 +32,15 @@ DEFAULT_RESET_COUNT = 20
 DEFAULT_POSITION_TOLERANCE = 0.15
 DEFAULT_YAW_TOLERANCE = 0.2
 DEFAULT_SPEED_TOLERANCE = 0.05
+DEFAULT_ACCELERATION_TOLERANCE = 0.10
+DEFAULT_ARTIFACT_TOLERANCE = 0.10
+DEFAULT_TELEPORT_SPIKE_TOLERANCE = 0.25
 DEFAULT_SERVICE_TIMEOUT = 2.0
 DEFAULT_STATE_TIMEOUT = 5.0
 DEFAULT_POST_RESET_HOLD_TIME = 0.5
 DEFAULT_POS_LIMIT = 5.0
+DEFAULT_SIMULATOR_PACKAGE = 'as2_platform_multirotor_simulator'
+DEFAULT_FORK_PATH = Path('/home/jordi/as2_rl_ws/src/as2_platform_multirotor_simulator')
 
 
 class ResetAttemptResult:
@@ -44,6 +56,14 @@ class ResetAttemptResult:
         yaw_error: float = math.inf,
         linear_speed_norm: float = math.inf,
         angular_speed_norm: float = math.inf,
+        linear_acceleration_norm: float = math.inf,
+        angular_acceleration_norm: float = math.inf,
+        force_norm: float = math.inf,
+        torque_norm: float = math.inf,
+        motor_angular_velocity_norm: float = math.inf,
+        motor_angular_acceleration_norm: float = math.inf,
+        dynamic_artifacts_cleared: bool = False,
+        post_reset_max_sample_displacement: float = math.inf,
         observation: Sequence[float] | None = None,
         other_namespace_poses: Mapping[str, Sequence[float]] | None = None,
         message: str = '',
@@ -55,6 +75,14 @@ class ResetAttemptResult:
         self.yaw_error = float(yaw_error)
         self.linear_speed_norm = float(linear_speed_norm)
         self.angular_speed_norm = float(angular_speed_norm)
+        self.linear_acceleration_norm = float(linear_acceleration_norm)
+        self.angular_acceleration_norm = float(angular_acceleration_norm)
+        self.force_norm = float(force_norm)
+        self.torque_norm = float(torque_norm)
+        self.motor_angular_velocity_norm = float(motor_angular_velocity_norm)
+        self.motor_angular_acceleration_norm = float(motor_angular_acceleration_norm)
+        self.dynamic_artifacts_cleared = bool(dynamic_artifacts_cleared)
+        self.post_reset_max_sample_displacement = float(post_reset_max_sample_displacement)
         self.observation = list(observation) if observation is not None else []
         self.other_namespace_poses = {
             str(namespace): [float(value) for value in pose]
@@ -72,6 +100,14 @@ class ResetAttemptResult:
             'yaw_error': self.yaw_error,
             'linear_speed_norm': self.linear_speed_norm,
             'angular_speed_norm': self.angular_speed_norm,
+            'linear_acceleration_norm': self.linear_acceleration_norm,
+            'angular_acceleration_norm': self.angular_acceleration_norm,
+            'force_norm': self.force_norm,
+            'torque_norm': self.torque_norm,
+            'motor_angular_velocity_norm': self.motor_angular_velocity_norm,
+            'motor_angular_acceleration_norm': self.motor_angular_acceleration_norm,
+            'dynamic_artifacts_cleared': self.dynamic_artifacts_cleared,
+            'post_reset_max_sample_displacement': self.post_reset_max_sample_displacement,
             'observation': list(self.observation),
             'other_namespace_poses': dict(self.other_namespace_poses),
             'message': self.message,
@@ -161,6 +197,48 @@ def _pose_distance(a: Sequence[float], b: Sequence[float]) -> float:
     return math.sqrt(sum((float(a[idx]) - float(b[idx])) ** 2 for idx in range(3)))
 
 
+def max_pose_sample_displacement(samples: Sequence[Mapping[str, Any]]) -> float:
+    """Return the maximum displacement between consecutive sampled positions."""
+    positions: list[Sequence[float]] = []
+    for sample in samples:
+        position = sample.get('position')
+        if isinstance(position, Sequence) and not isinstance(position, (str, bytes)) and len(position) >= 3:
+            positions.append(position)
+    if len(positions) < 2:
+        return 0.0
+    return max(_pose_distance(prev, curr) for prev, curr in zip(positions, positions[1:]))
+
+
+def max_target_hold_displacement(
+    samples: Sequence[Mapping[str, Any]],
+    *,
+    target_pose: Sequence[float],
+    position_tolerance: float,
+    yaw_tolerance: float,
+) -> float:
+    """Return post-reset hold displacement after the first target-matching sample."""
+    hold_samples: list[Mapping[str, Any]] = []
+    target_seen = False
+    for sample in samples:
+        if not target_seen:
+            target_seen = snapshot_matches_target(
+                sample,
+                target_pose,
+                position_tolerance=position_tolerance,
+                yaw_tolerance=yaw_tolerance,
+            )
+        if target_seen:
+            hold_samples.append(sample)
+    return max_pose_sample_displacement(hold_samples)
+
+
+def _response_float(response: Any, field_name: str) -> float:
+    try:
+        return float(getattr(response, field_name))
+    except (TypeError, ValueError, AttributeError):
+        return math.inf
+
+
 def _quaternion_yaw(q: Any) -> float:
     """Return yaw from a ROS geometry quaternion."""
     siny_cosp = 2.0 * (float(q.w) * float(q.z) + float(q.x) * float(q.y))
@@ -220,22 +298,131 @@ def snapshot_matches_target(
     )
 
 
+def validate_simulator_prefix(actual_prefix: str, expected_prefix: str) -> str:
+    """Return the resolved prefix or fail closed on base-install ambiguity."""
+    actual = str(actual_prefix).strip()
+    expected = str(expected_prefix).strip().rstrip('/')
+    if not actual:
+        raise RuntimeError('simulator package prefix is empty; source the AS2 Multirotor Simulator overlay')
+    if actual.startswith('/opt/ros/'):
+        raise RuntimeError(
+            'base install ambiguity: as2_platform_multirotor_simulator resolved to '
+            f'{actual}; source the fork overlay before validation'
+        )
+    if expected and not actual.startswith(expected):
+        raise RuntimeError(
+            'as2_platform_multirotor_simulator resolves outside expected overlay: '
+            f'expected under {expected}, actual {actual}'
+        )
+    return actual
+
+
 def verify_overlay_prefix(expected_prefix: str) -> str:
     """Fail closed if ros2 resolves the simulator outside the expected overlay."""
     result = subprocess.run(
-        ['ros2', 'pkg', 'prefix', 'as2_platform_multirotor_simulator'],
+        ['ros2', 'pkg', 'prefix', DEFAULT_SIMULATOR_PACKAGE],
         capture_output=True,
         text=True,
         timeout=10,
         check=False,
     )
     actual_prefix = result.stdout.strip()
-    if result.returncode != 0 or not actual_prefix.startswith(expected_prefix):
+    if result.returncode != 0:
         raise RuntimeError(
             'as2_platform_multirotor_simulator resolves outside expected overlay: '
             f'expected under {expected_prefix}, actual {actual_prefix or result.stderr.strip() or "<not found>"}'
         )
-    return actual_prefix
+    return validate_simulator_prefix(actual_prefix, expected_prefix)
+
+
+def _message_field_names(message_type: Any) -> list[str]:
+    """Return ROS message field names from generated metadata or slots."""
+    getters = [getattr(message_type, 'get_fields_and_field_types', None)]
+    try:
+        instance = message_type()
+    except Exception:  # noqa: BLE001 - best-effort introspection only.
+        instance = None
+    if instance is not None:
+        getters.append(getattr(instance, 'get_fields_and_field_types', None))
+
+    for getter in getters:
+        if not callable(getter):
+            continue
+        try:
+            fields = getter()
+        except TypeError:
+            continue
+        if isinstance(fields, Mapping):
+            return [str(name) for name in fields.keys()]
+
+    slots = getattr(message_type, '__slots__', []) or []
+    return [str(slot).lstrip('_') for slot in slots]
+
+
+def describe_reset_service_shape(service_type: Any) -> dict[str, Any]:
+    """Return request/response field names for ResetSimulatorState."""
+    request_type = getattr(service_type, 'Request')
+    response_type = getattr(service_type, 'Response')
+    return {
+        'service_type': getattr(service_type, '__name__', service_type.__class__.__name__),
+        'request_fields': _message_field_names(request_type),
+        'response_fields': _message_field_names(response_type),
+    }
+
+
+def _git_output(repo_path: Path, args: Sequence[str]) -> str | None:
+    result = subprocess.run(
+        ['git', '-C', str(repo_path), *args],
+        capture_output=True,
+        text=True,
+        timeout=5,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def describe_fork_git_state(fork_path: Path | str = DEFAULT_FORK_PATH) -> dict[str, Any]:
+    """Report fork Git identity without creating repos, commits, or remotes."""
+    path = Path(fork_path)
+    inside = _git_output(path, ['rev-parse', '--is-inside-work-tree'])
+    if inside != 'true':
+        return {
+            'path': str(path),
+            'is_git_repo': False,
+            'remote_url': None,
+            'branch': None,
+            'commit': None,
+            'status': 'not_git_repository',
+        }
+
+    short_status = _git_output(path, ['status', '--short'])
+    return {
+        'path': str(path),
+        'is_git_repo': True,
+        'remote_url': _git_output(path, ['remote', 'get-url', 'origin']),
+        'branch': _git_output(path, ['branch', '--show-current']),
+        'commit': _git_output(path, ['rev-parse', 'HEAD']),
+        'status': 'dirty' if short_status else 'clean',
+    }
+
+
+def build_runtime_overlay_report(
+    *,
+    simulator_prefix: str,
+    expected_simulator_prefix: str,
+    service_type: Any,
+    fork_path: Path | str = DEFAULT_FORK_PATH,
+) -> dict[str, Any]:
+    """Build the non-mutating runtime identity report for validation output."""
+    return {
+        'simulator_package': DEFAULT_SIMULATOR_PACKAGE,
+        'simulator_prefix': validate_simulator_prefix(simulator_prefix, expected_simulator_prefix),
+        'expected_simulator_prefix': str(expected_simulator_prefix).rstrip('/'),
+        'service_shape': describe_reset_service_shape(service_type),
+        'fork_git': describe_fork_git_state(fork_path),
+    }
 
 
 def _required_num_drones(namespaces: Sequence[str]) -> int:
@@ -348,11 +535,13 @@ class LiveResetRunner:
 
     def _wait_for_post_reset_hold(self) -> dict[str, Any] | None:
         snapshot = None
+        samples: list[dict[str, Any]] = []
         acquisition_deadline = time.time() + self._state_timeout
         while time.time() <= acquisition_deadline:
             candidate = self._snapshot(self._target_namespace, timeout=0.05)
             if candidate is not None:
                 snapshot = candidate
+                samples.append(candidate)
                 if snapshot_matches_target(
                     candidate,
                     self._target_pose,
@@ -367,6 +556,14 @@ class LiveResetRunner:
             latest = self._snapshot(self._target_namespace, timeout=0.0)
             if latest is not None:
                 snapshot = latest
+                samples.append(latest)
+        if snapshot is not None:
+            snapshot['post_reset_max_sample_displacement'] = max_target_hold_displacement(
+                samples,
+                target_pose=self._target_pose,
+                position_tolerance=self._position_tolerance,
+                yaw_tolerance=self._yaw_tolerance,
+            )
         return snapshot
 
     def collect(self, reset_count: int) -> list[ResetAttemptResult]:
@@ -442,6 +639,16 @@ class LiveResetRunner:
                     yaw_error=yaw_error,
                     linear_speed_norm=linear_speed_norm,
                     angular_speed_norm=angular_speed_norm,
+                    linear_acceleration_norm=_response_float(response, 'linear_acceleration_norm'),
+                    angular_acceleration_norm=_response_float(response, 'angular_acceleration_norm'),
+                    force_norm=_response_float(response, 'force_norm'),
+                    torque_norm=_response_float(response, 'torque_norm'),
+                    motor_angular_velocity_norm=_response_float(response, 'motor_angular_velocity_norm'),
+                    motor_angular_acceleration_norm=_response_float(response, 'motor_angular_acceleration_norm'),
+                    dynamic_artifacts_cleared=bool(getattr(response, 'dynamic_artifacts_cleared', False)),
+                    post_reset_max_sample_displacement=float(
+                        snapshot.get('post_reset_max_sample_displacement', math.inf)
+                    ),
                     observation=normalized_observation_from_state(
                         position=snapshot['position'],
                         yaw=snapshot['yaw'],
@@ -466,6 +673,9 @@ def evaluate_reset_attempts(
     yaw_tolerance: float = DEFAULT_YAW_TOLERANCE,
     linear_speed_tolerance: float = DEFAULT_SPEED_TOLERANCE,
     angular_speed_tolerance: float = DEFAULT_SPEED_TOLERANCE,
+    acceleration_tolerance: float = DEFAULT_ACCELERATION_TOLERANCE,
+    artifact_tolerance: float = DEFAULT_ARTIFACT_TOLERANCE,
+    teleport_spike_tolerance: float = DEFAULT_TELEPORT_SPIKE_TOLERANCE,
     namespace_tolerance: float = 1e-6,
 ) -> ResetEvaluation:
     """Evaluate deterministic reset attempts against the SDD acceptance gate."""
@@ -492,6 +702,27 @@ def evaluate_reset_attempts(
             return ResetEvaluation(False, f'attempt {attempt.iteration}: linear speed {attempt.linear_speed_norm:.4f} exceeds tolerance')
         if attempt.angular_speed_norm > angular_speed_tolerance:
             return ResetEvaluation(False, f'attempt {attempt.iteration}: angular speed {attempt.angular_speed_norm:.4f} exceeds tolerance')
+        artifact_checks = [
+            ('linear acceleration', attempt.linear_acceleration_norm, acceleration_tolerance),
+            ('angular acceleration', attempt.angular_acceleration_norm, acceleration_tolerance),
+            ('force artifact', attempt.force_norm, artifact_tolerance),
+            ('torque artifact', attempt.torque_norm, artifact_tolerance),
+            ('motor angular velocity artifact', attempt.motor_angular_velocity_norm, artifact_tolerance),
+            ('motor angular acceleration artifact', attempt.motor_angular_acceleration_norm, artifact_tolerance),
+        ]
+        for label, value, tolerance in artifact_checks:
+            if not math.isfinite(value) or value > tolerance:
+                return ResetEvaluation(
+                    False,
+                    f'attempt {attempt.iteration}: {label} {value:.4f} exceeds tolerance',
+                )
+        if not attempt.dynamic_artifacts_cleared:
+            return ResetEvaluation(False, f'attempt {attempt.iteration}: dynamic artifacts were not cleared')
+        if attempt.post_reset_max_sample_displacement > teleport_spike_tolerance:
+            return ResetEvaluation(
+                False,
+                f'attempt {attempt.iteration}: teleport spike {attempt.post_reset_max_sample_displacement:.4f} exceeds tolerance',
+            )
         if not observation_is_normalized(attempt.observation):
             return ResetEvaluation(False, f'attempt {attempt.iteration}: observation outside [-1, 1]')
 
@@ -522,7 +753,14 @@ def _load_reset_service_type() -> Any:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            'Runtime scope: use conda activate rl_uav or conda run -n rl_uav, '
+            'and validate only the AS2 Multirotor Simulator overlay. Gazebo is not an acceptance path.'
+        ),
+    )
     parser.add_argument('--namespace', default='drone0', help='Target namespace to reset')
     parser.add_argument('--other-namespace', action='append', default=[], help='Namespace that must not move')
     parser.add_argument('--reset-count', type=int, default=DEFAULT_RESET_COUNT)
@@ -533,6 +771,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument('--position-tolerance', type=float, default=DEFAULT_POSITION_TOLERANCE)
     parser.add_argument('--yaw-tolerance', type=float, default=DEFAULT_YAW_TOLERANCE)
     parser.add_argument('--speed-tolerance', type=float, default=DEFAULT_SPEED_TOLERANCE)
+    parser.add_argument('--acceleration-tolerance', type=float, default=DEFAULT_ACCELERATION_TOLERANCE)
+    parser.add_argument('--artifact-tolerance', type=float, default=DEFAULT_ARTIFACT_TOLERANCE)
+    parser.add_argument('--teleport-spike-tolerance', type=float, default=DEFAULT_TELEPORT_SPIKE_TOLERANCE)
     parser.add_argument('--service-timeout', type=float, default=DEFAULT_SERVICE_TIMEOUT)
     parser.add_argument('--state-timeout', type=float, default=DEFAULT_STATE_TIMEOUT)
     parser.add_argument('--post-reset-hold-time', type=float, default=DEFAULT_POST_RESET_HOLD_TIME)
@@ -542,6 +783,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument('--launch-wait', type=float, default=8.0)
     parser.add_argument('--readiness-timeout', type=float, default=30.0)
     parser.add_argument('--expected-simulator-prefix', default='/home/jordi/as2_rl_ws')
+    parser.add_argument('--simulator-fork-path', default=str(DEFAULT_FORK_PATH))
     return parser
 
 
@@ -590,6 +832,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(str(exc))
         return 1
 
+    runtime_overlay = build_runtime_overlay_report(
+        simulator_prefix=simulator_prefix,
+        expected_simulator_prefix=args.expected_simulator_prefix,
+        service_type=service_type,
+        fork_path=args.simulator_fork_path,
+    )
+
     target_pose = [args.x, args.y, args.z, args.yaw]
     runner = LiveResetRunner(
         service_type=service_type,
@@ -618,11 +867,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         yaw_tolerance=args.yaw_tolerance,
         linear_speed_tolerance=args.speed_tolerance,
         angular_speed_tolerance=args.speed_tolerance,
+        acceleration_tolerance=args.acceleration_tolerance,
+        artifact_tolerance=args.artifact_tolerance,
+        teleport_spike_tolerance=args.teleport_spike_tolerance,
     )
     print(json.dumps({
         'status': 'success' if evaluation.success else 'failure',
         'message': evaluation.message,
         'simulator_prefix': simulator_prefix,
+        'runtime_overlay': runtime_overlay,
         'service_name': reset_service_name(args.namespace),
         'target_pose': target_pose,
         'reset_count': len(attempts),
@@ -635,6 +888,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 'yaw_error': attempt.yaw_error,
                 'linear_speed_norm': attempt.linear_speed_norm,
                 'angular_speed_norm': attempt.angular_speed_norm,
+                'linear_acceleration_norm': attempt.linear_acceleration_norm,
+                'angular_acceleration_norm': attempt.angular_acceleration_norm,
+                'force_norm': attempt.force_norm,
+                'torque_norm': attempt.torque_norm,
+                'motor_angular_velocity_norm': attempt.motor_angular_velocity_norm,
+                'motor_angular_acceleration_norm': attempt.motor_angular_acceleration_norm,
+                'dynamic_artifacts_cleared': attempt.dynamic_artifacts_cleared,
+                'post_reset_max_sample_displacement': attempt.post_reset_max_sample_displacement,
                 'observation': attempt.observation,
                 'message': attempt.message,
                 'other_namespace_poses': attempt.other_namespace_poses,

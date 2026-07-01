@@ -30,6 +30,10 @@ import rl_uav  # noqa: F401  # triggers env registration
 
 from as2_runtime import ensure_as2_simulator
 
+VALIDATOR_UNSAFE_LOW_ALTITUDE_THRESHOLD = 0.30
+VALIDATOR_HEIGHT_BOUNDS = (0.1, 2.0)
+VALIDATOR_FIXED_START_POSE = [0.0, 0.0, 1.0, 0.0]
+
 
 def run_with_timeout(func, timeout_s: float, *args, **kwargs):
     box: dict[str, object] = {}
@@ -97,6 +101,26 @@ def build_hold_actions(action_space: gymnasium.spaces.Box, num_envs: int) -> np.
     return np.zeros((num_envs, action_dim), dtype=np.float32)
 
 
+def build_vectorized_env_kwargs(namespace: str, target_z: float, steps: int) -> dict[str, object]:
+    """Build live vectorized validator env kwargs with safe randomized starts."""
+    return {
+        'drone_namespace': namespace,
+        'target_pose': [0.0, 0.0, target_z, 0.0],
+        'distance_threshold': 0.1,
+        'pos_limit': 20.0,
+        'fixed_start_pose': list(VALIDATOR_FIXED_START_POSE),
+        'randomize_hover_start': False,
+        'scene_bounds_xy': 10.0,
+        'height_bounds': VALIDATOR_HEIGHT_BOUNDS,
+        'unsafe_low_altitude_threshold': VALIDATOR_UNSAFE_LOW_ALTITUDE_THRESHOLD,
+        'min_start_target_distance': 1.0,
+        'hover_speed_threshold': 0.08,
+        'hover_settle_time': 0.5,
+        'hover_timeout': 10.0,
+        'max_steps': max(500, steps + 50),
+    }
+
+
 def close_vector_env(vec_env: gymnasium.vector.SyncVectorEnv, timeout_s: float) -> None:
     for env in vec_env.envs:
         inner = env.unwrapped
@@ -155,18 +179,7 @@ def main() -> int:
             (
                 lambda ns=ns: gymnasium.make(
                     'AS2TestEnv-v0',
-                    drone_namespace=ns,
-                    target_pose=[0.0, 0.0, args.target_z, 0.0],
-                    distance_threshold=0.1,
-                    pos_limit=20.0,
-                    randomize_hover_start=True,
-                    scene_bounds_xy=10.0,
-                    height_bounds=(0.1, 2.0),
-                    min_start_target_distance=1.0,
-                    hover_speed_threshold=0.08,
-                    hover_settle_time=0.5,
-                    hover_timeout=10.0,
-                    max_steps=max(500, args.steps + 50),
+                    **build_vectorized_env_kwargs(ns, args.target_z, args.steps),
                 )
             )
             for ns in namespaces
@@ -218,10 +231,10 @@ def main() -> int:
             )
 
         reset_modes = reset_infos.get('reset_mode', []) if isinstance(reset_infos, dict) else []
-        if len(reset_modes) and any(mode != 'randomized_hover_start' for mode in reset_modes):
+        if len(reset_modes) and any(mode != 'fixed_start_pose' for mode in reset_modes):
             return classify_failure(
                 'reset_failure',
-                f'Expected randomized_hover_start reset mode, got {reset_modes}',
+                f'Expected fixed_start_pose reset mode, got {reset_modes}',
                 namespaces,
             )
 

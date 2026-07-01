@@ -153,6 +153,54 @@ def build_mocked_env(
     return env, inner
 
 
+def build_deterministic_inner_env(
+    namespace='drone0',
+    *,
+    pos=(0.0, 0.0, 1.0),
+    vel=(0.0, 0.0, 0.0),
+    yaw=0.0,
+    target_pose=None,
+    pos_limit=5.0,
+    max_vel=2.0,
+    speed_deadband=0.05,
+    path_facing_weight=0.25,
+):
+    """Create a ROS-free AS2TestEnv instance with deterministic mocked state."""
+    env = AS2TestEnv(
+        drone_namespace=namespace,
+        target_pose=target_pose,
+        pos_limit=pos_limit,
+        max_vel=max_vel,
+        step_duration=0.0,
+        speed_deadband=speed_deadband,
+        path_facing_weight=path_facing_weight,
+    )
+    env._drone = fake_drone(pos, vel, yaw=yaw)
+    env._speed_handler = FakeSpeedHandler()
+    env._is_flying = True
+    return env
+
+
+def vector_env_boundary_config(vec_env):
+    """Return per-instance boundary config used by vectorized environments."""
+    return [
+        {
+            'namespace': env.unwrapped.drone_namespace,
+            'pos_limit': env.unwrapped.pos_limit,
+            'max_vel': env.unwrapped.max_vel,
+        }
+        for env in vec_env.envs
+    ]
+
+
+def vector_env_config_matches(vec_env):
+    """Whether pos_limit and max_vel are identical across vectorized instances."""
+    configs = vector_env_boundary_config(vec_env)
+    pos_limits = {cfg['pos_limit'] for cfg in configs}
+    max_vels = {cfg['max_vel'] for cfg in configs}
+    return len(pos_limits) == 1 and len(max_vels) == 1
+
+
 def expected_reward_components(inner, pos, vel, yaw):
     """Expected reward decomposition from mocked state."""
     tx, ty, tz, _ = inner._target_pose
@@ -267,7 +315,25 @@ check(f"batched obs_space.shape == ({NUM_ENVS},4)", vec_env.observation_space.sh
 for i in range(NUM_ENVS):
     ns = vec_env.envs[i].unwrapped.drone_namespace
     check(f"  sub-env[{i}].drone_namespace == 'drone{i}'", ns == f'drone{i}')
+_default_vec_config = vector_env_boundary_config(vec_env)
+check("vectorized config exposes pos_limit and max_vel per instance", all('pos_limit' in cfg and 'max_vel' in cfg for cfg in _default_vec_config))
+check("vectorized default config keeps pos_limit/max_vel consistent", vector_env_config_matches(vec_env))
 vec_env.close()
+
+_override_vec_env = gymnasium.vector.SyncVectorEnv([
+    (lambda ns='drone_cfg0': gymnasium.make('AS2TestEnv-v0', drone_namespace=ns, pos_limit=5.0, max_vel=2.0)),
+    (lambda ns='drone_cfg1': gymnasium.make('AS2TestEnv-v0', drone_namespace=ns, pos_limit=6.0, max_vel=2.0)),
+])
+_override_config = vector_env_boundary_config(_override_vec_env)
+check("intentional vectorized pos_limit override is detectable", not vector_env_config_matches(_override_vec_env))
+check(
+    "intentional override keeps namespace-local config values explicit",
+    _override_config == [
+        {'namespace': 'drone_cfg0', 'pos_limit': 5.0, 'max_vel': 2.0},
+        {'namespace': 'drone_cfg1', 'pos_limit': 6.0, 'max_vel': 2.0},
+    ],
+)
+_override_vec_env.close()
 
 # ===========================================================================
 # TEST 4 — Shapes in vectorized reset() and step()
@@ -318,6 +384,42 @@ check("out-of-bounds: pos dims clipped to ±1.0",
 check("out-of-bounds: all obs in [-1, 1]",
       np.all(obs_out >= -1.0) and np.all(obs_out <= 1.0))
 vec_env.close()
+
+# Deterministic clipping fixtures do not use Gym wrappers or ROS initialization.
+_obs_fixtures = [
+    {
+        'label': 'positive x/z, negative y, positive yaw boundary',
+        'position': [12.0, -13.0, 20.0],
+        'yaw': math.pi,
+        'expected': [1.0, -1.0, 1.0, 1.0],
+    },
+    {
+        'label': 'negative x/z, positive y, negative yaw boundary',
+        'position': [-12.0, 13.0, -20.0],
+        'yaw': -math.pi,
+        'expected': [-1.0, 1.0, -1.0, -1.0],
+    },
+    {
+        'label': 'mixed in-range and clipped axes preserve ordering',
+        'position': [2.5, -7.5, 1.5],
+        'yaw': math.pi / 2.0,
+        'expected': [0.5, -1.0, 0.1, 0.5],
+    },
+]
+for _fixture in _obs_fixtures:
+    _fixture_env = build_deterministic_inner_env(
+        namespace=f"fixture_{_fixture['label'].split()[0]}",
+        pos=_fixture['position'],
+        yaw=_fixture['yaw'],
+    )
+    _fixture_obs = _fixture_env._get_obs()
+    check(
+        f"fixture: {_fixture['label']} clipped with sign/axis preservation",
+        np.allclose(_fixture_obs, np.array(_fixture['expected'], dtype=np.float32), atol=1e-6)
+        and np.all(_fixture_obs >= -1.0)
+        and np.all(_fixture_obs <= 1.0),
+    )
+    _fixture_env.close()
 
 # ===========================================================================
 # TEST 6 — Numerical normalization correctness per sub-environment
@@ -374,6 +476,72 @@ e1.close(); e2.close(); e3.close()
 # TEST 8 — Reward correctness: distance + path-facing
 # ===========================================================================
 print("\n[8] Reward correctness — distance + continuous path-facing")
+
+# Monotonic distance penalty: same yaw/velocity, different target distance.
+_near_reward_env = build_deterministic_inner_env(
+    namespace='reward_near',
+    pos=(1.0, 0.0, 1.0),
+    vel=(0.0, 0.0, 0.0),
+)
+_far_reward_env = build_deterministic_inner_env(
+    namespace='reward_far',
+    pos=(3.0, 0.0, 1.0),
+    vel=(0.0, 0.0, 0.0),
+)
+_near_distance_raw, _near_distance_norm = _near_reward_env._compute_distance()
+_far_distance_raw, _far_distance_norm = _far_reward_env._compute_distance()
+_near_distance_reward = _near_reward_env._compute_reward_distance(_near_distance_norm)
+_far_distance_reward = _far_reward_env._compute_reward_distance(_far_distance_norm)
+check("distance fixture: near state has smaller raw distance", _near_distance_raw < _far_distance_raw)
+check("distance reward is monotonic with position error", _near_distance_reward >= _far_distance_reward)
+_near_reward_env.close(); _far_reward_env.close()
+
+# Path-facing contribution: equal position error and speed, aligned versus opposed yaw.
+_aligned_pf_env = build_deterministic_inner_env(
+    namespace='path_facing_aligned',
+    pos=(1.0, 0.0, 1.0),
+    vel=(1.0, 0.0, 0.0),
+    yaw=0.0,
+)
+_opposed_pf_env = build_deterministic_inner_env(
+    namespace='path_facing_opposed',
+    pos=(1.0, 0.0, 1.0),
+    vel=(1.0, 0.0, 0.0),
+    yaw=math.pi,
+)
+_aligned_pf, _aligned_speed_xy, _, _aligned_yaw_error = _aligned_pf_env._compute_path_facing_term()
+_opposed_pf, _opposed_speed_xy, _, _opposed_yaw_error = _opposed_pf_env._compute_path_facing_term()
+check("path-facing aligned yaw has zero error", math.isclose(_aligned_yaw_error, 0.0, abs_tol=1e-9))
+check("path-facing opposed yaw has pi error", math.isclose(abs(_opposed_yaw_error), math.pi, rel_tol=1e-6))
+check("path-facing aligned contribution exceeds opposed", _aligned_pf > _opposed_pf)
+check(
+    "path-facing aligned/opposed uses equal non-zero speed",
+    math.isclose(_aligned_speed_xy, _opposed_speed_xy, rel_tol=1e-9) and _aligned_speed_xy > 0.0,
+)
+_aligned_pf_env.close(); _opposed_pf_env.close()
+
+# Below-deadband horizontal speed must be neutral for arbitrary yaw.
+_deadband_low = 0.05
+_low_speed_a = build_deterministic_inner_env(
+    namespace='deadband_low_a',
+    pos=(1.0, 0.0, 1.0),
+    vel=(_deadband_low / 2.0, 0.0, 0.0),
+    yaw=-2.0,
+    speed_deadband=_deadband_low,
+)
+_low_speed_b = build_deterministic_inner_env(
+    namespace='deadband_low_b',
+    pos=(1.0, 0.0, 1.0),
+    vel=(0.0, _deadband_low / 2.0, 0.0),
+    yaw=2.5,
+    speed_deadband=_deadband_low,
+)
+_low_pf_a, _low_speed_xy_a, _, _low_yaw_error_a = _low_speed_a._compute_path_facing_term()
+_low_pf_b, _low_speed_xy_b, _, _low_yaw_error_b = _low_speed_b._compute_path_facing_term()
+check("low-speed deadband reports speed below threshold", _low_speed_xy_a < _deadband_low and _low_speed_xy_b < _deadband_low)
+check("low-speed deadband keeps arbitrary yaw neutral", _low_pf_a == 0.0 and _low_pf_b == 0.0)
+check("low-speed deadband zeroes yaw error contribution", _low_yaw_error_a == 0.0 and _low_yaw_error_b == 0.0)
+_low_speed_a.close(); _low_speed_b.close()
 
 # Alignment test: measured velocity along +x and yaw=0 should maximize path-facing.
 _pos8 = (1.0, 2.0, 3.0)
@@ -628,6 +796,16 @@ _done_namespaces = _validator.namespaces_with_done(
     ['drone0', 'drone1', 'drone2', 'drone3'],
 )
 check("validator: namespaces_with_done reports terminated/truncated envs", _done_namespaces == ['drone1', 'drone3'])
+
+_validator_env_kwargs = _validator.build_vectorized_env_kwargs(
+    namespace='drone0',
+    target_z=5.0,
+    steps=30,
+)
+check("validator: fixed reset avoids stochastic unsafe-low samples", _validator_env_kwargs['randomize_hover_start'] is False)
+check("validator: fixed reset starts above unsafe low altitude", _validator_env_kwargs['fixed_start_pose'][2] > _validator_env_kwargs['unsafe_low_altitude_threshold'])
+check("validator: physical lower bound remains below unsafe threshold", _validator_env_kwargs['height_bounds'][0] < _validator_env_kwargs['unsafe_low_altitude_threshold'])
+check("validator: vectorized max_steps covers requested live steps", _validator_env_kwargs['max_steps'] >= 80)
 
 # ===========================================================================
 # TEST 12 — Randomized hover reset contracts
@@ -1167,8 +1345,71 @@ _handler16f1c = RecordingSpeedHandler(_inner16f1c._drone)
 _inner16f1c._speed_handler = _handler16f1c
 _inner16f1c._drive_to_start_pose_with_velocity([0.0, 0.0, 1.0, 0.0])
 _min_speed_reset_twist16f1c = _handler16f1c.commands[0][0]
-check("reset min-speed is clipped by reset_max_vel", math.isclose(_min_speed_reset_twist16f1c[0], -0.2, rel_tol=1e-6))
+_near_drive_cap16f1c = _inner16f1c.reset_max_vel * 0.17 / (3.0 * _inner16f1c._reset_position_tolerance())
+check("drive reset min-speed is bounded by near-target cap", abs(_min_speed_reset_twist16f1c[0]) <= _near_drive_cap16f1c + 1e-6)
 _env16f1c.close()
+
+_env16f1d = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16f1d',
+    step_duration=0.0,
+    max_vel=0.5,
+    reset_max_vel=1.0,
+    reset_xy_kp=4.0,
+    reset_z_kp=4.0,
+    fixed_start_timeout=0.01,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.2,
+)
+_inner16f1d = _env16f1d.unwrapped
+_inner16f1d._drone = fake_drone([0.3, -0.28, 0.8], [0.0, 0.0, 0.0], yaw=2.2)
+_handler16f1d = RecordingSpeedHandler(_inner16f1d._drone)
+_inner16f1d._speed_handler = _handler16f1d
+_inner16f1d._drive_to_start_pose_with_velocity([0.0, 0.0, 1.0, 0.0])
+_near_drive_twist16f1d, _near_drive_yaw16f1d = _handler16f1d.commands[0]
+check(
+    "drive reset near target uses one conservative XY axis",
+    _near_drive_twist16f1d[0] < 0.0
+    and abs(_near_drive_twist16f1d[0]) < _inner16f1d.reset_max_vel
+    and math.isclose(_near_drive_twist16f1d[1], 0.0, abs_tol=1e-9),
+)
+check(
+    "drive reset near target suppresses simultaneous Z/yaw correction",
+    math.isclose(_near_drive_twist16f1d[2], 0.0, abs_tol=1e-9)
+    and math.isclose(_near_drive_yaw16f1d, 0.0, abs_tol=1e-9),
+)
+_env16f1d.close()
+
+_env16f1e = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16f1e',
+    step_duration=0.0,
+    max_vel=0.5,
+    reset_max_vel=1.0,
+    reset_xy_kp=4.0,
+    reset_z_kp=4.0,
+    fixed_start_timeout=0.01,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.2,
+)
+_inner16f1e = _env16f1e.unwrapped
+_inner16f1e._drone = fake_drone([2.0, -1.0, 0.8], [0.0, 0.0, 0.0], yaw=1.5)
+_handler16f1e = RecordingSpeedHandler(_inner16f1e._drone)
+_inner16f1e._speed_handler = _handler16f1e
+_inner16f1e._drive_to_start_pose_with_velocity([0.0, 0.0, 1.0, 0.0])
+_far_drive_twist16f1e, _far_drive_yaw16f1e = _handler16f1e.commands[0]
+check(
+    "drive reset keeps full authority for large dominant-axis error",
+    math.isclose(_far_drive_twist16f1e[0], -1.0, rel_tol=1e-6),
+)
+check(
+    "drive reset large XY phase does not command simultaneous Y/Z/yaw",
+    math.isclose(_far_drive_twist16f1e[1], 0.0, abs_tol=1e-9)
+    and math.isclose(_far_drive_twist16f1e[2], 0.0, abs_tol=1e-9)
+    and math.isclose(_far_drive_yaw16f1e, 0.0, abs_tol=1e-9),
+)
+check("drive reset timeout reports drive phase", _inner16f1e._last_reset_diagnostics.get('phase') == 'drive_xy_axis_x')
+_env16f1e.close()
 
 _env16f2 = gymnasium.make(
     'AS2TestEnv-v0',
@@ -1427,8 +1668,194 @@ class _RecordThenReacquireHoldHandler:
 _inner16h1._speed_handler = _RecordThenReacquireHoldHandler(_inner16h1._drone)
 _hold_reacquire16h1 = _inner16h1._hold_start_pose_after_controller_reset([0.0, 0.0, 1.0, 0.0], 1)
 _first_hold_correction16h1 = next((cmd for cmd in _hold_correction_commands16h1 if any(abs(v) > 1e-9 for v in cmd)), [0.0, 0.0, 0.0])
+check("post-controller reset sends zero command before correction", _hold_correction_commands16h1 and all(abs(v) < 1e-9 for v in _hold_correction_commands16h1[0]))
 check("post-controller reacquire correction uses reset_max_vel", _hold_reacquire16h1 is True and math.isclose(_first_hold_correction16h1[0], -0.25, rel_tol=1e-6))
 _env16h1.close()
+
+_env16h1a = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h1a',
+    step_duration=0.0,
+    reset_max_vel=1.0,
+    reset_xy_kp=4.0,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.2,
+)
+_inner16h1a = _env16h1a.unwrapped
+_small_lateral_cmd16h1a = _inner16h1a._reset_lateral_axis_command(
+    np.array([0.0, 0.314, 0.0], dtype=np.float32),
+    1,
+)
+_larger_lateral_cmd16h1a = _inner16h1a._reset_lateral_axis_command(
+    np.array([0.0, 0.45, 0.0], dtype=np.float32),
+    1,
+)
+_near_cap16h1a = _inner16h1a.reset_max_vel * 0.314 / (3.0 * _inner16h1a._reset_position_tolerance())
+check("small lateral post-controller error does not command full reset_max_vel", abs(_small_lateral_cmd16h1a[1]) < _inner16h1a.reset_max_vel)
+check("lateral post-controller command is capped near tolerance", abs(_small_lateral_cmd16h1a[1]) <= _near_cap16h1a + 1e-6)
+check("lateral post-controller command scales with error", abs(_larger_lateral_cmd16h1a[1]) > abs(_small_lateral_cmd16h1a[1]))
+_env16h1a.close()
+
+_env16h1a2 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h1a2',
+    step_duration=0.0,
+    reset_max_vel=1.0,
+    reset_xy_kp=0.1,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.5,
+)
+_inner16h1a2 = _env16h1a2.unwrapped
+_near_min_lateral_cmd16h1a2 = _inner16h1a2._reset_lateral_axis_command(
+    np.array([0.0, 0.17, 0.0], dtype=np.float32),
+    1,
+)
+_near_min_cap16h1a2 = _inner16h1a2.reset_max_vel * 0.17 / (3.0 * _inner16h1a2._reset_position_tolerance())
+check("lateral min speed is bounded by near-target cap", abs(_near_min_lateral_cmd16h1a2[1]) <= _near_min_cap16h1a2 + 1e-6)
+check("lateral min speed does not force overshoot near tolerance", abs(_near_min_lateral_cmd16h1a2[1]) < _inner16h1a2.reset_min_speed)
+_env16h1a2.close()
+
+_env16h1a3 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h1a3',
+    step_duration=0.0,
+    reset_max_vel=1.0,
+    reset_xy_kp=1.0,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.5,
+)
+_inner16h1a3 = _env16h1a3.unwrapped
+_diagonal_lateral_error16h1a3 = np.array([0.12, 0.12, 0.0], dtype=np.float32)
+_diagonal_lateral_cmd16h1a3 = _inner16h1a3._reset_lateral_axis_command(
+    _diagonal_lateral_error16h1a3,
+    0,
+)
+_diagonal_near_cap16h1a3 = (
+    _inner16h1a3.reset_max_vel
+    * abs(float(_diagonal_lateral_error16h1a3[0]))
+    / (3.0 * _inner16h1a3._reset_position_tolerance())
+)
+check(
+    "diagonal lateral error outside reset tolerance commands correction",
+    math.hypot(float(_diagonal_lateral_error16h1a3[0]), float(_diagonal_lateral_error16h1a3[1]))
+    > _inner16h1a3._reset_position_tolerance()
+    and abs(float(_diagonal_lateral_cmd16h1a3[0])) > 1e-9,
+)
+check(
+    "diagonal lateral correction remains near-target capped",
+    abs(float(_diagonal_lateral_cmd16h1a3[0])) <= _diagonal_near_cap16h1a3 + 1e-6,
+)
+_env16h1a3.close()
+
+_env16h1a4 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h1a4',
+    step_duration=0.0,
+    reset_max_vel=1.0,
+    reset_xy_kp=4.0,
+    reset_z_kp=4.0,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.5,
+    reset_yaw_required=False,
+)
+_inner16h1a4 = _env16h1a4.unwrapped
+_near_3d_error16h1a4 = np.array([0.1, 0.1, 0.1], dtype=np.float32)
+_near_3d_cmd16h1a4, _near_3d_yaw16h1a4, _near_3d_phase16h1a4 = _inner16h1a4._phased_reset_command(
+    _near_3d_error16h1a4,
+    current_z=0.9,
+    target_z=1.0,
+    yaw_error=1.5,
+)
+_near_3d_cap16h1a4 = (
+    _inner16h1a4.reset_max_vel
+    * float(np.linalg.norm(_near_3d_error16h1a4))
+    / (3.0 * _inner16h1a4._reset_position_tolerance())
+)
+check(
+    "near-threshold 3D hold error outside reset tolerance commands correction",
+    float(np.linalg.norm(_near_3d_error16h1a4)) > _inner16h1a4._reset_position_tolerance()
+    and math.hypot(float(_near_3d_error16h1a4[0]), float(_near_3d_error16h1a4[1])) <= _inner16h1a4._reset_position_tolerance()
+    and abs(float(_near_3d_error16h1a4[2])) <= _inner16h1a4._reset_position_tolerance()
+    and float(np.linalg.norm(_near_3d_cmd16h1a4)) > 1e-9
+    and _near_3d_phase16h1a4 == '3d_trim',
+)
+check(
+    "near-threshold 3D hold correction remains conservative and yaw-disabled",
+    float(np.linalg.norm(_near_3d_cmd16h1a4)) <= _near_3d_cap16h1a4 + 1e-6
+    and math.isclose(_near_3d_yaw16h1a4, 0.0, abs_tol=1e-9),
+)
+_env16h1a4.close()
+
+_env16h1a5 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h1a5',
+    step_duration=0.0,
+    reset_max_vel=1.0,
+    reset_xy_kp=4.0,
+    reset_z_kp=4.0,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.5,
+    reset_yaw_required=False,
+)
+_inner16h1a5 = _env16h1a5.unwrapped
+_high_z_error16h1a5 = np.array([1.0, -0.7, -1.76], dtype=np.float32)
+_high_z_cmd16h1a5, _high_z_yaw16h1a5, _high_z_phase16h1a5 = _inner16h1a5._phased_reset_command(
+    _high_z_error16h1a5,
+    current_z=3.36,
+    target_z=1.6,
+    yaw_error=1.5,
+)
+check(
+    "high-altitude reset prioritizes descending before XY correction",
+    _high_z_phase16h1a5 == 'z_high_trim'
+    and math.isclose(float(_high_z_cmd16h1a5[0]), 0.0, abs_tol=1e-9)
+    and math.isclose(float(_high_z_cmd16h1a5[1]), 0.0, abs_tol=1e-9)
+    and float(_high_z_cmd16h1a5[2]) < 0.0
+    and math.isclose(_high_z_yaw16h1a5, 0.0, abs_tol=1e-9),
+)
+
+_near_high_z_error16h1a5 = np.array([0.4, 0.0, -0.18], dtype=np.float32)
+_near_high_z_cmd16h1a5, _, _near_high_z_phase16h1a5 = _inner16h1a5._phased_reset_command(
+    _near_high_z_error16h1a5,
+    current_z=1.78,
+    target_z=1.6,
+    yaw_error=0.0,
+)
+check(
+    "near-target high-altitude trim remains conservative",
+    _near_high_z_phase16h1a5 == 'z_high_trim'
+    and float(_near_high_z_cmd16h1a5[2]) < 0.0
+    and abs(float(_near_high_z_cmd16h1a5[2])) < _inner16h1a5.reset_max_vel,
+)
+_env16h1a5.close()
+
+_env16h1a6 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h1a6',
+    step_duration=0.0,
+    reset_max_vel=1.0,
+    reset_xy_kp=4.0,
+    reset_z_kp=4.0,
+    fixed_start_tolerance=0.15,
+    reset_min_speed=0.5,
+)
+_inner16h1a6 = _env16h1a6.unwrapped
+_low_z_error16h1a6 = np.array([1.0, 0.0, 0.8], dtype=np.float32)
+_low_z_cmd16h1a6, _low_z_yaw16h1a6, _low_z_phase16h1a6 = _inner16h1a6._phased_reset_command(
+    _low_z_error16h1a6,
+    current_z=0.2,
+    target_z=1.0,
+    yaw_error=1.5,
+)
+check(
+    "low-altitude recovery still takes precedence over high-altitude and XY trim",
+    _low_z_phase16h1a6 == 'vertical_recovery'
+    and math.isclose(float(_low_z_cmd16h1a6[0]), 0.0, abs_tol=1e-9)
+    and math.isclose(float(_low_z_cmd16h1a6[1]), 0.0, abs_tol=1e-9)
+    and float(_low_z_cmd16h1a6[2]) > 0.0
+    and math.isclose(_low_z_yaw16h1a6, 0.0, abs_tol=1e-9),
+)
+_env16h1a6.close()
 
 _env16h1b = gymnasium.make(
     'AS2TestEnv-v0',
@@ -1655,7 +2082,7 @@ class _VerticalFirstHoldHandler:
 
 _inner16h3._speed_handler = _VerticalFirstHoldHandler(_inner16h3._drone)
 _hold_vertical_first16h3 = _inner16h3._hold_start_pose_after_controller_reset([0.0, 0.0, 1.6, 0.0], 1)
-_first_hold_command16h3 = _hold_commands16h3[0] if _hold_commands16h3 else ([999.0, 999.0, 999.0], 999.0)
+_first_hold_command16h3 = next((cmd for cmd in _hold_commands16h3 if any(abs(v) > 1e-9 for v in cmd[0])), ([999.0, 999.0, 999.0], 999.0))
 check("post-controller hold prioritizes vertical recovery near safety floor", _hold_vertical_first16h3 is True)
 check(
     "post-controller hold suppresses lateral/yaw correction during vertical recovery",
@@ -1691,6 +2118,43 @@ check("position-only episode reset ignores large yaw during hold", _info16h4.get
 check("position-only episode reset keeps yaw diagnostic in monitor info", math.isclose(_info16h4.get('reset_yaw_error'), 2.6, abs_tol=1e-3))
 check("position-only episode reset commands zero yaw during hold", all(math.isclose(cmd[1], 0.0, abs_tol=1e-9) for cmd in _handler16h4.commands))
 _env16h4.close()
+
+_env16h5 = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone16h5',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    fixed_start_tolerance=0.15,
+    reset_yaw_required=False,
+    hover_settle_time=0.0,
+    hover_timeout=0.2,
+    reset_min_speed=0.2,
+    use_simulator_reset_service=False,
+)
+_inner16h5 = _env16h5.unwrapped
+_inner16h5._drone = fake_drone([0.6, 0.3, 1.05], [0.0, 0.0, 0.0], yaw=2.2)
+_axis_commands16h5 = []
+
+
+class _AxisPriorityPositionOnlyHandler:
+    def __init__(self, drone):
+        self.drone = drone
+
+    def send_speed_command_with_yaw_speed(self, **kw):
+        twist = list(kw.get('twist', [0.0, 0.0, 0.0]))
+        yaw_speed = float(kw.get('yaw_speed', 999.0))
+        _axis_commands16h5.append((twist, yaw_speed))
+        if any(abs(v) > 1e-9 for v in twist):
+            self.drone.position = [0.0, 0.0, 1.0]
+        return True
+
+
+_inner16h5._speed_handler = _AxisPriorityPositionOnlyHandler(_inner16h5._drone)
+_axis_priority16h5 = _inner16h5._hold_start_pose_after_controller_reset([0.0, 0.0, 1.0, 0.0], 1)
+_first_axis_command16h5 = next((cmd for cmd in _axis_commands16h5 if any(abs(v) > 1e-9 for v in cmd[0])), ([999.0, 999.0, 999.0], 999.0))
+check("position-only XY phase uses one dominant horizontal axis", _axis_priority16h5 is True and _first_axis_command16h5[0][0] < 0.0 and math.isclose(_first_axis_command16h5[0][1], 0.0, abs_tol=1e-9))
+check("position-only XY phase does not command unnecessary vertical/yaw", math.isclose(_first_axis_command16h5[0][2], 0.0, abs_tol=1e-9) and math.isclose(_first_axis_command16h5[1], 0.0, abs_tol=1e-9))
+_env16h5.close()
 
 _env16i = gymnasium.make(
     'AS2TestEnv-v0',
@@ -1955,6 +2419,7 @@ check(
 print("\n[19] Deterministic reset validator contracts")
 
 _reset_validator_path = Path(__file__).resolve().parent / 'validate_deterministic_reset.py'
+_reset_validator_text = _reset_validator_path.read_text(encoding='utf-8') if _reset_validator_path.is_file() else ''
 _reset_validator_spec = importlib.util.spec_from_file_location('validate_deterministic_reset', _reset_validator_path)
 _reset_validator = importlib.util.module_from_spec(_reset_validator_spec)
 assert _reset_validator_spec is not None and _reset_validator_spec.loader is not None
@@ -1963,6 +2428,86 @@ _reset_validator_spec.loader.exec_module(_reset_validator)
 check(
     "reset validator service name is absolute and namespaced",
     _reset_validator.reset_service_name('drone1') == '/drone1/platform/reset_simulator_state',
+)
+
+
+class _ValidatorShapeRequest:
+    __slots__ = [
+        '_x',
+        '_y',
+        '_z',
+        '_yaw',
+        '_position_tolerance',
+        '_yaw_tolerance',
+        '_linear_speed_tolerance',
+        '_angular_speed_tolerance',
+    ]
+
+
+class _ValidatorShapeResponse:
+    __slots__ = [
+        '_success',
+        '_message',
+        '_position_error',
+        '_yaw_error',
+        '_linear_speed_norm',
+        '_angular_speed_norm',
+        '_linear_acceleration_norm',
+        '_angular_acceleration_norm',
+        '_force_norm',
+        '_torque_norm',
+        '_motor_angular_velocity_norm',
+        '_motor_angular_acceleration_norm',
+        '_dynamics_reset_applied',
+        '_motor_state_reset_applied',
+        '_controller_reset_applied',
+        '_imu_reset_applied',
+        '_odometry_reset_applied',
+        '_references_reset_applied',
+        '_dynamic_artifacts_cleared',
+    ]
+
+
+class _ValidatorShapeService:
+    Request = _ValidatorShapeRequest
+    Response = _ValidatorShapeResponse
+
+
+_runtime_overlay_report19 = _reset_validator.build_runtime_overlay_report(
+    simulator_prefix='/home/jordi/as2_rl_ws/install/as2_platform_multirotor_simulator',
+    expected_simulator_prefix='/home/jordi/as2_rl_ws',
+    service_type=_ValidatorShapeService,
+    fork_path=_simulator_source,
+)
+check(
+    "reset validator reports sourced simulator package prefix",
+    _runtime_overlay_report19['simulator_prefix'] == '/home/jordi/as2_rl_ws/install/as2_platform_multirotor_simulator'
+    and _runtime_overlay_report19['expected_simulator_prefix'] == '/home/jordi/as2_rl_ws',
+)
+check(
+    "reset validator reports ResetSimulatorState request and response shape",
+    'x' in _runtime_overlay_report19['service_shape']['request_fields']
+    and 'angular_speed_tolerance' in _runtime_overlay_report19['service_shape']['request_fields']
+    and 'dynamic_artifacts_cleared' in _runtime_overlay_report19['service_shape']['response_fields'],
+)
+check(
+    "reset validator reports fork remote branch commit state without mutation",
+    all(key in _runtime_overlay_report19['fork_git'] for key in ['is_git_repo', 'remote_url', 'branch', 'commit', 'status']),
+)
+try:
+    _reset_validator.validate_simulator_prefix('/opt/ros/humble', '/home/jordi/as2_rl_ws')
+    check("reset validator rejects base-install prefix ambiguity", False)
+except RuntimeError as _exc19:
+    check(
+        "reset validator rejects base-install prefix ambiguity",
+        'base install' in str(_exc19).lower() or 'outside expected overlay' in str(_exc19).lower(),
+    )
+check(
+    "reset validator documents conda and AS2 Multirotor-only execution",
+    'conda run -n rl_uav python3 scripts/validate_deterministic_reset.py' in _reset_validator_text
+    and 'AS2 Multirotor Simulator' in _reset_validator_text
+    and 'Gazebo' in _reset_validator_text
+    and 'not an acceptance path' in _reset_validator_text,
 )
 
 
@@ -2045,6 +2590,14 @@ _valid_reset_results = [
         yaw_error=0.01,
         linear_speed_norm=0.0,
         angular_speed_norm=0.0,
+        linear_acceleration_norm=0.0,
+        angular_acceleration_norm=0.0,
+        force_norm=0.0,
+        torque_norm=0.0,
+        motor_angular_velocity_norm=0.0,
+        motor_angular_acceleration_norm=0.0,
+        dynamic_artifacts_cleared=True,
+        post_reset_max_sample_displacement=0.01,
         observation=[0.0, 0.0, 0.0, 0.0],
         other_namespace_poses={'drone1': list(_stable_other_pose)},
     )
@@ -2087,6 +2640,70 @@ _twist_failure_summary = _reset_validator.evaluate_reset_attempts(
 )
 check("reset validator rejects non-zero post-reset twist", not _twist_failure_summary.success and 'linear speed' in _twist_failure_summary.message)
 
+_artifact_failure_results = list(_valid_reset_results)
+_artifact_failure_results[4] = _artifact_failure_results[4].with_overrides(
+    linear_acceleration_norm=0.3,
+)
+_artifact_failure_summary = _reset_validator.evaluate_reset_attempts(
+    _artifact_failure_results,
+    expected_reset_count=20,
+    namespaces=['drone0', 'drone1'],
+    target_namespace='drone0',
+)
+check("reset validator rejects post-reset acceleration artifacts", not _artifact_failure_summary.success and 'linear acceleration' in _artifact_failure_summary.message)
+
+_proof_failure_results = list(_valid_reset_results)
+_proof_failure_results[5] = _proof_failure_results[5].with_overrides(dynamic_artifacts_cleared=False)
+_proof_failure_summary = _reset_validator.evaluate_reset_attempts(
+    _proof_failure_results,
+    expected_reset_count=20,
+    namespaces=['drone0', 'drone1'],
+    target_namespace='drone0',
+)
+check("reset validator rejects missing dynamic artifact proof", not _proof_failure_summary.success and 'dynamic artifacts' in _proof_failure_summary.message)
+
+_teleport_failure_results = list(_valid_reset_results)
+_teleport_failure_results[6] = _teleport_failure_results[6].with_overrides(
+    post_reset_max_sample_displacement=0.5,
+)
+_teleport_failure_summary = _reset_validator.evaluate_reset_attempts(
+    _teleport_failure_results,
+    expected_reset_count=20,
+    namespaces=['drone0', 'drone1'],
+    target_namespace='drone0',
+)
+check("reset validator rejects post-reset teleport spike", not _teleport_failure_summary.success and 'teleport spike' in _teleport_failure_summary.message)
+
+check(
+    "reset validator computes max post-reset sample displacement",
+    math.isclose(
+        _reset_validator.max_pose_sample_displacement([
+            {'position': [0.0, 0.0, 1.0]},
+            {'position': [0.03, 0.04, 1.0]},
+            {'position': [0.03, 0.04, 1.12]},
+        ]),
+        0.12,
+        abs_tol=1e-6,
+    ),
+)
+check(
+    "reset validator excludes intended reset relocation from hold displacement",
+    math.isclose(
+        _reset_validator.max_target_hold_displacement(
+            [
+                {'position': [0.0, 0.0, 0.0], 'yaw': 0.0},
+                {'position': [0.0, 0.0, 1.0], 'yaw': 0.0},
+                {'position': [0.0, 0.0, 1.04], 'yaw': 0.0},
+            ],
+            target_pose=[0.0, 0.0, 1.0, 0.0],
+            position_tolerance=0.15,
+            yaw_tolerance=0.2,
+        ),
+        0.04,
+        abs_tol=1e-6,
+    ),
+)
+
 _obs_failure_results = list(_valid_reset_results)
 _obs_failure_results[7] = _obs_failure_results[7].with_overrides(observation=[1.2, 0.0, 0.0, 0.0])
 _obs_failure_summary = _reset_validator.evaluate_reset_attempts(
@@ -2108,6 +2725,57 @@ _namespace_failure_summary = _reset_validator.evaluate_reset_attempts(
     target_namespace='drone0',
 )
 check("reset validator rejects namespace isolation leak", not _namespace_failure_summary.success and 'namespace isolation' in _namespace_failure_summary.message)
+
+_motion_validator_path = Path(__file__).resolve().parent / 'validate_reset_motion_live.py'
+_motion_validator_spec = importlib.util.spec_from_file_location('validate_reset_motion_live', _motion_validator_path)
+_motion_validator = importlib.util.module_from_spec(_motion_validator_spec)
+assert _motion_validator_spec is not None and _motion_validator_spec.loader is not None
+_motion_validator_spec.loader.exec_module(_motion_validator)
+
+_actionability_success = _motion_validator.evaluate_actionability_result(
+    reset_info={
+        'reset_success': True,
+        'reset_method': 'simulator_service',
+        'reset_service_attempted': True,
+        'reset_service_status': 'service_success',
+    },
+    distances=[2.0, 1.8, 1.6],
+    positions=[[0.0, 0.0, 1.0], [0.2, 0.0, 1.0], [0.4, 0.0, 1.0]],
+    command_acceptance=[True, True, True],
+    min_distance_reduction=0.25,
+    min_position_delta=0.1,
+)
+check("motion validator accepts service-backed post-reset actionability", _actionability_success['success'] is True)
+
+_velocity_primary_failure = _motion_validator.evaluate_actionability_result(
+    reset_info={
+        'reset_success': True,
+        'reset_method': 'velocity',
+        'reset_service_attempted': False,
+        'reset_service_status': 'not_attempted',
+    },
+    distances=[2.0, 1.5],
+    positions=[[0.0, 0.0, 1.0], [0.5, 0.0, 1.0]],
+    command_acceptance=[True, True],
+    min_distance_reduction=0.25,
+    min_position_delta=0.1,
+)
+check("motion validator rejects velocity-only primary reset", _velocity_primary_failure['success'] is False and _velocity_primary_failure['reason'] == 'reset_not_service_backed')
+
+_stuck_actionability = _motion_validator.evaluate_actionability_result(
+    reset_info={
+        'reset_success': True,
+        'reset_method': 'simulator_service',
+        'reset_service_attempted': True,
+        'reset_service_status': 'service_success',
+    },
+    distances=[2.0, 1.95],
+    positions=[[0.0, 0.0, 1.0], [0.02, 0.0, 1.0]],
+    command_acceptance=[True, True],
+    min_distance_reduction=0.25,
+    min_position_delta=0.1,
+)
+check("motion validator rejects accepted but non-actionable command", _stuck_actionability['success'] is False and _stuck_actionability['reason'] == 'insufficient_physical_motion')
 
 # ===========================================================================
 # TEST 20 — Service-backed reset client contracts
@@ -2608,6 +3276,188 @@ check("ignored service helper leaves no service-attempt diagnostic", _info20m2.g
 check("ignored service helper velocity reset emits normalized obs", np.all(_obs20m2 >= -1.0) and np.all(_obs20m2 <= 1.0))
 _env20m2.close()
 
+_env20n = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone20n',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    use_simulator_reset_service=True,
+    use_service_reset_after_velocity_timeout=False,
+)
+_inner20n = _env20n.unwrapped
+_events20n = []
+_inner20n._drone = fake_drone([2.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner20n._is_flying = True
+_inner20n._wait_for_hover_settle = lambda: True
+_inner20n._recover_low_altitude_hover_before_velocity_reset = lambda hover_height: True
+_inner20n._reset_velocity_controller = lambda: True
+_inner20n._try_service_backed_reset = lambda start_pose: _events20n.append('service_reset') or True
+
+
+def _velocity_timeout20n(start_pose):
+    _inner20n._last_reset_diagnostics = {
+        'reason': 'timeout',
+        'phase': 'drive_xy_axis_y',
+        'position_error': 1.1123,
+        'initial_position_error': 8.8071,
+        'best_position_error': 0.9585,
+    }
+    raise RuntimeError('velocity timeout')
+
+
+_inner20n._apply_and_confirm_start_pose = _velocity_timeout20n
+try:
+    _env20n.reset()
+    _disabled_fallback_failed20n = False
+except RuntimeError:
+    _disabled_fallback_failed20n = True
+check("already-flying velocity timeout does not use service fallback when flag disabled", _disabled_fallback_failed20n and _events20n == [])
+_env20n.close()
+
+_env20o = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone20o',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    use_simulator_reset_service=True,
+    use_service_reset_after_velocity_timeout=True,
+)
+_inner20o = _env20o.unwrapped
+_events20o = []
+_drone20o = fake_drone([2.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner20o._drone = _drone20o
+_inner20o._is_flying = True
+_inner20o._wait_for_hover_settle = lambda: True
+_inner20o._recover_low_altitude_hover_before_velocity_reset = lambda hover_height: True
+_inner20o._reset_velocity_controller = lambda: True
+
+
+def _velocity_timeout20o(start_pose):
+    _inner20o._last_reset_diagnostics = {
+        'reason': 'timeout',
+        'phase': 'drive_xy_axis_y',
+        'position_error': 1.1123,
+        'initial_position_error': 8.8071,
+        'best_position_error': 0.9585,
+    }
+    raise RuntimeError('velocity timeout')
+
+
+def _service_fallback_success20o(start_pose):
+    _events20o.append('service_reset')
+    _drone20o.position = list(start_pose[:3])
+    _drone20o.orientation = [0.0, 0.0, start_pose[3]]
+    _inner20o._speed_handler = _AcceptingSpeedHandler()
+    _inner20o._last_reset_diagnostics = {'reason': 'service_success', 'position_error': 0.01, 'yaw_error': 0.02}
+    _inner20o._last_reset_service_status = 'service_success'
+    _inner20o._is_flying = True
+    return True
+
+
+_inner20o._apply_and_confirm_start_pose = _velocity_timeout20o
+_inner20o._try_service_backed_reset = _service_fallback_success20o
+_obs20o, _info20o = _env20o.reset()
+check("enabled velocity-timeout service fallback is attempted", _events20o == ['service_reset'])
+check("service fallback success exposes coherent monitor diagnostics", _info20o.get('reset_method') == 'simulator_service' and _info20o.get('reset_path') == 'velocity_timeout_service_fallback' and _info20o.get('reset_service_status') == 'service_success_after_velocity_timeout')
+check("service fallback success emits normalized obs", np.all(_obs20o >= -1.0) and np.all(_obs20o <= 1.0))
+_env20o.close()
+
+_env20p = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone20p',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    use_simulator_reset_service=True,
+    use_service_reset_after_velocity_timeout=True,
+)
+_inner20p = _env20p.unwrapped
+_drone20p = fake_drone([2.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner20p._drone = _drone20p
+_inner20p._is_flying = True
+_inner20p._wait_for_hover_settle = lambda: True
+_inner20p._recover_low_altitude_hover_before_velocity_reset = lambda hover_height: True
+_inner20p._reset_velocity_controller = lambda: True
+_inner20p._recover_motion_reference_path = lambda: False
+
+
+def _velocity_timeout20p(start_pose):
+    _inner20p._last_reset_diagnostics = {
+        'reason': 'timeout',
+        'phase': 'drive_xy_axis_y',
+        'position_error': 1.1123,
+        'initial_position_error': 8.8071,
+        'best_position_error': 0.9585,
+    }
+    raise RuntimeError('velocity timeout')
+
+
+_inner20p._apply_and_confirm_start_pose = _velocity_timeout20p
+
+
+def _service_fallback_without_command_path20p(start_pose):
+    _drone20p.position = list(start_pose[:3])
+    _drone20p.orientation = [0.0, 0.0, start_pose[3]]
+    _inner20p._speed_handler = _RejectOnceSpeedHandler()
+    _inner20p._last_reset_diagnostics = {'reason': 'service_success'}
+    _inner20p._last_reset_service_status = 'service_success'
+    _inner20p._is_flying = True
+    return True
+
+
+_inner20p._try_service_backed_reset = _service_fallback_without_command_path20p
+try:
+    _env20p.reset()
+    _command_path_failure20p = False
+except RuntimeError:
+    _command_path_failure20p = True
+check("service fallback only reports success if post-reset command path is ready", _command_path_failure20p and _inner20p._last_reset_diagnostics.get('reason') == 'service_fallback_command_path_failed')
+_env20p.close()
+
+_env20q = gymnasium.make(
+    'AS2TestEnv-v0',
+    drone_namespace='drone20q',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    use_simulator_reset_service=True,
+    use_service_reset_after_velocity_timeout=True,
+)
+_inner20q = _env20q.unwrapped
+_inner20q._drone = fake_drone([2.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner20q._is_flying = True
+_inner20q._wait_for_hover_settle = lambda: True
+_inner20q._recover_low_altitude_hover_before_velocity_reset = lambda hover_height: True
+_inner20q._reset_velocity_controller = lambda: True
+
+
+def _velocity_timeout20q(start_pose):
+    _inner20q._last_reset_diagnostics = {
+        'reason': 'timeout',
+        'phase': 'drive_xy_axis_y',
+        'position_error': 1.1123,
+        'initial_position_error': 8.8071,
+        'best_position_error': 0.9585,
+    }
+    raise RuntimeError('velocity timeout')
+
+
+_inner20q._apply_and_confirm_start_pose = _velocity_timeout20q
+
+
+def _service_fallback_failure20q(start_pose):
+    _inner20q._last_reset_diagnostics = {'reason': 'service_unavailable', 'failure_class': 'service_unavailable'}
+    _inner20q._last_reset_service_status = 'service_unavailable'
+    return False
+
+
+_inner20q._try_service_backed_reset = _service_fallback_failure20q
+try:
+    _env20q.reset()
+    _service_failure20q = False
+except RuntimeError:
+    _service_failure20q = True
+check("service fallback failure fails fast with diagnostics", _service_failure20q and _inner20q._last_reset_diagnostics.get('reason') == 'service_unavailable' and 'original_velocity_reset_diagnostics' in _inner20q._last_reset_diagnostics)
+_env20q.close()
+
 _env20l = gymnasium.make(
     'AS2TestEnv-v0',
     drone_namespace='drone20l',
@@ -2730,6 +3580,19 @@ _expected_srv_fields = [
     'float64 yaw_error',
     'float64 linear_speed_norm',
     'float64 angular_speed_norm',
+    'float64 linear_acceleration_norm',
+    'float64 angular_acceleration_norm',
+    'float64 force_norm',
+    'float64 torque_norm',
+    'float64 motor_angular_velocity_norm',
+    'float64 motor_angular_acceleration_norm',
+    'bool dynamics_reset_applied',
+    'bool motor_state_reset_applied',
+    'bool controller_reset_applied',
+    'bool imu_reset_applied',
+    'bool odometry_reset_applied',
+    'bool references_reset_applied',
+    'bool dynamic_artifacts_cleared',
 ]
 if _simulator_srv.is_file():
     _simulator_srv_text = _simulator_srv.read_text(encoding='utf-8')
@@ -2803,8 +3666,42 @@ check(
     all(token in _simulator_source_text for token in ['simulator_.get_dynamics().set_state(reset_state)', 'simulator_.get_imu().reset()', 'simulator_.get_inertial_odometry().reset()']),
 )
 check(
+    "simulator zeroes acceleration, force, torque, and motor artifacts",
+    all(token in _simulator_source_text for token in [
+        'reset_state.kinematics.linear_acceleration = zero_vector',
+        'reset_state.kinematics.angular_acceleration = zero_vector',
+        'reset_state.dynamics.force = zero_vector',
+        'reset_state.dynamics.torque = zero_vector',
+        'reset_state.actuators.motor_angular_velocity.setZero()',
+        'reset_state.actuators.motor_angular_acceleration.setZero()',
+    ]),
+)
+check(
     "simulator clears stale control references before success",
     all(token in _simulator_source_text for token in ['simulator_.get_controller().reset_controller()', 'simulator_.set_reference_position(target_position)', 'simulator_.set_reference_velocity(zero_vector)', 'simulator_.set_reference_yaw_rate(0.0)']),
+)
+check(
+    "simulator exposes acceleration and dynamic artifact response metrics",
+    all(token in _simulator_source_text for token in [
+        'response->linear_acceleration_norm',
+        'response->angular_acceleration_norm',
+        'response->force_norm',
+        'response->torque_norm',
+        'response->motor_angular_velocity_norm',
+        'response->motor_angular_acceleration_norm',
+    ]),
+)
+check(
+    "simulator exposes reset proof flags for internals and estimators",
+    all(token in _simulator_source_text for token in [
+        'response->dynamics_reset_applied',
+        'response->motor_state_reset_applied',
+        'response->controller_reset_applied',
+        'response->imu_reset_applied',
+        'response->odometry_reset_applied',
+        'response->references_reset_applied',
+        'response->dynamic_artifacts_cleared',
+    ]),
 )
 check(
     "simulator reports valid reset success only after tolerance checks",
@@ -3012,6 +3909,78 @@ check("step diagnostics report command acceptance rate", math.isclose(_info26b.g
 check("step diagnostics keep reset method/path for monitor", _info26b.get('reset_method') == 'velocity' and 'reset_path' in _info26b)
 check("step diagnostics keep reset failure diagnostics for monitor", all(k in _info26b for k in ['reset_failure_class', 'reset_position_error', 'reset_yaw_error', 'reset_service_status']))
 _env26.close()
+
+# ===========================================================================
+# TEST 27 — Simulator reset proof and fork repository preparation docs
+# ===========================================================================
+print("\n[27] Simulator reset proof and fork repository preparation docs")
+
+_reset_contract_doc = _simulator_source / 'RESET_CONTRACT.md'
+_fork_repo_doc = _simulator_source / 'GITHUB_FORK_PREP.md'
+_reset_contract_text = _reset_contract_doc.read_text(encoding='utf-8') if _reset_contract_doc.is_file() else ''
+_fork_repo_text = _fork_repo_doc.read_text(encoding='utf-8') if _fork_repo_doc.is_file() else ''
+_fork_git_status = subprocess.run(
+    ['git', '-C', str(_simulator_source), 'rev-parse', '--is-inside-work-tree'],
+    capture_output=True,
+    text=True,
+)
+_fork_has_git = _fork_git_status.returncode == 0 and _fork_git_status.stdout.strip() == 'true'
+
+check("reset contract proof document exists", _reset_contract_doc.is_file())
+check(
+    "reset proof document maps dynamic artifacts to implementation lines",
+    all(token in _reset_contract_text for token in [
+        'linear_acceleration',
+        'angular_acceleration',
+        'dynamics.force',
+        'dynamics.torque',
+        'motor_angular_velocity',
+        'motor_angular_acceleration',
+        'reset_controller',
+        'get_imu().reset()',
+        'get_inertial_odometry().reset()',
+    ]),
+)
+check(
+    "reset proof document defines telemetry-side acceleration boundary",
+    'telemetry-side proof boundary' in _reset_contract_text.lower()
+    and '/imu' in _reset_contract_text
+    and '/ground_truth' in _reset_contract_text,
+)
+check(
+    "reset proof document keeps ROS-free bindings as future work only",
+    'ROS-free Python bindings' in _reset_contract_text
+    and 'fixed-dt simulator APIs' in _reset_contract_text
+    and 'future work' in _reset_contract_text.lower(),
+)
+check("GitHub fork preparation document exists", _fork_repo_doc.is_file())
+check(
+    "fork prep records manual remote, branch, commit pin, and rollback steps",
+    all(token in _fork_repo_text for token in [
+        'git init',
+        'git remote add origin <REMOTE_URL>',
+        'git checkout -b',
+        'git rev-parse HEAD',
+        'rollback',
+        'Do not push from automation',
+    ]),
+)
+check(
+    "fork prep records intended remote branch commit pin and rollback note placeholders",
+    all(token in _fork_repo_text for token in [
+        'Intended remote',
+        'Intended branch',
+        'Commit pin',
+        'Rollback note',
+        'conda activate rl_uav',
+        'AS2 Multirotor Simulator',
+    ]),
+)
+check(
+    "fork prep explicitly handles local non-git state",
+    (not _fork_has_git and 'not a Git repository' in _fork_repo_text)
+    or (_fork_has_git and 'git status --short --branch' in _fork_repo_text),
+)
 
 # ===========================================================================
 # Summary
