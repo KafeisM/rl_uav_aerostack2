@@ -16,6 +16,14 @@
       "sessions": 8,
       "memories": 58,
       "prompts": 38
+    },
+    {
+      "id": "17bb4fd3",
+      "created_by": "jordi",
+      "created_at": "2026-07-02T11:09:25Z",
+      "sessions": 64,
+      "memories": 287,
+      "prompts": 127
     }
   ]
 }
