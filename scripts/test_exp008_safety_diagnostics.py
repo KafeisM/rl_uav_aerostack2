@@ -160,6 +160,40 @@ def test_post_publication_drop_is_terminal_safety_before_no_motion() -> None:
     assert info['terminal_stop_command_accepted'] is True
 
 
+def test_in_step_unsafe_low_altitude_terminal_survives_recovery_exception() -> None:
+    env = DroppingAfterPublicationEnv(
+        verbose=False,
+        step_duration=0.0,
+        target_pose=[2.0, 0.0, 1.5, 0.0],
+        height_bounds=(0.1, 2.0),
+        unsafe_low_altitude_threshold=0.5,
+        low_altitude_guard_margin=0.2,
+        low_altitude_guard_climb_speed=0.15,
+    )
+    env._drone = DummyDrone([0.0, 0.0, 0.8])
+    env.stop_command_sent = False
+    env.fixed_start_pose = [0.0, 0.0, 1.0, 0.0]
+    recovery_calls: list[float] = []
+
+    def raise_recovery(hover_height: float) -> bool:
+        recovery_calls.append(float(hover_height))
+        raise RuntimeError('synthetic in-step recovery failure')
+
+    env._recover_low_altitude_hover_before_velocity_reset = raise_recovery  # type: ignore[method-assign]
+
+    _, reward, terminated, truncated, info = env.step(np.array([0.5, 0.0, 0.0, 0.0], dtype=np.float32))
+
+    assert recovery_calls == [env._reset_recovery_hover_height()]
+    assert terminated is True
+    assert truncated is False
+    assert reward == -env.oob_penalty
+    assert info['terminal_reason'] == 'unsafe_low_altitude'
+    assert info['is_unsafe_low_altitude'] is True
+    assert info['terminal_stop_command_accepted'] is True
+    assert env.stop_command_sent is True
+    assert env._terminal_reset_requires_service is True
+
+
 def test_height_upper_bound_is_terminal_box_boundary() -> None:
     env = make_env(2.51)
     _, reward, terminated, truncated, info = env.step(np.array([0.0, 0.0, 0.0, 0.0], dtype=np.float32))

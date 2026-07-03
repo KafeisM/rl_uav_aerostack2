@@ -71,19 +71,13 @@ def prepare_run_paths(config: dict[str, Any]) -> RunPaths:
     )
 
 
-def build_vec_env(
-    config: dict[str, Any],
-    monitor_dir: Path,
-    num_envs_override: int | None = None,
-) -> tuple[VecEnv, list[str]]:
-    """Build SB3 vectorized env with unique drone namespaces."""
-    env_cfg = config['environment']
-    num_envs = int(num_envs_override or env_cfg['num_envs'])
-    if num_envs < 1:
-        raise ValueError('num_envs must be >= 1')
+def build_env_kwargs(env_cfg: dict[str, Any]) -> dict[str, Any]:
+    """Map the YAML environment section to AS2TestEnv constructor kwargs.
 
-    namespaces = [f"{env_cfg['namespace_prefix']}{i}" for i in range(num_envs)]
-    env_kwargs = {
+    Shared by ``build_vec_env`` and ROS-free diagnostics so every consumer
+    derives env parameters from the same config keys and defaults.
+    """
+    return {
         'use_sim_time': env_cfg['use_sim_time'],
         'verbose': env_cfg['verbose'],
         'max_vel': env_cfg['max_vel'],
@@ -95,6 +89,8 @@ def build_vec_env(
         'step_duration': env_cfg['step_duration'],
         'command_publication_interval': env_cfg.get('command_publication_interval', 0.05),
         'min_motion_command_publications': env_cfg.get('min_motion_command_publications', 1),
+        'interface_spin_rate': env_cfg.get('interface_spin_rate', 300.0),
+        'reset_platform_state_timeout': env_cfg.get('reset_platform_state_timeout', 2.0),
         'target_pose': env_cfg['target_pose'],
         'distance_threshold': env_cfg['distance_threshold'],
         'max_steps': env_cfg['max_steps'],
@@ -131,6 +127,21 @@ def build_vec_env(
         'hover_timeout': env_cfg.get('hover_timeout', 10.0),
         'max_reset_sample_attempts': env_cfg.get('max_reset_sample_attempts', 100),
     }
+
+
+def build_vec_env(
+    config: dict[str, Any],
+    monitor_dir: Path,
+    num_envs_override: int | None = None,
+) -> tuple[VecEnv, list[str]]:
+    """Build SB3 vectorized env with unique drone namespaces."""
+    env_cfg = config['environment']
+    num_envs = int(num_envs_override or env_cfg['num_envs'])
+    if num_envs < 1:
+        raise ValueError('num_envs must be >= 1')
+
+    namespaces = [f"{env_cfg['namespace_prefix']}{i}" for i in range(num_envs)]
+    env_kwargs = build_env_kwargs(env_cfg)
 
     def _make_env(ns: str, rank: int):
         def _thunk():

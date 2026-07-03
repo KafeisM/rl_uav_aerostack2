@@ -83,6 +83,7 @@ class AS2TestEnv(gym.Env):
         step_duration: float = 0.1,
         command_publication_interval: float = 0.05,
         min_motion_command_publications: int = 1,
+        interface_spin_rate: float = 300.0,
         target_pose: list[float] | None = None,
         distance_threshold: float = 0.5,
         max_steps: int = 500,
@@ -110,6 +111,7 @@ class AS2TestEnv(gym.Env):
         target_marker_scale: float = 0.35,
         close_operation_timeout: float = 10.0,
         reset_service_timeout: float = 2.0,
+        reset_platform_state_timeout: float = 2.0,
         use_simulator_reset_service: bool = True,
         use_service_reset_after_velocity_timeout: bool = False,
         randomize_hover_start: bool = False,
@@ -145,6 +147,13 @@ class AS2TestEnv(gym.Env):
             command_publication_interval: Period used to refresh live motion
                                           references during the step hold.
             min_motion_command_publications: Minimum sends attempted per step.
+            interface_spin_rate: Spin rate (Hz) for the DroneInterface executor
+                                 thread. AS2's default (20 Hz) processes at most
+                                 one ROS callback per spin, which is slower than
+                                 the combined inbound telemetry rate and leaves
+                                 `.position` stale for several env steps. Must
+                                 exceed the total inbound message rate
+                                 (pose + twist + info, ~130 msg/s by default).
             target_pose: Target pose [x, y, z, yaw] for the drone to reach.
                          Defaults to [0, 0, 1, 0] (origin, 1m height, yaw=0).
                          The target is fixed across episodes.
@@ -181,6 +190,9 @@ class AS2TestEnv(gym.Env):
         self.step_duration = step_duration
         self.command_publication_interval = float(command_publication_interval)
         self.min_motion_command_publications = max(1, int(min_motion_command_publications))
+        self.interface_spin_rate = float(interface_spin_rate)
+        if not math.isfinite(self.interface_spin_rate) or self.interface_spin_rate <= 0.0:
+            raise ValueError('interface_spin_rate must be a positive finite value')
         self.distance_threshold = distance_threshold
         self.max_steps = max_steps
         self.success_reward = success_reward
@@ -211,6 +223,7 @@ class AS2TestEnv(gym.Env):
         self.target_marker_scale = float(target_marker_scale)
         self.close_operation_timeout = float(close_operation_timeout)
         self.reset_service_timeout = float(reset_service_timeout)
+        self.reset_platform_state_timeout = float(reset_platform_state_timeout)
         self.use_simulator_reset_service = bool(use_simulator_reset_service)
         self.use_service_reset_after_velocity_timeout = bool(use_service_reset_after_velocity_timeout)
         self.randomize_hover_start = randomize_hover_start
@@ -285,6 +298,9 @@ class AS2TestEnv(gym.Env):
         self._last_low_altitude_guard_active = False
         self._terminal_reset_requires_service = False
         self._last_speed_command_reference_frame = 'unknown'
+        self._pose_freshness_last_position: list[float] | None = None
+        self._pose_freshness_consecutive_identical_reads = 0
+        self._pose_freshness_last_change_time: float | None = None
 
     def _init_ros(self):
         """Initialize ROS2 (once per process) and create DroneInterface."""
@@ -298,10 +314,17 @@ class AS2TestEnv(gym.Env):
                 AS2TestEnv._rclpy_initialized = True
                 logger.info("ROS2 initialized (process-wide)")
 
+        # spin_rate must exceed the combined inbound telemetry rate: the AS2
+        # interface spins a SingleThreadedExecutor with spin_once(timeout=0)
+        # once per interval, processing at most one callback per spin. With
+        # the default 20 Hz, self_localization/pose (~60 Hz) plus twist and
+        # platform info saturate the executor and pose reads go stale for
+        # several env steps.
         self._drone = DroneInterface(
             drone_id=self.drone_namespace,
             use_sim_time=self.use_sim_time,
-            verbose=self.verbose
+            verbose=self.verbose,
+            spin_rate=self.interface_spin_rate,
         )
 
         # Create SpeedMotion handler directly (instead of load_module which
@@ -548,6 +571,55 @@ class AS2TestEnv(gym.Env):
         except Exception:
             return None
 
+    def _reset_pose_freshness(self, position: list[float] | None) -> None:
+        """Restart pose freshness tracking at an episode boundary."""
+        self._pose_freshness_last_position = list(position) if position is not None else None
+        self._pose_freshness_consecutive_identical_reads = 0
+        self._pose_freshness_last_change_time = (
+            time.monotonic() if position is not None else None
+        )
+
+    def _update_pose_freshness(self, position: list[float] | None) -> dict[str, Any]:
+        """Track consecutive identical pose samples across env steps.
+
+        A healthy telemetry chain refreshes the observed pose faster than one
+        env step (self_localization/pose publishes at ~60 Hz), so consecutive
+        step-boundary samples of a moving drone should never be bit-identical.
+        Repeated identical reads indicate stale telemetry (e.g. the interface
+        executor cannot keep up with the inbound message rate).
+
+        Returns:
+            Dict with pose freshness diagnostics for the step info.
+        """
+        now = time.monotonic()
+        if position is None:
+            # Unreadable pose is treated as a stale sample; keep the anchor.
+            self._pose_freshness_consecutive_identical_reads += 1
+            changed = False
+        elif self._pose_freshness_last_position is None or (
+            list(position) != self._pose_freshness_last_position
+        ):
+            self._pose_freshness_last_position = list(position)
+            self._pose_freshness_last_change_time = now
+            self._pose_freshness_consecutive_identical_reads = 0
+            changed = True
+        else:
+            self._pose_freshness_consecutive_identical_reads += 1
+            changed = False
+
+        age = (
+            now - self._pose_freshness_last_change_time
+            if self._pose_freshness_last_change_time is not None
+            else float('nan')
+        )
+        return {
+            'pose_freshness_changed': bool(changed),
+            'pose_freshness_identical_reads': int(
+                self._pose_freshness_consecutive_identical_reads
+            ),
+            'pose_freshness_age_seconds': float(age),
+        }
+
     def _step_safety_snapshot(self) -> dict[str, Any]:
         """Capture raw step telemetry used to fail closed on safety transitions."""
         position = self._current_position_xyz()
@@ -745,6 +817,8 @@ class AS2TestEnv(gym.Env):
             raise ValueError('close_operation_timeout must be > 0')
         if self.reset_service_timeout <= 0.0:
             raise ValueError('reset_service_timeout must be > 0')
+        if self.reset_platform_state_timeout <= 0.0:
+            raise ValueError('reset_platform_state_timeout must be > 0')
         if self.pos_limit < self.scene_bounds_xy:
             raise ValueError(
                 'pos_limit must be >= scene_bounds_xy to preserve normalization budget'
@@ -878,6 +952,8 @@ class AS2TestEnv(gym.Env):
             'angular_speed_norm',
             'post_reset_platform_reassertion_attempted',
             'post_reset_platform_fsm_ready',
+            'post_reset_platform_state',
+            'post_reset_platform_control_mode',
             'post_reset_takeoff_ready',
             'post_reset_takeoff_skipped',
             'post_reset_takeoff_skip_reason',
@@ -1525,6 +1601,23 @@ class AS2TestEnv(gym.Env):
         stable_elapsed = 0.0
         settle_started = time.time()
         settle_elapsed = 0.0
+        # The service-reset path records platform/service proof fields before
+        # this hold runs; carry them into the hold-phase diagnostics rewrite.
+        preserved_diagnostics = {
+            key: self._last_reset_diagnostics[key]
+            for key in (
+                'service_name',
+                'message',
+                'platform_fsm_synced',
+                'platform_control_mode_synced',
+                'post_reset_platform_fsm_ready',
+                'post_reset_platform_state',
+                'post_reset_platform_reassertion_attempted',
+                'post_reset_platform_control_mode',
+            )
+            if isinstance(self._last_reset_diagnostics, dict)
+            and key in self._last_reset_diagnostics
+        }
         last_command = [0.0, 0.0, 0.0, 0.0]
         last_pose: list[float] | None = None
         last_distance = float('inf')
@@ -1628,6 +1721,7 @@ class AS2TestEnv(gym.Env):
                     continue
 
                 self._last_reset_diagnostics = {
+                    **preserved_diagnostics,
                     'reason': 'post_controller_hold',
                     'attempt': attempt,
                     'elapsed': round(time.time() - started, 3),
@@ -1655,6 +1749,7 @@ class AS2TestEnv(gym.Env):
             time.sleep(check_dt)
 
         self._last_reset_diagnostics = {
+            **preserved_diagnostics,
             'reason': timeout_reason,
             'attempt': attempt,
             'elapsed': round(timeout_elapsed, 3),
@@ -2083,8 +2178,14 @@ class AS2TestEnv(gym.Env):
         desired_mode.reference_frame = reference_frame
         self._last_speed_command_reference_frame = frame
 
-    def _ensure_offboard_after_reset(self) -> bool:
-        """Reassert AS2 arm/offboard mode after simulator-backed state reset."""
+    def _ensure_offboard_after_reset(self, confirm_platform_state: bool = False) -> bool:
+        """Reassert AS2 arm/offboard mode after simulator-backed state reset.
+
+        With ``confirm_platform_state=True``, the reasserted state is not
+        trusted: the reported platform info must additionally confirm the AS2
+        command gate (connected + armed + offboard + FLYING + settled control
+        mode) before the reset is considered command-ready.
+        """
         def _info_flag(flag: str) -> bool:
             try:
                 info = getattr(self._drone, 'info', {})
@@ -2110,17 +2211,125 @@ class AS2TestEnv(gym.Env):
                 return False
 
         offboard = getattr(self._drone, 'offboard', None)
-        if offboard is None:
+        if offboard is not None:
+            try:
+                if not (bool(offboard()) or _info_flag('offboard')):
+                    return False
+            except Exception as e:
+                self._last_reset_diagnostics = {
+                    'reason': 'post_reset_offboard_failed',
+                    'state_error': str(e),
+                }
+                logger.error('Unable to reassert offboard mode after simulator reset: %s', e)
+                return False
+
+        if not confirm_platform_state:
             return True
+        return self._confirm_platform_state_after_service_reset()
+
+    def _platform_info_snapshot(self) -> Optional[dict]:
+        """Return a copy of the drone-reported platform info when observable."""
         try:
-            return bool(offboard()) or _info_flag('offboard')
-        except Exception as e:
-            self._last_reset_diagnostics = {
-                'reason': 'post_reset_offboard_failed',
-                'state_error': str(e),
-            }
-            logger.error('Unable to reassert offboard mode after simulator reset: %s', e)
-            return False
+            info = getattr(self._drone, 'info', None)
+        except Exception:
+            return None
+        return dict(info) if isinstance(info, dict) else None
+
+    @staticmethod
+    def _platform_status_flying_value() -> int:
+        try:
+            from as2_msgs.msg import PlatformStatus
+            return int(PlatformStatus.FLYING)
+        except Exception:
+            return 3
+
+    @staticmethod
+    def _platform_control_mode_unset_value() -> int:
+        try:
+            from as2_msgs.msg import ControlMode
+            return int(ControlMode.UNSET)
+        except Exception:
+            return 0
+
+    def _platform_state_summary(self, snapshot: dict) -> dict[str, Any]:
+        """Extract the AS2 command-gate fields from a platform info snapshot."""
+        return {
+            key: snapshot.get(key)
+            for key in ('connected', 'armed', 'offboard', 'state', 'control_mode')
+        }
+
+    def _platform_state_command_ready(self, snapshot: dict) -> bool:
+        """Mirror the AS2 platform sendCommand() gate on reported info.
+
+        Only fields exposed by the interface are verified; the live
+        DroneInterface always reports every gate field, while ROS-free stubs
+        may expose a subset.
+        """
+        checks = {
+            'connected': lambda value: bool(value),
+            'armed': lambda value: bool(value),
+            'offboard': lambda value: bool(value),
+            'state': lambda value: value == self._platform_status_flying_value(),
+            'control_mode': lambda value: value != self._platform_control_mode_unset_value(),
+        }
+        for key, is_ready in checks.items():
+            if key not in snapshot:
+                continue
+            try:
+                if not is_ready(snapshot[key]):
+                    return False
+            except Exception:
+                return False
+        return True
+
+    def _confirm_platform_state_after_service_reset(self) -> bool:
+        """Confirm the platform reports a command-ready state after reset."""
+        snapshot = self._platform_info_snapshot()
+        if snapshot is None:
+            # Platform info is not observable through this drone interface;
+            # keep the service-result-based acceptance for ROS-free stubs.
+            self._last_reset_diagnostics.update({
+                'post_reset_platform_fsm_ready': None,
+                'post_reset_platform_state': 'unobservable',
+            })
+            return True
+
+        timeout = max(float(self.reset_platform_state_timeout), 0.05)
+        check_dt = 0.05
+        started = time.time()
+        reassertion_attempted = False
+        while True:
+            # A snapshot that turns unobservable mid-loop must not confirm
+            # readiness vacuously; keep polling until timeout instead.
+            snapshot = self._platform_info_snapshot()
+            if snapshot is not None and self._platform_state_command_ready(snapshot):
+                self._last_reset_diagnostics.update({
+                    'post_reset_platform_fsm_ready': True,
+                    'post_reset_platform_reassertion_attempted': reassertion_attempted,
+                    'post_reset_platform_state': self._platform_state_summary(snapshot),
+                })
+                return True
+            if not reassertion_attempted:
+                reassertion_attempted = True
+                self._set_platform_flying_after_service_reset()
+                continue
+            if time.time() - started >= timeout:
+                break
+            time.sleep(check_dt)
+
+        self._last_reset_diagnostics.update({
+            'post_reset_platform_fsm_ready': False,
+            'post_reset_platform_reassertion_attempted': reassertion_attempted,
+            'post_reset_platform_state': (
+                self._platform_state_summary(snapshot)
+                if snapshot is not None else 'unobservable'
+            ),
+        })
+        logger.error(
+            'Platform state is not command-ready after simulator reset: %s',
+            self._last_reset_diagnostics['post_reset_platform_state'],
+        )
+        return False
 
     def _reset_velocity_controller(self) -> bool:
         from as2_motion_reference_handlers.speed_motion import SpeedMotion
@@ -2168,6 +2377,12 @@ class AS2TestEnv(gym.Env):
                 'post_reset_mode_refresh_ready': success,
                 'post_reset_mode_refresh_reason': 'success' if success else 'service_rejected',
             })
+            if success:
+                snapshot = self._platform_info_snapshot()
+                if snapshot is not None and 'control_mode' in snapshot:
+                    self._last_reset_diagnostics['post_reset_platform_control_mode'] = (
+                        snapshot.get('control_mode')
+                    )
             return success
         except Exception as e:
             self._last_reset_diagnostics.update({
@@ -2501,11 +2716,14 @@ class AS2TestEnv(gym.Env):
                 'yaw_error': getattr(response, 'yaw_error', None),
                 'linear_speed_norm': getattr(response, 'linear_speed_norm', None),
                 'angular_speed_norm': getattr(response, 'angular_speed_norm', None),
+                'platform_fsm_synced': getattr(response, 'platform_fsm_synced', None),
+                'platform_control_mode_synced': getattr(
+                    response, 'platform_control_mode_synced', None),
             }
             self._last_reset_service_status = str(self._last_reset_diagnostics['reason'])
             if bool(response.success):
                 takeoff_ready = self._takeoff_after_service_reset(start_pose)
-                offboard_ready = self._ensure_offboard_after_reset()
+                offboard_ready = self._ensure_offboard_after_reset(confirm_platform_state=True)
                 mode_refresh_ready = bool(offboard_ready) and self._refresh_controller_mode_after_service_reset()
                 controller_ready = bool(mode_refresh_ready) and self._reset_velocity_controller()
                 controller_hold_ready = bool(takeoff_ready and offboard_ready and controller_ready) and self._hold_service_reset_start_pose(start_pose)
@@ -2767,7 +2985,9 @@ class AS2TestEnv(gym.Env):
         )
         self._last_reset_method = self._classify_reset_method(supports_in_air_reset, reset_reason)
         self._terminal_reset_requires_service = False
-        self._initialize_episode_monitoring(self._current_position_xyz())
+        reset_position = self._current_position_xyz()
+        self._initialize_episode_monitoring(reset_position)
+        self._reset_pose_freshness(reset_position)
         self._add_episode_monitor_info(info)
 
         logger.info(f"Reset complete. Initial obs: {obs}")
@@ -2812,6 +3032,10 @@ class AS2TestEnv(gym.Env):
             info['motion_command_publication_count'] = 0
             info['motion_command_accepted_publication_count'] = 0
             info['low_altitude_guard_active'] = False
+            # No action is processed on this early return; the key must still
+            # exist because SB3 Monitor reads every monitor_info_keywords entry
+            # at episode end.
+            info['vertical_safety_penalty'] = 0.0
             info['step_altitude_before'] = pre_step_snapshot['altitude']
             info['step_altitude_after'] = pre_step_snapshot['altitude']
             info['step_min_altitude'] = step_min_altitude
@@ -2819,6 +3043,7 @@ class AS2TestEnv(gym.Env):
             info['step_speed_z_after'] = pre_step_snapshot['speed_z']
             info['step_safety_checked_after_publication'] = False
             info['step_safety_terminal'] = True
+            info.update(self._update_pose_freshness(pre_step_snapshot['position']))
             self._terminal_reset_requires_service = True
             if pre_step_unsafe_low_altitude and (self.fixed_start_pose is not None or self.randomize_hover_start):
                 try:
@@ -2833,6 +3058,17 @@ class AS2TestEnv(gym.Env):
                     )
             info['terminal_stop_command_accepted'] = self._send_terminal_stop_command()
             return obs, -self.oob_penalty, True, False, info
+
+        # A non-finite action (diverged policy) would poison the simulator
+        # velocity reference and silently freeze telemetry; np.clip propagates
+        # NaN, so sanitize before clipping.
+        action = np.asarray(action, dtype=np.float32)
+        if not np.all(np.isfinite(action)):
+            logger.warning(
+                'Non-finite action received; replacing with zero command: %s',
+                action,
+            )
+            action = np.where(np.isfinite(action), action, 0.0).astype(np.float32)
 
         # Clip action to valid range (per-dimension bounds)
         action = np.clip(action, self.action_space.low, self.action_space.high)
@@ -2961,6 +3197,7 @@ class AS2TestEnv(gym.Env):
         info['step_speed_z_after'] = post_step_snapshot['speed_z']
         info['step_safety_checked_after_publication'] = True
         info['step_safety_terminal'] = safety_terminal_reason in {'out_of_bounds', 'unsafe_low_altitude'}
+        info.update(self._update_pose_freshness(post_step_snapshot['position']))
         self._update_episode_action_monitoring(info['action_sent'])
         self._update_episode_monitoring(
             self._current_position_xyz(),
@@ -3011,9 +3248,16 @@ class AS2TestEnv(gym.Env):
             info['is_unsafe_low_altitude'] = True
             self._terminal_reset_requires_service = True
             if self.fixed_start_pose is not None or self.randomize_hover_start:
-                self._recover_low_altitude_hover_before_velocity_reset(
-                    self._reset_recovery_hover_height()
-                )
+                try:
+                    self._recover_low_altitude_hover_before_velocity_reset(
+                        self._reset_recovery_hover_height()
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        'Low-altitude terminal recovery failed before reset; '
+                        'preserving terminal stop and service reset requirement: %s',
+                        exc,
+                    )
 
         # Success: drone reached the target
         elif d_raw < self.distance_threshold:

@@ -25,6 +25,9 @@ environment:
   step_duration: 0.2
   command_publication_interval: 0.05
   min_motion_command_publications: 4
+  # DroneInterface executor spin rate (Hz). Must exceed the combined inbound
+  # telemetry rate (~130 msg/s) so observed pose stays fresh within one step.
+  interface_spin_rate: 300.0
   fixed_start_pose: [0.0, 0.0, 1.6, 0.0]
   fixed_start_tolerance: 0.22
   fixed_start_timeout: 60.0
@@ -33,13 +36,24 @@ environment:
   reset_yaw_required: false
   reset_min_speed: 0.20
   reset_ground_recovery_height: 1.4
-  unsafe_low_altitude_threshold: 1.3
-  low_altitude_guard_margin: 0.60
+  # Vertical safety geometry (nominal z = 1.6):
+  #   floor 0.8 < unsafe 1.0 < guard 1.0+max(0.30, 2*max_vel*step_duration=0.20)=1.3
+  #   < worst-case reset start 1.6-0.242 < start/target 1.6 < ceiling 2.5.
+  # The guard and the descent-penalty band top (unsafe + band = 1.3) stay
+  # >= 2*max_vel*step_duration below the start/target altitude so nominal
+  # flight is never overridden or penalized, while the guard still fires
+  # 0.3 m (0.6 s at max descent) before the unsafe terminal threshold.
+  unsafe_low_altitude_threshold: 1.0
+  low_altitude_guard_margin: 0.30
   low_altitude_guard_climb_speed: 0.5
   vertical_safety_band: 0.30
   vertical_safety_penalty_weight: 6.0
   vertical_descent_penalty_weight: 8.0
-  target_pose: [0.5, 0.0, 1.6, 0.0]
+  # Start-target separation must exceed distance_threshold by more than the
+  # reset restore tolerance (~0.22 m) plus the observed post-reset z settle
+  # (~0.10 m); 0.5 m separation with a 0.4 m threshold produced instant-success
+  # zero-motion episodes after in-air resets.
+  target_pose: [1.0, 0.0, 1.6, 0.0]
   distance_threshold: 0.4
   max_steps: 80
   success_reward: 20.0

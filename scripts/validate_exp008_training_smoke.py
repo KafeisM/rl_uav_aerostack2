@@ -316,6 +316,9 @@ def build_step_sample(
         'motion_command_accepted_publication_count': int(
             info.get('motion_command_accepted_publication_count', 0)
         ),
+        'pose_freshness_changed': info.get('pose_freshness_changed'),
+        'pose_freshness_identical_reads': info.get('pose_freshness_identical_reads'),
+        'pose_freshness_age_seconds': info.get('pose_freshness_age_seconds'),
         'reset_success': bool(info.get('reset_success', True)),
         'low_altitude_guard_active': bool(info.get('low_altitude_guard_active', False)),
         'vertical_action_requested': float(requested_action[2]),

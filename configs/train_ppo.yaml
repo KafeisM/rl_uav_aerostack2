@@ -21,6 +21,9 @@ environment:
   step_duration: 0.1
   command_publication_interval: 0.05
   min_motion_command_publications: 1
+  # DroneInterface executor spin rate (Hz). Must exceed the combined inbound
+  # telemetry rate (~130 msg/s) so observed pose stays fresh within one step.
+  interface_spin_rate: 300.0
   target_pose: [0.0, 0.0, 1.0, 0.0]
   distance_threshold: 0.5
   max_steps: 500

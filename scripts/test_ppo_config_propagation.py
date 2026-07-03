@@ -38,6 +38,7 @@ def main() -> int:
         'reset_z_kp',
         'command_publication_interval',
         'min_motion_command_publications',
+        'interface_spin_rate',
         'fixed_start_pose',
         'fixed_start_tolerance',
         'fixed_start_timeout',
@@ -114,6 +115,7 @@ def main() -> int:
         assert inner.reset_z_kp == env_cfg['reset_z_kp']
         assert inner.command_publication_interval == env_cfg['command_publication_interval']
         assert inner.min_motion_command_publications == env_cfg['min_motion_command_publications']
+        assert inner.interface_spin_rate == env_cfg['interface_spin_rate']
         assert inner.scene_bounds_xy == env_cfg['scene_bounds_xy']
         assert tuple(inner.height_bounds) == tuple(env_cfg['height_bounds'])
         assert inner.min_start_target_distance == env_cfg['min_start_target_distance']
@@ -178,6 +180,9 @@ def main() -> int:
     exp008_ppo_cfg = exp008_config['ppo']
     assert exp008_env_cfg['fixed_start_tolerance'] >= 0.22
     assert exp008_env_cfg['fixed_start_timeout'] >= 30.0
+    # Interface spin rate must exceed the combined inbound telemetry rate
+    # (~130 msg/s) so per-step pose reads stay fresh.
+    assert exp008_env_cfg['interface_spin_rate'] >= 200.0
     print('✓ PASS: Exp008 reset tolerance covers live post-controller settle slack')
 
     exp008a_config = load_training_config(Path('configs/train_ppo_phase1_exp008a.yaml'))
@@ -190,7 +195,13 @@ def main() -> int:
     assert exp008a_env_cfg['fixed_start_pose'][2] == exp008_env_cfg['fixed_start_pose'][2]
     assert exp008a_env_cfg['target_pose'][2] == exp008_env_cfg['target_pose'][2]
     assert exp008a_env_cfg['target_pose'][0] < exp008_env_cfg['target_pose'][0]
-    assert exp008a_env_cfg['target_pose'][0] <= 0.6
+    # Phase-1 target stays close, but separation must clear the success radius
+    # by more than the in-air reset restore residual (~0.25 m) so episodes
+    # cannot spawn already inside the success sphere.
+    assert exp008a_env_cfg['target_pose'][0] <= 1.0
+    exp008a_separation = abs(
+        exp008a_env_cfg['target_pose'][0] - exp008a_env_cfg['fixed_start_pose'][0])
+    assert exp008a_separation - exp008a_env_cfg['distance_threshold'] > 0.25
     assert exp008a_env_cfg['distance_threshold'] >= exp008_env_cfg['distance_threshold']
     assert exp008a_env_cfg['distance_threshold'] >= 0.4
     assert 0.0 < exp008a_env_cfg['path_facing_weight'] < exp008_env_cfg['path_facing_weight']
@@ -210,7 +221,11 @@ def main() -> int:
     assert exp008a_env_cfg['reset_max_vel'] > exp008a_env_cfg['max_vel']
     assert exp008a_env_cfg['reset_max_vel'] >= 1.0
     assert exp008a_env_cfg['unsafe_low_altitude_threshold'] >= exp008_env_cfg['unsafe_low_altitude_threshold']
-    assert exp008a_env_cfg['unsafe_low_altitude_threshold'] >= 1.3
+    # Unsafe threshold must terminate above the physical floor but leave the
+    # action guard (unsafe + guard margin) clear of the 1.6 m nominal altitude;
+    # scripts/test_vertical_safety_geometry.py asserts the full geometry chain.
+    assert exp008a_env_cfg['unsafe_low_altitude_threshold'] >= 1.0
+    assert exp008a_env_cfg['unsafe_low_altitude_threshold'] > exp008a_env_cfg['height_bounds'][0]
     assert exp008a_env_cfg['unsafe_low_altitude_threshold'] < exp008a_env_cfg['reset_ground_recovery_height']
     assert exp008a_env_cfg['reset_ground_recovery_height'] < exp008a_env_cfg['fixed_start_pose'][2]
     assert exp008a_env_cfg['low_altitude_guard_margin'] >= exp008_env_cfg['low_altitude_guard_margin']
@@ -218,6 +233,7 @@ def main() -> int:
     assert exp008a_env_cfg['vertical_descent_penalty_weight'] >= exp008_env_cfg['vertical_descent_penalty_weight']
     assert exp008a_env_cfg['randomize_hover_start'] is False
     assert exp008a_env_cfg['use_service_reset_after_velocity_timeout'] is True
+    assert exp008a_env_cfg['interface_spin_rate'] >= 200.0
     exp008a_monitor_keywords = set(exp008a_env_cfg['monitor_info_keywords'])
     for keyword in [
         'mean_action_norm',
