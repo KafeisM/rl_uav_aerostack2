@@ -98,6 +98,7 @@ def build_env_kwargs(env_cfg: dict[str, Any]) -> dict[str, Any]:
         'oob_penalty': env_cfg['oob_penalty'],
         'path_facing_weight': env_cfg['path_facing_weight'],
         'progress_reward_weight': env_cfg.get('progress_reward_weight', 0.0),
+        'terminal_yaw_penalty_weight': env_cfg.get('terminal_yaw_penalty_weight', 0.0),
         'speed_deadband': env_cfg['speed_deadband'],
         'fixed_start_pose': env_cfg.get('fixed_start_pose'),
         'fixed_start_tolerance': env_cfg.get('fixed_start_tolerance', 0.15),
@@ -126,6 +127,8 @@ def build_env_kwargs(env_cfg: dict[str, Any]) -> dict[str, Any]:
         'hover_settle_time': env_cfg.get('hover_settle_time', 1.0),
         'hover_timeout': env_cfg.get('hover_timeout', 10.0),
         'max_reset_sample_attempts': env_cfg.get('max_reset_sample_attempts', 100),
+        'randomize_yaw': env_cfg.get('randomize_yaw', True),
+        'randomization_bounds_margin': env_cfg.get('randomization_bounds_margin', 0.0),
     }
 
 

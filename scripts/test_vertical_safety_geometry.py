@@ -30,6 +30,10 @@ FIXED_START_CONFIGS = [
     'configs/train_ppo_phase1_exp008a.yaml',
 ]
 
+RANDOMIZED_CONFIGS = [
+    'configs/train_ppo_phase1_exp010.yaml',
+]
+
 BASELINE_CONFIG = 'configs/train_ppo.yaml'
 
 
@@ -180,6 +184,119 @@ def assert_guard_runtime_behavior(config_name: str, env: AS2TestEnv) -> None:
     assert env._compute_vertical_safety_penalty(-float(env.max_vel)) < 0.0
 
 
+def assert_randomized_geometry(config_name: str, env: AS2TestEnv) -> None:
+    """Randomized configs have no fixed start pose; guard/unsafe/bounds
+    invariants still hold, and the sampling margin must absorb the reset
+    restore residual. Start-target-margin invariants only apply to
+    fixed-start configs."""
+    floor_z, ceiling_z = env.height_bounds
+    unsafe = float(env.unsafe_low_altitude_threshold)
+    guard = env._low_altitude_guard_height()
+    band_top = unsafe + float(env.vertical_safety_band)
+    margin = float(env.randomization_bounds_margin)
+    step_travel = 2.0 * float(env.max_vel) * float(env.step_duration)
+    reset_tolerance = env._reset_position_tolerance()
+    z_sample_low = floor_z + margin
+    z_sample_high = ceiling_z - margin
+
+    assert env.fixed_start_pose is None, (
+        f'{config_name}: randomized config must not define a fixed start pose'
+    )
+    assert env.randomize_hover_start is True, (
+        f'{config_name}: expected randomize_hover_start enabled'
+    )
+
+    # Ordering: floor < unsafe < guard < ceiling.
+    assert floor_z < unsafe < guard < ceiling_z, (
+        f'{config_name}: expected floor {floor_z} < unsafe {unsafe} < '
+        f'guard {guard} < ceiling {ceiling_z}'
+    )
+
+    # Guard fires with room to recover before the unsafe terminal threshold.
+    assert guard - unsafe >= step_travel - 1e-9, (
+        f'{config_name}: guard-to-unsafe margin {guard - unsafe} is below '
+        f'2*max_vel*step_duration {step_travel}'
+    )
+
+    # Unsafe threshold keeps at least one step of descent above the floor.
+    assert unsafe - floor_z >= float(env.max_vel) * float(env.step_duration) - 1e-9, (
+        f'{config_name}: unsafe {unsafe} leaves less than one step of descent '
+        f'above floor {floor_z}'
+    )
+
+    # Sampling margin must absorb the reset restore residual so a restored
+    # edge sample cannot leave the scene box (the margin's whole purpose).
+    assert margin > reset_tolerance, (
+        f'{config_name}: randomization_bounds_margin {margin} must exceed the '
+        f'reset position tolerance {reset_tolerance}'
+    )
+
+    # Sampled altitudes must spawn above the unsafe terminal threshold.
+    assert z_sample_low > unsafe, (
+        f'{config_name}: lowest sampled z {z_sample_low} must sit above the '
+        f'unsafe threshold {unsafe}'
+    )
+    assert z_sample_low < z_sample_high, (
+        f'{config_name}: margin {margin} leaves an empty z sampling range'
+    )
+
+    # Penalty band (if any) must stay below the sampled altitude range.
+    if float(env.vertical_safety_band) > 0.0:
+        assert band_top < z_sample_low, (
+            f'{config_name}: penalty band top {band_top} overlaps sampled z '
+            f'range starting at {z_sample_low}'
+        )
+
+    # Min separation must exceed the success radius by more than the reset
+    # restore residual, and must be feasible inside the margin-shrunk box.
+    assert env.min_start_target_distance is not None, (
+        f'{config_name}: randomized config must set min_start_target_distance'
+    )
+    min_separation = float(env.min_start_target_distance)
+    assert min_separation - float(env.distance_threshold) > reset_tolerance, (
+        f'{config_name}: min separation {min_separation} minus threshold '
+        f'{env.distance_threshold} must exceed reset tolerance {reset_tolerance}'
+    )
+    xy_span = 2.0 * (float(env.scene_bounds_xy) - margin)
+    max_separation = math.sqrt(
+        xy_span ** 2 + xy_span ** 2 + (z_sample_high - z_sample_low) ** 2
+    )
+    assert min_separation < max_separation, (
+        f'{config_name}: min separation {min_separation} exceeds the box '
+        f'diagonal {max_separation}'
+    )
+
+    # Recovery hover height must clear the unsafe band and stay inside bounds.
+    recovery_height = float(env.reset_ground_recovery_height)
+    assert unsafe < recovery_height < ceiling_z, (
+        f'{config_name}: reset_ground_recovery_height {recovery_height} must '
+        f'lie between unsafe {unsafe} and ceiling {ceiling_z}'
+    )
+
+
+def assert_randomized_guard_runtime_behavior(config_name: str, env: AS2TestEnv) -> None:
+    """Exercise the guard/penalty code at the randomized geometry boundaries."""
+    floor_z, ceiling_z = env.height_bounds
+    guard = env._low_altitude_guard_height()
+    margin = float(env.randomization_bounds_margin)
+    z_sample_high = ceiling_z - margin
+
+    # High sampled altitude: level and descending commands pass through.
+    env._drone = DummyDrone([0.0, 0.0, z_sample_high])
+    assert env._apply_low_altitude_action_guard(0.0) == 0.0
+    assert env._last_low_altitude_guard_active is False
+    assert env._compute_vertical_safety_penalty(-float(env.max_vel)) == 0.0
+
+    # Just inside the guard band: downward command becomes a forced climb.
+    env._drone = DummyDrone([0.0, 0.0, guard - 0.01])
+    guarded_vz = env._apply_low_altitude_action_guard(-float(env.max_vel))
+    assert guarded_vz > 0.0, f'{config_name}: guard must force a climb below {guard}'
+    assert env._last_low_altitude_guard_active is True
+    # With the exp010 zeroed weights the guard must never touch the reward.
+    if float(env.vertical_safety_band) <= 0.0:
+        assert env._compute_vertical_safety_penalty(-float(env.max_vel)) == 0.0
+
+
 def assert_baseline_geometry(config_name: str, env: AS2TestEnv) -> None:
     """Baseline has no fixed start and disables the penalty band; the guard
     must still sit strictly below the target altitude."""
@@ -214,6 +331,15 @@ def main() -> int:
         finally:
             env.close()
         print(f'✓ PASS: {config_name} vertical safety geometry is coherent')
+
+    for config_name in RANDOMIZED_CONFIGS:
+        env = build_env_from_config(load_env_config(REPO_ROOT / config_name))
+        try:
+            assert_randomized_geometry(config_name, env)
+            assert_randomized_guard_runtime_behavior(config_name, env)
+        finally:
+            env.close()
+        print(f'✓ PASS: {config_name} randomized safety geometry is coherent')
 
     baseline_env = build_env_from_config(load_env_config(REPO_ROOT / BASELINE_CONFIG))
     try:

@@ -15,7 +15,10 @@ Reward:
       based on measured horizontal velocity direction
     - Low-speed deadband neutrality: if speed_xy <= speed_deadband,
       path-facing contribution is 0.0
-    - Success terminal bonus: +success_reward (default 20.0) when d < distance_threshold
+    - Success terminal bonus: +success_reward (default 20.0) when
+      d < distance_threshold, reduced by
+      terminal_yaw_penalty_weight * |wrap(yaw - target_yaw)| / pi
+      (weight defaults to 0.0, i.e. disabled)
     - Safety penalty: -oob_penalty (default 10.0) when exceeding bounds
       or crossing the training low-altitude safety threshold
 
@@ -91,6 +94,7 @@ class AS2TestEnv(gym.Env):
         oob_penalty: float = 10.0,
         path_facing_weight: float = 0.25,
         progress_reward_weight: float = 0.0,
+        terminal_yaw_penalty_weight: float = 0.0,
         speed_deadband: float = 0.05,
         fixed_start_pose: list[float] | None = None,
         fixed_start_tolerance: float = 0.15,
@@ -123,6 +127,7 @@ class AS2TestEnv(gym.Env):
         hover_timeout: float = 10.0,
         max_reset_sample_attempts: int = 100,
         randomize_yaw: bool = True,
+        randomization_bounds_margin: float = 0.0,
     ):
         """
         Initialize the test environment.
@@ -172,6 +177,15 @@ class AS2TestEnv(gym.Env):
                                            This is intentionally separate from
                                            height_bounds[0], which remains the
                                            physical scene lower bound.
+            terminal_yaw_penalty_weight: Weight of the terminal yaw reduction
+                                         applied to the success reward:
+                                         success_reward - weight * yaw_err_norm
+                                         with yaw_err_norm in [0, 1]. Default
+                                         0.0 keeps prior behavior.
+            randomization_bounds_margin: Minimum distance (m) kept between
+                                         randomized start/target samples and
+                                         every scene box face (XY faces and
+                                         both height bounds). Default 0.0.
         """
         super().__init__()
 
@@ -199,6 +213,7 @@ class AS2TestEnv(gym.Env):
         self.oob_penalty = oob_penalty
         self.path_facing_weight = path_facing_weight
         self.progress_reward_weight = float(progress_reward_weight)
+        self.terminal_yaw_penalty_weight = float(terminal_yaw_penalty_weight)
         self.speed_deadband = speed_deadband
         self.fixed_start_pose = list(fixed_start_pose) if fixed_start_pose is not None else None
         self.fixed_start_tolerance = float(fixed_start_tolerance)
@@ -235,6 +250,7 @@ class AS2TestEnv(gym.Env):
         self.hover_timeout = float(hover_timeout)
         self.max_reset_sample_attempts = int(max_reset_sample_attempts)
         self.randomize_yaw = bool(randomize_yaw)
+        self.randomization_bounds_margin = float(randomization_bounds_margin)
         self._last_sample_attempts = 0
 
         self._validate_bounds()
@@ -504,7 +520,10 @@ class AS2TestEnv(gym.Env):
             return 0.0, 0.0, 0.0, 0.0
 
     def _compute_yaw_error(self) -> float:
-        """Backward-compatible target yaw error helper (unused in reward)."""
+        """Normalized target yaw error: |wrap(yaw - target_yaw)| / pi in [0, 1].
+
+        Used by the terminal success reward when terminal_yaw_penalty_weight > 0.
+        """
         try:
             yaw = self._drone.orientation[2]
             _, _, _, tyaw = self._target_pose
@@ -790,6 +809,20 @@ class AS2TestEnv(gym.Env):
             raise ValueError('height_bounds must satisfy z_min <= z_max')
         if self.max_reset_sample_attempts < 1:
             raise ValueError('max_reset_sample_attempts must be >= 1')
+        if self.terminal_yaw_penalty_weight < 0.0:
+            raise ValueError('terminal_yaw_penalty_weight must be >= 0')
+        if self.randomization_bounds_margin < 0.0:
+            raise ValueError('randomization_bounds_margin must be >= 0')
+        if self.randomization_bounds_margin >= self.scene_bounds_xy:
+            raise ValueError(
+                'randomization_bounds_margin must be < scene_bounds_xy '
+                'so the XY sampling range stays non-empty'
+            )
+        if z_min + self.randomization_bounds_margin > z_max - self.randomization_bounds_margin:
+            raise ValueError(
+                'randomization_bounds_margin must leave a non-empty '
+                'height sampling range within height_bounds'
+            )
         if self.reset_max_vel <= 0.0:
             raise ValueError('reset_max_vel must be > 0')
         if self.reset_xy_kp <= 0.0:
@@ -845,19 +878,43 @@ class AS2TestEnv(gym.Env):
             else self.distance_threshold,
         )
 
+        # Keep sampled poses away from the box faces: the reset restore
+        # tolerance (~0.24 m) can push an edge-sampled start out of bounds,
+        # wasting the episode on a pre-step terminal and forcing a service
+        # reset. The lower-z margin is measured from the EFFECTIVE floor —
+        # the unsafe-altitude threshold when it sits above the physical
+        # bound — because a restored start below the unsafe threshold also
+        # terminates immediately.
+        margin = float(self.randomization_bounds_margin)
+        xy_low = -self.scene_bounds_xy + margin
+        xy_high = self.scene_bounds_xy - margin
+        effective_floor = max(
+            float(self.height_bounds[0]),
+            float(self.unsafe_low_altitude_threshold),
+        )
+        z_low = effective_floor + margin
+        z_high = self.height_bounds[1] - margin
+        if z_low > z_high:
+            raise ValueError(
+                'randomization_bounds_margin leaves no height sampling range '
+                f'above the effective floor {effective_floor} '
+                f'(z_low {z_low} > z_high {z_high})'
+            )
+
         for attempt in range(1, self.max_reset_sample_attempts + 1):
             start_yaw = float(self.np_random.uniform(-math.pi, math.pi)) if self.randomize_yaw else 0.0
+            target_yaw = float(self.np_random.uniform(-math.pi, math.pi)) if self.randomize_yaw else 0.0
             start_pose = [
-                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
-                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
-                float(self.np_random.uniform(self.height_bounds[0], self.height_bounds[1])),
+                float(self.np_random.uniform(xy_low, xy_high)),
+                float(self.np_random.uniform(xy_low, xy_high)),
+                float(self.np_random.uniform(z_low, z_high)),
                 start_yaw,
             ]
             target_pose = [
-                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
-                float(self.np_random.uniform(-self.scene_bounds_xy, self.scene_bounds_xy)),
-                float(self.np_random.uniform(self.height_bounds[0], self.height_bounds[1])),
-                0.0,
+                float(self.np_random.uniform(xy_low, xy_high)),
+                float(self.np_random.uniform(xy_low, xy_high)),
+                float(self.np_random.uniform(z_low, z_high)),
+                target_yaw,
             ]
             distance = math.dist(start_pose[:3], target_pose[:3])
             if distance > min_distance:
@@ -3032,10 +3089,12 @@ class AS2TestEnv(gym.Env):
             info['motion_command_publication_count'] = 0
             info['motion_command_accepted_publication_count'] = 0
             info['low_altitude_guard_active'] = False
-            # No action is processed on this early return; the key must still
+            # No action is processed on this early return; the keys must still
             # exist because SB3 Monitor reads every monitor_info_keywords entry
             # at episode end.
             info['vertical_safety_penalty'] = 0.0
+            info['terminal_yaw_error'] = self._compute_yaw_error()
+            info['terminal_yaw_penalty'] = 0.0
             info['step_altitude_before'] = pre_step_snapshot['altitude']
             info['step_altitude_after'] = pre_step_snapshot['altitude']
             info['step_min_altitude'] = step_min_altitude
@@ -3222,6 +3281,11 @@ class AS2TestEnv(gym.Env):
         info['speed_xy'] = speed_xy
         info['path_yaw'] = path_yaw
         info['path_yaw_error'] = path_yaw_error
+        # Terminal yaw diagnostics must exist on every episode-ending path
+        # because SB3 Monitor reads all monitor_info_keywords at episode end.
+        # The penalty is only applied (and overwritten) on the success branch.
+        info['terminal_yaw_error'] = self._compute_yaw_error()
+        info['terminal_yaw_penalty'] = 0.0
 
         terminated = False
         truncated = False
@@ -3259,14 +3323,21 @@ class AS2TestEnv(gym.Env):
                         exc,
                     )
 
-        # Success: drone reached the target
+        # Success: drone reached the target. The terminal reward includes a
+        # yaw-alignment reduction: success_reward - w * |wrap(yaw - tyaw)|/pi.
+        # With w <= success_reward the worst-case arrival still nets a
+        # positive terminal bonus, so arrival is never disincentivized.
         elif d_raw < self.distance_threshold:
             terminated = True
-            reward += self.success_reward
+            terminal_yaw_error = self._compute_yaw_error()
+            terminal_yaw_penalty = self.terminal_yaw_penalty_weight * terminal_yaw_error
+            reward += self.success_reward - terminal_yaw_penalty
             info['terminal_reason'] = 'success'
             info['is_success'] = True
             info['is_out_of_bounds'] = False
             info['is_unsafe_low_altitude'] = False
+            info['terminal_yaw_error'] = terminal_yaw_error
+            info['terminal_yaw_penalty'] = terminal_yaw_penalty
 
         # Max steps: episode truncation (time limit)
         if not terminated and self._step_count >= self.max_steps:

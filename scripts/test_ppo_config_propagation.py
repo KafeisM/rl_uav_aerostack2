@@ -63,6 +63,9 @@ def main() -> int:
         'hover_settle_time',
         'hover_timeout',
         'max_reset_sample_attempts',
+        'randomize_yaw',
+        'randomization_bounds_margin',
+        'terminal_yaw_penalty_weight',
     ]:
         assert key in env_cfg, f"Missing environment key: {key}"
 
@@ -142,6 +145,9 @@ def main() -> int:
         assert inner.hover_settle_time == env_cfg['hover_settle_time']
         assert inner.hover_timeout == env_cfg['hover_timeout']
         assert inner.max_reset_sample_attempts == env_cfg['max_reset_sample_attempts']
+        assert inner.randomize_yaw == env_cfg['randomize_yaw']
+        assert inner.randomization_bounds_margin == env_cfg['randomization_bounds_margin']
+        assert inner.terminal_yaw_penalty_weight == env_cfg['terminal_yaw_penalty_weight']
         monitor_keywords = set(env_cfg['monitor_info_keywords'])
         for keyword in [
             'physical_displacement',
@@ -249,6 +255,76 @@ def main() -> int:
         assert keyword in exp008a_monitor_keywords, f'Missing Exp008a PPO action diagnostic keyword: {keyword}'
     assert exp008a_ppo_cfg['n_steps'] <= exp008_ppo_cfg['n_steps']
     print('✓ PASS: Exp008a easier curriculum config is bounded and propagated')
+
+    exp010_config = load_training_config(Path('configs/train_ppo_phase1_exp010.yaml'))
+    exp010_env_cfg = exp010_config['environment']
+    exp010_training_cfg = exp010_config['training']
+    exp010_ppo_cfg = exp010_config['ppo']
+
+    assert exp010_config['experiment']['name'] == 'ppo_phase1_exp010_tutor_reward_randomized_50k'
+    assert exp010_training_cfg['checkpoint_prefix'] == 'ppo_phase1_exp010'
+    assert exp010_training_cfg['total_timesteps'] == 50000
+    assert exp010_training_cfg['checkpoint_freq'] == 5000
+
+    # Tutor-spec minimal reward: continuous term is exactly -d_norm.
+    assert exp010_env_cfg['path_facing_weight'] == 0.0
+    assert exp010_env_cfg['progress_reward_weight'] == 0.0
+    assert exp010_env_cfg['vertical_safety_penalty_weight'] == 0.0
+    assert exp010_env_cfg['vertical_descent_penalty_weight'] == 0.0
+    assert exp010_env_cfg['vertical_safety_band'] == 0.0
+    # Terminal yaw reduction: worst-case arrival must still net > 0.
+    assert exp010_env_cfg['terminal_yaw_penalty_weight'] == 10.0
+    assert exp010_env_cfg['success_reward'] - exp010_env_cfg['terminal_yaw_penalty_weight'] > 0.0
+    # Safety terminals stay discouraged.
+    assert exp010_env_cfg['oob_penalty'] == 15.0
+    assert exp010_env_cfg['unsafe_low_altitude_threshold'] == 1.0
+    assert exp010_env_cfg['low_altitude_guard_margin'] == 0.30
+
+    # Full randomization: the reset must take the randomized branch.
+    assert exp010_env_cfg['randomize_hover_start'] is True
+    assert exp010_env_cfg['fixed_start_pose'] is None
+    assert exp010_env_cfg['randomize_yaw'] is True
+    assert exp010_env_cfg['min_start_target_distance'] == 1.0
+    assert exp010_env_cfg['distance_threshold'] < exp010_env_cfg['min_start_target_distance']
+    assert exp010_env_cfg['randomization_bounds_margin'] == 0.3
+    assert exp010_env_cfg['scene_bounds_xy'] == 5.0
+    assert list(exp010_env_cfg['height_bounds']) == [0.8, 2.5]
+
+    # Randomized targets can be ~14 m apart; 80 steps only covered 8 m.
+    assert exp010_env_cfg['max_steps'] == 200
+    assert exp010_env_cfg['num_envs'] == 1
+    assert exp010_env_cfg['vec_env'] == 'dummy'
+    assert exp010_env_cfg['interface_spin_rate'] >= 200.0
+
+    # Tutor's exact PPO hyperparameter set (mirrors configs/train_ppo.yaml).
+    baseline_ppo_cfg = config['ppo']
+    for key in [
+        'learning_rate',
+        'n_steps',
+        'batch_size',
+        'n_epochs',
+        'gamma',
+        'gae_lambda',
+        'clip_range',
+        'ent_coef',
+        'vf_coef',
+        'max_grad_norm',
+        'normalize_advantage',
+        'use_sde',
+        'sde_sample_freq',
+    ]:
+        assert exp010_ppo_cfg[key] == baseline_ppo_cfg[key], (
+            f"exp010 ppo.{key} {exp010_ppo_cfg[key]} != tutor baseline {baseline_ppo_cfg[key]}"
+        )
+    assert exp010_ppo_cfg['policy_kwargs'] == baseline_ppo_cfg['policy_kwargs']
+
+    # New terminal yaw diagnostics must be monitored on every episode end.
+    exp010_monitor_keywords = set(exp010_env_cfg['monitor_info_keywords'])
+    for keyword in ['terminal_yaw_error', 'terminal_yaw_penalty']:
+        assert keyword in exp010_monitor_keywords, (
+            f'Missing Exp010 monitor diagnostic keyword: {keyword}'
+        )
+    print('✓ PASS: Exp010 tutor-spec reward/randomization config is bounded and propagated')
 
     return 0
 

@@ -31,6 +31,9 @@ environment:
   oob_penalty: 10.0
   path_facing_weight: 0.25
   progress_reward_weight: 0.0
+  # Terminal yaw reduction on success: success_reward - weight * yaw_err_norm.
+  # 0.0 disables it (backward compatible).
+  terminal_yaw_penalty_weight: 0.0
   speed_deadband: 0.05
   fixed_start_pose: null
   fixed_start_tolerance: 0.15
@@ -63,6 +66,9 @@ environment:
   hover_settle_time: 1.0
   hover_timeout: 10.0
   max_reset_sample_attempts: 100
+  randomize_yaw: true
+  # Margin (m) kept between randomized samples and every scene box face.
+  randomization_bounds_margin: 0.0
 
 training:
   total_timesteps: 1000000
