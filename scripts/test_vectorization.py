@@ -64,6 +64,7 @@ importlib.reload(rl_uav)  # triggers gymnasium.register(...)
 
 import gymnasium
 import numpy as np
+import rl_uav.envs.as2_test_env as as2_env_module
 from rl_uav.envs.as2_test_env import AS2TestEnv
 
 # ---------------------------------------------------------------------------
@@ -130,7 +131,7 @@ def inject_mocks(vec_env, positions, velocities, yaws=None):
 def build_mocked_env(
     namespace='drone0',
     *,
-    pos=(1.0, 2.0, 3.0),
+    pos=(1.0, 2.0, 1.0),
     vel=(0.0, 0.0, 0.0),
     yaw=0.0,
     speed_deadband=0.05,
@@ -544,7 +545,7 @@ check("low-speed deadband zeroes yaw error contribution", _low_yaw_error_a == 0.
 _low_speed_a.close(); _low_speed_b.close()
 
 # Alignment test: measured velocity along +x and yaw=0 should maximize path-facing.
-_pos8 = (1.0, 2.0, 3.0)
+_pos8 = (1.0, 2.0, 1.0)
 _vel8 = (1.0, 0.0, 0.0)
 _yaw8 = 0.0
 _env8, _inner8 = build_mocked_env(pos=_pos8, vel=_vel8, yaw=_yaw8)
@@ -639,6 +640,40 @@ check("oob: terminal_reason='out_of_bounds'",     _info9b.get('terminal_reason')
 check("oob: reward == -oob_penalty (overwritten)", math.isclose(_rew9b, -_inner9b.oob_penalty, rel_tol=1e-5))
 _env9b.close()
 
+_env9f = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone9f', step_duration=0.0)
+_inner9f = _env9f.unwrapped
+_drone9f = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner9f._drone = _drone9f
+_inner9f._speed_handler = RecordingSpeedHandler(_drone9f)
+_inner9f._is_flying = True
+_env9f.reset()
+_drone9f.position = [6.0, 0.0, 1.0]
+_handler9f = RecordingSpeedHandler(_drone9f)
+_inner9f._speed_handler = _handler9f
+_, _, _term9f, _trunc9f, _info9f = _env9f.step(np.array([0.4, -0.2, 0.1, 0.3], dtype=np.float32))
+_last_twist9f, _last_yaw9f = _handler9f.commands[-1]
+check("terminal out-of-bounds sends a final zero speed command", _term9f and not _trunc9f and np.allclose(_last_twist9f, [0.0, 0.0, 0.0], atol=1e-6) and math.isclose(_last_yaw9f, 0.0, abs_tol=1e-6))
+check("terminal out-of-bounds reports stop command acceptance", _info9f.get('terminal_stop_command_accepted') is True)
+check("terminal out-of-bounds marks next reset for service", _inner9f._terminal_reset_requires_service is True)
+_env9f.close()
+
+_env9g = gymnasium.make('AS2TestEnv-v0', drone_namespace='drone9g', step_duration=0.0)
+_inner9g = _env9g.unwrapped
+_drone9g = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_inner9g._drone = _drone9g
+_inner9g._speed_handler = RecordingSpeedHandler(_drone9g)
+_inner9g._is_flying = True
+_env9g.reset()
+_drone9g.position = [-110.97, 37.50, 137.28]
+_handler9g = RecordingSpeedHandler(_drone9g)
+_inner9g._speed_handler = _handler9g
+_, _rew9g, _term9g, _trunc9g, _info9g = _env9g.step(np.zeros(4, dtype=np.float32))
+check("gross runaway position terminates", _term9g and not _trunc9g)
+check("gross runaway reports out-of-bounds", _info9g.get('terminal_reason') == 'out_of_bounds' and _info9g.get('is_out_of_bounds') is True)
+check("gross runaway uses oob penalty", math.isclose(_rew9g, -_inner9g.oob_penalty, rel_tol=1e-5))
+check("gross runaway sends terminal zero command", np.allclose(_handler9g.commands[-1][0], [0.0, 0.0, 0.0], atol=1e-6))
+_env9g.close()
+
 # 9d — Unsafe low-altitude threshold terminates before physical lower bound.
 _env9d = gymnasium.make(
     'AS2TestEnv-v0',
@@ -710,6 +745,9 @@ _inner9e._speed_handler = _handler9e
 _, _, _, _, _info9e = _env9e.step(np.array([0.0, 0.0, -1.0, 0.0], dtype=np.float32))
 check("near unsafe altitude clamps downward vertical action", math.isclose(_handler9e.commands[0][0][2], 0.25, abs_tol=1e-6))
 check("clamped vertical action is reported", math.isclose(_info9e.get('action_sent')[2], 0.25, abs_tol=1e-6))
+check("action diagnostics use guarded vertical action", math.isclose(_info9e.get('last_action_vz', 0.0), 0.25, abs_tol=1e-6))
+check("action diagnostics use guarded action norm", math.isclose(_info9e.get('mean_action_norm', 0.0), 0.25, abs_tol=1e-6))
+check("action diagnostics report zero XY norm for guarded climb", math.isclose(_info9e.get('mean_xy_action_norm', -1.0), 0.0, abs_tol=1e-6))
 check("low-altitude guard activation is reported", _info9e.get('low_altitude_guard_active') is True)
 check("near unsafe downward action receives vertical safety penalty", _info9e.get('vertical_safety_penalty', 0.0) < 0.0)
 _inner9e._drone = fake_drone([0.0, 0.0, 1.8], [0.0, 0.0, 0.0])
@@ -1017,6 +1055,53 @@ _inner16b._drive_to_start_pose_with_velocity = lambda start_pose: _calls16b.__se
 _inner16b._apply_start_pose([0.0, 0.0, 1.0, 0.0])
 check("fixed reset prefers velocity over go_to", _calls16b['velocity_reset'] == 1 and _calls16b['go_to'] == 0)
 _env16b.close()
+
+_env16b2 = AS2TestEnv(
+    drone_namespace='drone16b2',
+    step_duration=0.0,
+    fixed_start_pose=[0.0, 0.0, 1.0, 0.0],
+    use_simulator_reset_service=True,
+)
+_drone16b2 = fake_drone([-110.97, 37.50, 137.28], [0.0, 0.0, 0.0])
+_handler16b2 = RecordingSpeedHandler(_drone16b2)
+_inner16b2 = _env16b2
+_inner16b2._drone = _drone16b2
+_inner16b2._speed_handler = _handler16b2
+_inner16b2._is_flying = True
+_calls16b2 = {'service_reset': 0, 'velocity_prepare': 0}
+
+
+def _record_required_service_reset16b2(start_pose):
+    _calls16b2['service_reset'] += 1
+    _drone16b2.position = list(start_pose[:3])
+    _drone16b2.orientation = [0.0, 0.0, start_pose[3]]
+    _inner16b2._last_reset_diagnostics = {
+        'reason': 'service_success',
+        'failure_class': '',
+        'reset_path': 'service_success',
+        'target_pose': [float(v) for v in start_pose],
+        'position_error': 0.0,
+        'yaw_error': 0.0,
+    }
+    _inner16b2._last_reset_service_status = 'service_success'
+    _inner16b2._is_flying = True
+    return True
+
+
+def _forbidden_velocity_prepare16b2():
+    _calls16b2['velocity_prepare'] += 1
+    raise AssertionError('velocity reset must not fly back from far out-of-bounds')
+
+
+_inner16b2._try_service_backed_reset = _record_required_service_reset16b2
+_inner16b2._prepare_in_air_velocity_reset = _forbidden_velocity_prepare16b2
+_obs16b2, _info16b2 = _inner16b2.reset()
+check("far out-of-bounds reset uses simulator service", _calls16b2 == {'service_reset': 1, 'velocity_prepare': 0})
+check("far out-of-bounds reset does not velocity-fly back", _drone16b2.position == [0.0, 0.0, 1.0])
+check("far out-of-bounds reset reports simulator service method", _info16b2.get('reset_method') == 'simulator_service')
+check("far out-of-bounds reset clears terminal service requirement", _inner16b2._terminal_reset_requires_service is False)
+check("far out-of-bounds reset emits normalized obs", np.all(_obs16b2 >= -1.0) and np.all(_obs16b2 <= 1.0))
+_inner16b2.close()
 
 _env16c = gymnasium.make(
     'AS2TestEnv-v0',
@@ -2942,6 +3027,8 @@ try:
         hover_speed_threshold=0.04,
     )
     _env20f._reset_velocity_controller = lambda: True
+    _env20f._wait_until_service_reset_pose_observed = lambda start_pose: True
+    _env20f._confirm_post_service_command_path = lambda start_pose: True
     _service_success20f = _env20f._try_service_backed_reset([1.0, -2.0, 1.5, 0.3])
     _node20f = _created_reset_nodes20f[0] if _created_reset_nodes20f else None
     _executor20f = _created_reset_executors20f[0] if _created_reset_executors20f else None
@@ -3020,7 +3107,11 @@ _env20g._speed_handler = _PreResetSpeedHandler()
 _env20g._reset_service_type = _ResetSimulatorStateService
 _env20g._reset_service_client = _SuccessfulResetClient()
 _env20g._reset_aux_executor = _RecordingExecutor()
+_env20g._takeoff_after_service_reset = lambda start_pose: _events20g.append('takeoff_after_service') or True
 _env20g._reset_velocity_controller = lambda: _events20g.append('recreate_speed_handler') or True
+_env20g._hold_service_reset_start_pose = lambda start_pose: _events20g.append('hold_start_pose') or True
+_env20g._wait_until_service_reset_pose_observed = lambda start_pose: _events20g.append('pose_observed') or True
+_env20g._confirm_post_service_command_path = lambda start_pose: _events20g.append('actionability_probe') or True
 _service_success20g = _env20g._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
 
 
@@ -3029,9 +3120,24 @@ def _event_before(events, first, second):
 
 
 check("service reset does not stop AS2 behavior modules before service call", not any(event.endswith('.stop') for event in _events20g if isinstance(event, str)))
-check("service reset avoids pre-service zero speed command", not any(isinstance(event, tuple) and event[0] == 'zero_speed' for event in _events20g))
+_service_call_index20g = _events20g.index('service_call') if 'service_call' in _events20g else len(_events20g)
+check("service reset avoids pre-service zero speed command", not any(isinstance(event, tuple) and event[0] == 'zero_speed' for event in _events20g[:_service_call_index20g]))
 check("service reset recreates speed handler after success", _service_success20g is True and _event_before(_events20g, 'service_call', 'recreate_speed_handler'))
+check("service reset waits for observed pose before actionability", _event_before(_events20g, 'pose_observed', 'actionability_probe'))
 _env20g.close()
+
+
+class _ModeRefreshResponse:
+    success = True
+
+
+_env20g1 = AS2TestEnv(drone_namespace='drone20g1', reset_service_timeout=0.01)
+_env20g1._reset_aux_node = _RecordingResetNode('reset_aux', _ModeRefreshResponse())
+_env20g1._reset_aux_executor = _RecordingExecutor()
+_mode_refresh20g1 = _env20g1._refresh_controller_mode_after_service_reset()
+_mode_request20g1 = _env20g1._reset_aux_node.client.request.control_mode
+check("service reset refreshes controller through position mode before speed", _mode_refresh20g1 is True and _env20g1._reset_aux_node.client_service_name == '/drone20g1/controller/set_control_mode' and _mode_request20g1.reference_frame == 1)
+_env20g1.close()
 
 
 _events20i = []
@@ -3062,14 +3168,81 @@ _env20i._drone = _OffboardResetDrone()
 _env20i._reset_service_type = _ResetSimulatorStateService
 _env20i._reset_service_client = _SuccessfulResetClient()
 _env20i._reset_aux_executor = _RecordingExecutor()
-_env20i._set_platform_flying_after_service_reset = lambda: _events20i.append('platform_fsm_event') or False
+_env20i._set_platform_flying_after_service_reset = lambda: _events20i.append('platform_fsm_event') or True
 _env20i._reset_velocity_controller = lambda: _events20i.append('recreate_speed_handler') or True
+_env20i._confirm_post_service_command_path = lambda start_pose: _events20i.append('actionability_probe') or False
 _service_success20i = _env20i._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
-check("service reset does not drive platform FSM events after simulator reset", 'platform_fsm_event' not in _events20i)
+check("service reset does not call failing platform FSM service after failed actionability", 'platform_fsm_event' not in _events20i)
 check("service reset reasserts arm before offboard", _event_before(_events20i, 'arm', 'offboard'))
 check("service reset reasserts offboard before declaring command path ready", _event_before(_events20i, 'offboard', 'recreate_speed_handler'))
-check("service reset marks env flying only after command path is ready", _service_success20i is True and _env20i._is_flying is True)
+check("service reset fails closed when command path is not actionable", _service_success20i is False and _env20i._is_flying is False)
 _env20i.close()
+
+
+class _RejectedTakeoffAtResetPoseDrone:
+    position = [0.0, 0.0, 1.0]
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+
+    def takeoff(self, **kw):
+        return False
+
+    def manual(self, **kw):
+        pass
+
+    def shutdown(self, **kw):
+        pass
+
+
+_env20i1 = AS2TestEnv(drone_namespace='drone20i1', reset_service_timeout=0.01)
+_env20i1._drone = _RejectedTakeoffAtResetPoseDrone()
+_env20i1._is_flying = False
+_takeoff_ready20i1 = _env20i1._takeoff_after_service_reset([0.0, 0.0, 1.0, 0.0])
+check("post-reset takeoff is skipped when service pose is already observed", _takeoff_ready20i1 is True and _env20i1._last_reset_diagnostics.get('post_reset_takeoff_skipped') is True)
+_env20i1.close()
+
+
+class _DefaultHeightTakeoffDrone:
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+
+    def __init__(self):
+        self.position = [0.0, 0.0, 1.6]
+        self.takeoff_calls = []
+
+    def takeoff(self, **kw):
+        self.takeoff_calls.append(dict(kw))
+        self.position = [0.0, 0.0, 1.08]
+        return True
+
+    def arm(self, **kw):
+        return True
+
+    def offboard(self, **kw):
+        return True
+
+    def manual(self, **kw):
+        pass
+
+    def shutdown(self, **kw):
+        pass
+
+
+_env20i1b = AS2TestEnv(drone_namespace='drone20i1b', reset_service_timeout=0.01, step_duration=0.0)
+_drone20i1b = _DefaultHeightTakeoffDrone()
+_hold_calls20i1b = []
+_env20i1b._drone = _drone20i1b
+_env20i1b._reset_service_type = _ResetSimulatorStateService
+_env20i1b._reset_service_client = _RecordingResetClient()
+_env20i1b._reset_aux_executor = _RecordingExecutor()
+_env20i1b._reset_velocity_controller = lambda: True
+_env20i1b._hold_service_reset_start_pose = lambda start_pose: _hold_calls20i1b.append(list(start_pose)) or True
+_env20i1b._confirm_post_service_command_path = lambda start_pose: True
+_service_success20i1b = _env20i1b._try_service_backed_reset([0.0, 0.0, 1.6, 0.0])
+check("service reset does not issue takeoff that would pull z toward default height", _service_success20i1b is True and _drone20i1b.takeoff_calls == [] and math.isclose(_drone20i1b.position[2], 1.6, abs_tol=1e-6))
+check("service reset actively holds requested start z after controller reset", _hold_calls20i1b == [[0.0, 0.0, 1.6, 0.0]] and _env20i1b._last_reset_diagnostics.get('post_reset_controller_hold_ready') is True)
+check("takeoff diagnostics expose skipped command and observed z", _env20i1b._last_reset_diagnostics.get('post_reset_takeoff_commanded_height') is None and math.isclose(_env20i1b._last_reset_diagnostics.get('post_reset_takeoff_observed_z'), 1.6, abs_tol=1e-6))
+_env20i1b.close()
 
 
 _events20i2 = []
@@ -3102,6 +3275,7 @@ _env20i2._reset_service_type = _ResetSimulatorStateService
 _env20i2._reset_service_client = _SuccessfulResetClient()
 _env20i2._reset_aux_executor = _RecordingExecutor()
 _env20i2._reset_velocity_controller = lambda: _events20i2.append('recreate_speed_handler') or True
+_env20i2._confirm_post_service_command_path = lambda start_pose: True
 _service_success20i2 = _env20i2._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
 check("service reset reasserts arm/offboard even with stale true info flags", _events20i2[:3] == ['arm', 'offboard', 'recreate_speed_handler'])
 check("stale info reassertion still marks command path ready", _service_success20i2 is True and _env20i2._is_flying is True)
@@ -3113,11 +3287,44 @@ _env20j._drone = _OffboardResetDrone()
 _env20j._reset_service_type = _ResetSimulatorStateService
 _env20j._reset_service_client = _SuccessfulResetClient()
 _env20j._reset_aux_executor = _RecordingExecutor()
+_env20j._set_platform_flying_after_service_reset = lambda: True
 _env20j._reset_velocity_controller = lambda: False
 _service_success20j = _env20j._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
 check("service reset falls back if post-reset speed handler is not ready", _service_success20j is False)
 check("service reset records post-reset command path diagnostic", _env20j._last_reset_diagnostics.get('reason') == 'service_post_reset_command_path_failed')
 _env20j.close()
+
+
+_env20j2 = AS2TestEnv(drone_namespace='drone20j2', reset_service_timeout=0.01, step_duration=0.0)
+_env20j2._drone = fake_drone([0.3, 0.0, 1.08], [0.0, 0.0, 0.0])
+_env20j2._speed_handler = _PreResetSpeedHandler()
+_env20j2._reset_service_type = _ResetSimulatorStateService
+_env20j2._reset_service_client = _RecordingResetClient()
+_env20j2._reset_aux_executor = _RecordingExecutor()
+_env20j2._reset_velocity_controller = lambda: True
+_actionability_calls20j2 = []
+_env20j2._confirm_post_service_command_path = lambda start_pose: _actionability_calls20j2.append(start_pose) or True
+_service_success20j2 = _env20j2._try_service_backed_reset([0.0, 0.0, 1.6, 0.0])
+check("service reset fails closed when telemetry never observes reset pose", _service_success20j2 is False and _env20j2._last_reset_diagnostics.get('pose_observed') is False)
+check("stale service reset telemetry does not run actionability probe", _actionability_calls20j2 == [])
+check("stale service reset diagnostics expose observed pose error", _env20j2._last_reset_diagnostics.get('post_reset_observed_position_error', 0.0) > 0.0)
+_env20j2.close()
+
+
+_env20j3 = AS2TestEnv(drone_namespace='drone20j3', reset_service_timeout=0.01, step_duration=0.0)
+_env20j3._drone = fake_drone([0.0, 0.0, 1.6], [0.12, 0.0, 0.0])
+_env20j3._speed_handler = _PreResetSpeedHandler()
+_env20j3._reset_service_type = _ResetSimulatorStateService
+_env20j3._reset_service_client = _RecordingResetClient()
+_env20j3._reset_aux_executor = _RecordingExecutor()
+_env20j3._reset_velocity_controller = lambda: True
+_actionability_calls20j3 = []
+_env20j3._confirm_post_service_command_path = lambda start_pose: _actionability_calls20j3.append(start_pose) or True
+_service_success20j3 = _env20j3._try_service_backed_reset([0.0, 0.0, 1.6, 0.0])
+check("service reset fails closed while reset telemetry is still moving", _service_success20j3 is False and _env20j3._last_reset_diagnostics.get('pose_observed') is False)
+check("moving reset telemetry does not run actionability probe", _actionability_calls20j3 == [])
+check("moving reset telemetry exposes residual speed", _env20j3._last_reset_diagnostics.get('post_reset_observed_speed_norm', 0.0) > _env20j3.hover_speed_threshold)
+_env20j3.close()
 
 
 class _RejectOnceSpeedHandler:
@@ -3133,6 +3340,25 @@ class _AcceptingSpeedHandler(_RejectOnceSpeedHandler):
     def send_speed_command_with_yaw_speed(self, **kw):
         self.calls.append((list(kw.get('twist', [])), float(kw.get('yaw_speed', 999.0))))
         return True
+
+
+class _DesiredControlMode:
+    reference_frame = 0
+
+
+class _ReferenceFrameRecordingSpeedHandler(_AcceptingSpeedHandler):
+    def __init__(self):
+        super().__init__()
+        self.desired_control_mode_ = _DesiredControlMode()
+
+
+_env20k0 = AS2TestEnv(drone_namespace='drone20k0')
+_ref_handler20k0 = _ReferenceFrameRecordingSpeedHandler()
+_env20k0._speed_handler = _ref_handler20k0
+_send_success20k0 = _env20k0._send_speed_command([0.25, 0.0, 0.0], 0.0)
+check("speed commands configure AS2 local ENU reference frame for earth twists", _send_success20k0 is True and _ref_handler20k0.desired_control_mode_.reference_frame == 1)
+check("speed command diagnostics record twist frame", _env20k0._last_speed_command_reference_frame == 'earth')
+_env20k0.close()
 
 
 _env20k = gymnasium.make(
@@ -3172,6 +3398,275 @@ check("step reports recovered motion command accepted", _info20k.get('motion_com
 _env20k.close()
 
 
+_original_sleep20k_step = as2_env_module.time.sleep
+_sleep_calls20k_step = []
+
+
+def _record_sleep20k_step(duration):
+    _sleep_calls20k_step.append(float(duration))
+
+
+try:
+    as2_env_module.time.sleep = _record_sleep20k_step
+
+    _env20k_step = AS2TestEnv(drone_namespace='drone20k_step', step_duration=0.12)
+    _drone20k_step = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+    _handler20k_step = RecordingSpeedHandler(_drone20k_step)
+    _env20k_step._drone = _drone20k_step
+    _env20k_step._speed_handler = _handler20k_step
+    _env20k_step._is_flying = True
+    _, _, _term20k_step, _trunc20k_step, _info20k_step = _env20k_step.step(
+        np.array([0.4, 0.0, 0.0, 0.0], dtype=np.float32)
+    )
+    check("step republishes speed command across the step window", len(_handler20k_step.commands) == 3)
+    check("step reports motion publication diagnostics", _info20k_step.get('motion_command_publication_count') == 3 and _info20k_step.get('motion_command_accepted_publication_count') == 3)
+    check("non-terminal sustained step does not send stop command", not _term20k_step and not _trunc20k_step and 'terminal_stop_command_accepted' not in _info20k_step and not np.allclose(_handler20k_step.commands[-1][0], [0.0, 0.0, 0.0], atol=1e-6))
+    _env20k_step.close()
+
+    _env20k_zero = AS2TestEnv(drone_namespace='drone20k_zero', step_duration=0.0)
+    _drone20k_zero = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+    _handler20k_zero = RecordingSpeedHandler(_drone20k_zero)
+    _env20k_zero._drone = _drone20k_zero
+    _env20k_zero._speed_handler = _handler20k_zero
+    _env20k_zero._is_flying = True
+    _, _, _, _, _info20k_zero = _env20k_zero.step(np.array([0.4, 0.0, 0.0, 0.0], dtype=np.float32))
+    check("zero step duration publishes exactly once", len(_handler20k_zero.commands) == 1 and _info20k_zero.get('motion_command_publication_count') == 1)
+    _env20k_zero.close()
+
+    _env20k_min = AS2TestEnv(
+        drone_namespace='drone20k_min',
+        step_duration=0.0,
+        min_motion_command_publications=4,
+    )
+    _drone20k_min = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+    _handler20k_min = RecordingSpeedHandler(_drone20k_min)
+    _env20k_min._drone = _drone20k_min
+    _env20k_min._speed_handler = _handler20k_min
+    _env20k_min._is_flying = True
+    _, _, _, _, _info20k_min = _env20k_min.step(np.array([0.4, 0.0, 0.0, 0.0], dtype=np.float32))
+    check("step honors configured minimum motion publications", len(_handler20k_min.commands) == 4 and _info20k_min.get('motion_command_publication_count') == 4)
+    _env20k_min.close()
+
+    _env20k_short = AS2TestEnv(drone_namespace='drone20k_short', step_duration=0.01)
+    _drone20k_short = fake_drone([1.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+    _handler20k_short = RecordingSpeedHandler(_drone20k_short)
+    _env20k_short._drone = _drone20k_short
+    _env20k_short._speed_handler = _handler20k_short
+    _env20k_short._is_flying = True
+    _, _, _, _, _info20k_short = _env20k_short.step(np.array([0.4, 0.0, 0.0, 0.0], dtype=np.float32))
+    check("short step duration sleeps without extra publication", len(_handler20k_short.commands) == 1 and _info20k_short.get('motion_command_publication_count') == 1)
+    _env20k_short.close()
+finally:
+    as2_env_module.time.sleep = _original_sleep20k_step
+
+
+class _StaticAcceptingSpeedHandler:
+    def __init__(self):
+        self.calls = []
+
+    def send_speed_command_with_yaw_speed(self, **kw):
+        self.calls.append((list(kw.get('twist', [])), float(kw.get('yaw_speed', 999.0))))
+        return True
+
+
+class _DelayedProbeTelemetryDrone:
+    speed = [0.0, 0.0, 0.0]
+    orientation = [0.0, 0.0, 0.0]
+
+    def __init__(self):
+        self.position_reads = 0
+
+    @property
+    def position(self):
+        self.position_reads += 1
+        if self.position_reads >= 4:
+            return [0.02, 0.0, 1.0]
+        return [0.0, 0.0, 1.0]
+
+    def land(self, **kw):
+        return True
+
+    def manual(self, **kw):
+        pass
+
+    def shutdown(self, **kw):
+        pass
+
+
+_env20k1 = AS2TestEnv(drone_namespace='drone20k1', reset_service_timeout=0.01, step_duration=0.0)
+_env20k1._drone = _DelayedProbeTelemetryDrone()
+_env20k1._speed_handler = _StaticAcceptingSpeedHandler()
+_delayed_probe20k1 = _env20k1._measure_post_reset_probe_effect([0.10, 0.0, 0.0], 0.10)
+check("post-reset actionability probe accepts delayed telemetry movement", _delayed_probe20k1.get('actionable') is True and _delayed_probe20k1.get('forward_delta', 0.0) >= _delayed_probe20k1.get('min_forward_delta', 1.0))
+_env20k1.close()
+
+
+_env20l = AS2TestEnv(drone_namespace='drone20l', reset_service_timeout=0.01, step_duration=0.0)
+_drone20l = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_static_handler20l = _StaticAcceptingSpeedHandler()
+_env20l._drone = _drone20l
+_env20l._speed_handler = _static_handler20l
+_env20l._reset_service_type = _ResetSimulatorStateService
+_env20l._reset_service_client = _RecordingResetClient()
+_env20l._reset_aux_executor = _RecordingExecutor()
+_env20l._set_platform_flying_after_service_reset = lambda: True
+_env20l._reset_velocity_controller = lambda: setattr(_env20l, '_speed_handler', _static_handler20l) or True
+_service_success20l = _env20l._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
+check("service reset rejects accepted-but-stationary command path", _service_success20l is False)
+check("accepted-but-stationary reset records actionability failure", _env20l._last_reset_diagnostics.get('actionability_ready') is False and _env20l._last_reset_diagnostics.get('failure_class') == 'post_reset_command_path_failed')
+_env20l.close()
+
+
+_env20m = AS2TestEnv(drone_namespace='drone20m', reset_service_timeout=0.01, step_duration=0.0)
+_drone20m = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_static_handler20m = _StaticAcceptingSpeedHandler()
+_moving_handler20m = RecordingSpeedHandler(_drone20m)
+_env20m._drone = _drone20m
+_env20m._speed_handler = _static_handler20m
+_env20m._reset_service_type = _ResetSimulatorStateService
+_env20m._reset_service_client = _RecordingResetClient()
+_env20m._reset_aux_executor = _RecordingExecutor()
+_env20m._set_platform_flying_after_service_reset = lambda: True
+_env20m._reset_velocity_controller = lambda: setattr(_env20m, '_speed_handler', _static_handler20m) or True
+
+
+def _recover_actionable_command_path20m():
+    _env20m._speed_handler = _moving_handler20m
+    return True
+
+
+_env20m._recover_motion_reference_path = _recover_actionable_command_path20m
+_service_success20m = _env20m._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
+_actionability20m = _env20m._last_reset_diagnostics.get('post_reset_actionability', {})
+check("service reset recovers accepted-but-ignored command path", _service_success20m is True and _env20m._is_flying is True)
+check("recovered service reset requires measured probe motion", _actionability20m.get('recovery_ready') is True and _actionability20m.get('second_probe', {}).get('actionable') is True)
+_env20m.close()
+
+
+class _JumpingSpeedHandler:
+    def __init__(self, drone, scale=0.2):
+        self.drone = drone
+        self.scale = scale
+        self.calls = []
+
+    def send_speed_command_with_yaw_speed(self, **kw):
+        twist = list(kw.get('twist', [0.0, 0.0, 0.0]))
+        yaw_speed = float(kw.get('yaw_speed', 0.0))
+        self.calls.append((twist, yaw_speed))
+        self.drone.position = [
+            self.drone.position[0] + twist[0] * self.scale,
+            self.drone.position[1] + twist[1] * self.scale,
+            self.drone.position[2] + twist[2] * self.scale,
+        ]
+        return True
+
+
+_env20m2 = AS2TestEnv(drone_namespace='drone20m2', reset_service_timeout=0.01, step_duration=0.0)
+_drone20m2 = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_jumping_handler20m2 = _JumpingSpeedHandler(_drone20m2, scale=1.0)
+_restore_calls20m2 = []
+_env20m2._drone = _drone20m2
+_env20m2._speed_handler = _jumping_handler20m2
+_env20m2._reset_service_type = _ResetSimulatorStateService
+_env20m2._reset_service_client = _RecordingResetClient()
+_env20m2._reset_aux_executor = _RecordingExecutor()
+_env20m2._reset_velocity_controller = lambda: setattr(_env20m2, '_speed_handler', _jumping_handler20m2) or True
+
+
+def _restore_start_pose20m2(start_pose):
+    _restore_calls20m2.append(list(start_pose))
+    _drone20m2.position = list(start_pose[:3])
+    _drone20m2.orientation = [0.0, 0.0, start_pose[3]]
+    _env20m2._last_reset_diagnostics = {'reason': 'post_controller_hold', 'position_error': 0.0, 'yaw_error': 0.0}
+    return True
+
+
+_env20m2._apply_and_confirm_start_pose = _restore_start_pose20m2
+_service_success20m2 = _env20m2._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
+_actionability20m2 = _env20m2._last_reset_diagnostics.get('post_reset_actionability', {})
+check("service reset restores start pose after successful actionability probe", _service_success20m2 is True and _restore_calls20m2 == [[0.0, 0.0, 1.0, 0.0]] and np.allclose(_drone20m2.position, [0.0, 0.0, 1.0], atol=1e-6))
+check("actionability diagnostics record start pose restore", _actionability20m2.get('start_pose_restored') is True and _actionability20m2.get('start_pose_restore_method') == 'velocity_restore')
+_env20m2.close()
+
+
+_env20m3 = AS2TestEnv(drone_namespace='drone20m3', reset_service_timeout=0.01, step_duration=0.0)
+_drone20m3 = fake_drone([0.0, 0.0, 1.0], [0.0, 0.0, 0.0])
+_jumping_handler20m3 = _JumpingSpeedHandler(_drone20m3, scale=1.0)
+_env20m3._drone = _drone20m3
+_env20m3._speed_handler = _jumping_handler20m3
+_env20m3._reset_service_type = _ResetSimulatorStateService
+_env20m3._reset_service_client = _RecordingResetClient()
+_env20m3._reset_aux_executor = _RecordingExecutor()
+_env20m3._reset_velocity_controller = lambda: setattr(_env20m3, '_speed_handler', _jumping_handler20m3) or True
+
+
+def _fail_restore_start_pose20m3(start_pose):
+    _env20m3._last_reset_diagnostics = {'reason': 'post_controller_reacquire_timeout'}
+    raise RuntimeError('restore failed')
+
+
+_env20m3._apply_and_confirm_start_pose = _fail_restore_start_pose20m3
+_service_success20m3 = _env20m3._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
+_actionability20m3 = _env20m3._last_reset_diagnostics.get('post_reset_actionability', {})
+check("service reset fails closed when probe displacement cannot be restored", _service_success20m3 is False and _env20m3._last_reset_diagnostics.get('actionability_ready') is False)
+check("failed probe restore is visible in diagnostics", _actionability20m3.get('start_pose_restored') is False and _actionability20m3.get('start_pose_restore_method') == 'velocity_restore_failed')
+_env20m3.close()
+
+
+_env20m4 = AS2TestEnv(
+    drone_namespace='drone20m4',
+    step_duration=0.0,
+    fixed_start_tolerance=0.15,
+    hover_speed_threshold=0.05,
+)
+_env20m4._drone = fake_drone([0.062, 0.0, 1.0], [0.0, 0.0, 0.0])
+_env20m4._speed_handler = _StaticAcceptingSpeedHandler()
+_actionability20m4 = {}
+_restored20m4 = _env20m4._restore_start_pose_after_actionability_probe(
+    [0.0, 0.0, 1.0, 0.0],
+    _actionability20m4,
+)
+check("post-probe restore accepts small stable residual within fixed-start tolerance", _restored20m4 is True and _actionability20m4.get('start_pose_restored') is True)
+check("post-probe restore diagnostics use fixed-start tolerance", math.isclose(_actionability20m4.get('start_pose_restore_tolerance'), 0.15, abs_tol=1e-6))
+_env20m4.close()
+
+
+_env20m5 = AS2TestEnv(
+    drone_namespace='drone20m5',
+    step_duration=0.0,
+    fixed_start_tolerance=0.15,
+    hover_speed_threshold=0.05,
+)
+_env20m5._drone = fake_drone([0.20, 0.0, 1.0], [0.0, 0.0, 0.0])
+_env20m5._speed_handler = _StaticAcceptingSpeedHandler()
+_env20m5._apply_and_confirm_start_pose = lambda start_pose: True
+_actionability20m5 = {}
+_restored20m5 = _env20m5._restore_start_pose_after_actionability_probe(
+    [0.0, 0.0, 1.0, 0.0],
+    _actionability20m5,
+)
+check("post-probe restore rejects residual beyond fixed-start tolerance", _restored20m5 is False and _actionability20m5.get('start_pose_restored') is False)
+_env20m5.close()
+
+
+_env20m6 = AS2TestEnv(
+    drone_namespace='drone20m6',
+    step_duration=0.0,
+    fixed_start_tolerance=0.15,
+    hover_speed_threshold=0.05,
+)
+_env20m6._drone = fake_drone([0.062, 0.0, 1.0], [0.08, 0.0, 0.0])
+_env20m6._speed_handler = _StaticAcceptingSpeedHandler()
+_env20m6._apply_and_confirm_start_pose = lambda start_pose: True
+_actionability20m6 = {}
+_restored20m6 = _env20m6._restore_start_pose_after_actionability_probe(
+    [0.0, 0.0, 1.0, 0.0],
+    _actionability20m6,
+)
+check("post-probe restore rejects small residual while velocity is not stable", _restored20m6 is False and _actionability20m6.get('start_pose_restored') is False)
+_env20m6.close()
+
+
 class _FailingBehaviorStop:
     def stop(self):
         raise RuntimeError('stop failed')
@@ -3205,6 +3700,9 @@ _env20h._speed_handler = _PreResetSpeedHandler()
 _env20h._reset_service_type = _ResetSimulatorStateService
 _env20h._reset_service_client = _client20h
 _env20h._reset_velocity_controller = lambda: True
+_env20h._hold_service_reset_start_pose = lambda start_pose: True
+_env20h._wait_until_service_reset_pose_observed = lambda start_pose: True
+_env20h._confirm_post_service_command_path = lambda start_pose: True
 _service_success20h = _env20h._try_service_backed_reset([0.0, 0.0, 1.0, 0.0])
 check("service reset ignores AS2 behavior stop hooks", _service_success20h is True and _env20h._last_reset_diagnostics.get('reason') == 'service_success')
 check("service reset still calls service when behavior stop hook would fail", _client20h.call_count == 1)
@@ -3513,7 +4011,7 @@ except RuntimeError as _exc20l:
     _fresh_failure_text20l = str(_exc20l)
 check("fresh service reset failure fails fast", _fresh_failure_fast20l and 'service-backed reset failed' in _fresh_failure_text20l)
 check("fresh service reset failure does not enter velocity fallback", _calls20l['fallback'] == 0)
-check("fresh service reset defers takeoff before service readiness", _calls20l['arm'] == 1 and _calls20l['offboard'] == 1 and _calls20l['takeoff'] == 0)
+check("fresh service reset performs takeoff before service reset readiness", _calls20l['arm'] == 1 and _calls20l['offboard'] == 1 and _calls20l['takeoff'] == 1)
 _env20l.close()
 
 
@@ -3828,6 +4326,76 @@ check(
     ),
 )
 
+_sample25 = _training_smoke.build_step_sample(
+    episode_index=0,
+    step_index=1,
+    requested_action=[0.5, 0.0, 0.0, 0.0],
+    before_info={'position': [0.0, 0.0, 1.6], 'speed': [0.0, 0.0, 0.0], 'distance': 0.5},
+    info={
+        'position': [0.02, 0.0, 1.6],
+        'speed': [0.1, 0.0, 0.0],
+        'distance': 0.48,
+        'action_sent': [0.5, 0.0, 0.0, 0.0],
+        'raw_action': [0.5, 0.0, 0.0, 0.0],
+        'motion_command_accepted': True,
+        'motion_command_recovered': False,
+        'motion_command_publication_count': 3,
+        'motion_command_accepted_publication_count': 2,
+        'low_altitude_guard_active': False,
+    },
+    reward=-0.1,
+    done=False,
+)
+check("training smoke records requested action", _sample25['action_requested'] == [0.5, 0.0, 0.0, 0.0])
+check("training smoke records env-sent action", _sample25['action_sent'] == [0.5, 0.0, 0.0, 0.0])
+check("training smoke records before/after speed", _sample25['speed_before'] == [0.0, 0.0, 0.0] and _sample25['speed_after'] == [0.1, 0.0, 0.0])
+check("training smoke sample keeps position delta", np.allclose(_sample25['position_delta'], [0.02, 0.0, 0.0], atol=1e-6))
+check("training smoke records motion publication counts", _sample25['motion_command_publication_count'] == 3 and _sample25['motion_command_accepted_publication_count'] == 2)
+
+_stationary_count25 = 0
+_stationary_decision25a = _training_smoke.evaluate_stationary_command_window(
+    motion_command_accepted=True,
+    position_delta_norm=0.0,
+    consecutive_accepted_without_motion=_stationary_count25,
+    stationary_command_window=3,
+    stationary_command_epsilon=1e-4,
+)
+_stationary_count25 = _stationary_decision25a['consecutive_accepted_without_motion']
+check("training smoke counts accepted stationary commands", _stationary_count25 == 1)
+check("training smoke waits for the stationary command window", _stationary_decision25a['early_stop_reason'] is None)
+_stationary_decision25b = _training_smoke.evaluate_stationary_command_window(
+    motion_command_accepted=True,
+    position_delta_norm=1e-4,
+    consecutive_accepted_without_motion=_stationary_count25,
+    stationary_command_window=3,
+    stationary_command_epsilon=1e-4,
+)
+_stationary_count25 = _stationary_decision25b['consecutive_accepted_without_motion']
+check("training smoke treats epsilon-bound deltas as stationary", _stationary_count25 == 2)
+_stationary_decision25c = _training_smoke.evaluate_stationary_command_window(
+    motion_command_accepted=True,
+    position_delta_norm=2e-4,
+    consecutive_accepted_without_motion=_stationary_count25,
+    stationary_command_window=3,
+    stationary_command_epsilon=1e-4,
+)
+check("training smoke resets stationary count after physical motion", _stationary_decision25c['consecutive_accepted_without_motion'] == 0)
+_stationary_count25 = 0
+for _ in range(3):
+    _stationary_decision25d = _training_smoke.evaluate_stationary_command_window(
+        motion_command_accepted=True,
+        position_delta_norm=0.0,
+        consecutive_accepted_without_motion=_stationary_count25,
+        stationary_command_window=3,
+        stationary_command_epsilon=1e-4,
+    )
+    _stationary_count25 = _stationary_decision25d['consecutive_accepted_without_motion']
+check("training smoke stops after the stationary command window", _stationary_count25 == 3)
+check(
+    "training smoke reports accepted-without-motion early stop reason",
+    _stationary_decision25d['early_stop_reason'] == 'accepted_commands_without_physical_motion',
+)
+
 _moving_samples25 = [
     {'distance_after': 2.0, 'position_delta': [0.02, 0.0, 0.0], 'motion_command_accepted': True},
     {'distance_after': 1.6, 'position_delta': [0.4, 0.0, 0.0], 'motion_command_accepted': True},
@@ -3837,6 +4405,7 @@ _moving_summary25 = _training_smoke.summarize_episode_motion(
     samples=_moving_samples25,
     min_distance_reduction=0.25,
     min_position_delta=0.10,
+    stationary_command_epsilon=1e-4,
 )
 check("training smoke accepts physical movement", _moving_summary25['success'] is True)
 check("training smoke reports distance reduction", math.isclose(_moving_summary25['distance_reduction'], 0.4, abs_tol=1e-6))
@@ -3851,9 +4420,22 @@ _stuck_summary25 = _training_smoke.summarize_episode_motion(
     samples=_stuck_samples25,
     min_distance_reduction=0.25,
     min_position_delta=0.10,
+    stationary_command_epsilon=1e-4,
 )
 check("training smoke rejects accepted-but-stuck commands", _stuck_summary25['success'] is False)
 check("training smoke diagnoses insufficient movement", _stuck_summary25['reason'] == 'insufficient_physical_motion')
+
+_epsilon_summary25 = _training_smoke.summarize_episode_motion(
+    episode_index=2,
+    samples=[
+        {'distance_after': 2.0, 'position_delta': [0.005, 0.0, 0.0], 'motion_command_accepted': True},
+        {'distance_after': 2.0, 'position_delta': [0.020, 0.0, 0.0], 'motion_command_accepted': True},
+    ],
+    min_distance_reduction=0.25,
+    min_position_delta=0.10,
+    stationary_command_epsilon=0.01,
+)
+check("training smoke summary uses configured stationary epsilon", _epsilon_summary25['accepted_without_motion_steps'] == 1)
 
 _reset_summary25 = _training_smoke.summarize_reset_diagnostics(
     use_simulator_reset_service=True,
@@ -3895,6 +4477,8 @@ check("reset diagnostics expose failure class field", 'reset_failure_class' in _
 check("reset diagnostics expose position/yaw error fields", 'reset_position_error' in _reset_info26 and 'reset_yaw_error' in _reset_info26)
 check("reset diagnostics expose service status field", _reset_info26.get('reset_service_status') == 'not_attempted')
 check("reset diagnostics start physical displacement at zero", math.isclose(_reset_info26.get('physical_displacement', -1.0), 0.0, abs_tol=1e-6))
+check("reset diagnostics start action norms at zero", all(math.isclose(_reset_info26.get(k, -1.0), 0.0, abs_tol=1e-6) for k in ['mean_action_norm', 'max_action_norm', 'mean_xy_action_norm', 'max_xy_action_norm']))
+check("reset diagnostics start last action at zero", all(math.isclose(_reset_info26.get(k, -1.0), 0.0, abs_tol=1e-6) for k in ['last_action_vx', 'last_action_vy', 'last_action_vz', 'last_action_vyaw']))
 
 _drone26.position = [0.0, 0.0, 1.0]
 _inner26._speed_handler = RecordingSpeedHandler(_drone26)
@@ -3906,6 +4490,17 @@ check("step diagnostics track minimum altitude", _info26b.get('min_altitude', 9.
 check("step diagnostics count motion command attempts", _info26b.get('motion_command_steps') == 2)
 check("step diagnostics count accepted motion commands", _info26b.get('motion_command_accepted_steps') == 2)
 check("step diagnostics report command acceptance rate", math.isclose(_info26b.get('motion_command_acceptance_rate', 0.0), 1.0, abs_tol=1e-6))
+_expected_action_norm26 = math.sqrt(1.0 ** 2 + 0.4 ** 2)
+check("step diagnostics report mean action norm", math.isclose(_info26b.get('mean_action_norm', 0.0), _expected_action_norm26, abs_tol=1e-6))
+check("step diagnostics report max action norm", math.isclose(_info26b.get('max_action_norm', 0.0), _expected_action_norm26, abs_tol=1e-6))
+check("step diagnostics report mean XY action norm", math.isclose(_info26b.get('mean_xy_action_norm', 0.0), 1.0, abs_tol=1e-6))
+check("step diagnostics report max XY action norm", math.isclose(_info26b.get('max_xy_action_norm', 0.0), 1.0, abs_tol=1e-6))
+check("step diagnostics report last action components", all(math.isclose(_info26b.get(k, 9.0), v, abs_tol=1e-6) for k, v in {
+    'last_action_vx': 1.0,
+    'last_action_vy': 0.0,
+    'last_action_vz': -0.4,
+    'last_action_vyaw': 0.0,
+}.items()))
 check("step diagnostics keep reset method/path for monitor", _info26b.get('reset_method') == 'velocity' and 'reset_path' in _info26b)
 check("step diagnostics keep reset failure diagnostics for monitor", all(k in _info26b for k in ['reset_failure_class', 'reset_position_error', 'reset_yaw_error', 'reset_service_status']))
 _env26.close()

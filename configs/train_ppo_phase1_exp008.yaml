@@ -16,6 +16,8 @@ environment:
   max_vel: 1.0
   max_yaw_vel: 1.5707963267948966
   step_duration: 0.1
+  command_publication_interval: 0.05
+  min_motion_command_publications: 1
   fixed_start_pose: [0.0, 0.0, 1.6, 0.0]
   fixed_start_tolerance: 0.22
   fixed_start_timeout: 30.0

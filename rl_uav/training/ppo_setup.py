@@ -93,6 +93,8 @@ def build_vec_env(
         'max_yaw_vel': env_cfg['max_yaw_vel'],
         'pos_limit': env_cfg['pos_limit'],
         'step_duration': env_cfg['step_duration'],
+        'command_publication_interval': env_cfg.get('command_publication_interval', 0.05),
+        'min_motion_command_publications': env_cfg.get('min_motion_command_publications', 1),
         'target_pose': env_cfg['target_pose'],
         'distance_threshold': env_cfg['distance_threshold'],
         'max_steps': env_cfg['max_steps'],

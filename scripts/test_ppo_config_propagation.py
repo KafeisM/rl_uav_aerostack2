@@ -36,6 +36,8 @@ def main() -> int:
         'reset_max_vel',
         'reset_xy_kp',
         'reset_z_kp',
+        'command_publication_interval',
+        'min_motion_command_publications',
         'fixed_start_pose',
         'fixed_start_tolerance',
         'fixed_start_timeout',
@@ -110,6 +112,8 @@ def main() -> int:
         assert inner.reset_max_vel == env_cfg['max_vel']
         assert inner.reset_xy_kp == env_cfg['reset_xy_kp']
         assert inner.reset_z_kp == env_cfg['reset_z_kp']
+        assert inner.command_publication_interval == env_cfg['command_publication_interval']
+        assert inner.min_motion_command_publications == env_cfg['min_motion_command_publications']
         assert inner.scene_bounds_xy == env_cfg['scene_bounds_xy']
         assert tuple(inner.height_bounds) == tuple(env_cfg['height_bounds'])
         assert inner.min_start_target_distance == env_cfg['min_start_target_distance']
@@ -145,6 +149,14 @@ def main() -> int:
             'motion_command_steps',
             'motion_command_accepted_steps',
             'motion_command_acceptance_rate',
+            'mean_action_norm',
+            'max_action_norm',
+            'mean_xy_action_norm',
+            'max_xy_action_norm',
+            'last_action_vx',
+            'last_action_vy',
+            'last_action_vz',
+            'last_action_vyaw',
             'reset_method',
             'reset_path',
             'reset_service_attempted',
@@ -152,6 +164,7 @@ def main() -> int:
             'reset_position_error',
             'reset_yaw_error',
             'reset_service_status',
+            'terminal_stop_command_accepted',
             'vertical_safety_penalty',
             'low_altitude_guard_active',
         ]:
@@ -191,6 +204,9 @@ def main() -> int:
     assert exp008a_env_cfg['max_steps'] <= 80
     assert exp008a_env_cfg['max_vel'] <= exp008_env_cfg['max_vel']
     assert exp008a_env_cfg['max_vel'] <= 0.5
+    assert exp008a_env_cfg['step_duration'] >= 0.2
+    assert exp008a_env_cfg['command_publication_interval'] <= 0.05
+    assert exp008a_env_cfg['min_motion_command_publications'] >= 4
     assert exp008a_env_cfg['reset_max_vel'] > exp008a_env_cfg['max_vel']
     assert exp008a_env_cfg['reset_max_vel'] >= 1.0
     assert exp008a_env_cfg['unsafe_low_altitude_threshold'] >= exp008_env_cfg['unsafe_low_altitude_threshold']
@@ -202,6 +218,19 @@ def main() -> int:
     assert exp008a_env_cfg['vertical_descent_penalty_weight'] >= exp008_env_cfg['vertical_descent_penalty_weight']
     assert exp008a_env_cfg['randomize_hover_start'] is False
     assert exp008a_env_cfg['use_service_reset_after_velocity_timeout'] is True
+    exp008a_monitor_keywords = set(exp008a_env_cfg['monitor_info_keywords'])
+    for keyword in [
+        'mean_action_norm',
+        'max_action_norm',
+        'mean_xy_action_norm',
+        'max_xy_action_norm',
+        'last_action_vx',
+        'last_action_vy',
+        'last_action_vz',
+        'last_action_vyaw',
+        'terminal_stop_command_accepted',
+    ]:
+        assert keyword in exp008a_monitor_keywords, f'Missing Exp008a PPO action diagnostic keyword: {keyword}'
     assert exp008a_ppo_cfg['n_steps'] <= exp008_ppo_cfg['n_steps']
     print('✓ PASS: Exp008a easier curriculum config is bounded and propagated')
 

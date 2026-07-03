@@ -81,6 +81,8 @@ class AS2TestEnv(gym.Env):
         max_yaw_vel: float = math.pi,
         pos_limit: float = 5.0,
         step_duration: float = 0.1,
+        command_publication_interval: float = 0.05,
+        min_motion_command_publications: int = 1,
         target_pose: list[float] | None = None,
         distance_threshold: float = 0.5,
         max_steps: int = 500,
@@ -139,7 +141,10 @@ class AS2TestEnv(gym.Env):
                          Defines the bounds of the yaw action dimension.
             pos_limit: Maximum absolute position in meters (scenario boundary).
                        Used to normalize relative position observations to [-1, 1].
-            step_duration: Duration to wait after sending command (seconds).
+            step_duration: Duration to hold one policy command (seconds).
+            command_publication_interval: Period used to refresh live motion
+                                          references during the step hold.
+            min_motion_command_publications: Minimum sends attempted per step.
             target_pose: Target pose [x, y, z, yaw] for the drone to reach.
                          Defaults to [0, 0, 1, 0] (origin, 1m height, yaw=0).
                          The target is fixed across episodes.
@@ -174,6 +179,8 @@ class AS2TestEnv(gym.Env):
         self.max_yaw_vel = max_yaw_vel
         self.pos_limit = pos_limit
         self.step_duration = step_duration
+        self.command_publication_interval = float(command_publication_interval)
+        self.min_motion_command_publications = max(1, int(min_motion_command_publications))
         self.distance_threshold = distance_threshold
         self.max_steps = max_steps
         self.success_reward = success_reward
@@ -265,11 +272,19 @@ class AS2TestEnv(gym.Env):
         self._episode_min_altitude = float('nan')
         self._episode_motion_command_steps = 0
         self._episode_motion_command_accepted_steps = 0
+        self._episode_action_steps = 0
+        self._episode_action_norm_sum = 0.0
+        self._episode_max_action_norm = 0.0
+        self._episode_xy_action_norm_sum = 0.0
+        self._episode_max_xy_action_norm = 0.0
+        self._episode_last_action = [0.0, 0.0, 0.0, 0.0]
         self._last_reset_method = 'unknown'
         self._last_reset_path = 'unknown'
         self._last_reset_service_attempted = False
         self._last_reset_service_status = 'not_attempted'
         self._last_low_altitude_guard_active = False
+        self._terminal_reset_requires_service = False
+        self._last_speed_command_reference_frame = 'unknown'
 
     def _init_ros(self):
         """Initialize ROS2 (once per process) and create DroneInterface."""
@@ -496,12 +511,16 @@ class AS2TestEnv(gym.Env):
         try:
             info['position'] = list(self._drone.position)
             info['altitude'] = float(self._drone.position[2])
+            info['height_bounds'] = list(self.height_bounds)
+            info['unsafe_low_altitude_threshold'] = float(self.unsafe_low_altitude_threshold)
+            info['low_altitude_guard_height'] = self._low_altitude_guard_height()
             info['speed'] = list(self._drone.speed)
             info['orientation'] = list(self._drone.orientation)
             d, d_norm = self._compute_distance()
             info['distance'] = d
             info['final_distance'] = d
             info['distance_norm'] = d_norm
+            info['is_out_of_bounds'] = self._is_out_of_bounds()
             info['is_unsafe_low_altitude'] = self._is_unsafe_low_altitude()
         except Exception as e:
             info['state_error'] = str(e)
@@ -518,6 +537,50 @@ class AS2TestEnv(gym.Env):
             return xyz if all(math.isfinite(value) for value in xyz) else None
         except Exception:
             return None
+
+    def _current_speed_xyz(self) -> list[float] | None:
+        try:
+            speed = list(getattr(self._drone, 'speed', [0.0, 0.0, 0.0])[:3])
+            if len(speed) != 3:
+                return None
+            xyz = [float(value) for value in speed]
+            return xyz if all(math.isfinite(value) for value in xyz) else None
+        except Exception:
+            return None
+
+    def _step_safety_snapshot(self) -> dict[str, Any]:
+        """Capture raw step telemetry used to fail closed on safety transitions."""
+        position = self._current_position_xyz()
+        speed = self._current_speed_xyz()
+        altitude = float(position[2]) if position is not None else float('nan')
+        speed_z = float(speed[2]) if speed is not None else float('nan')
+        out_of_bounds = self._is_out_of_bounds()
+        unsafe_low_altitude = (not out_of_bounds) and self._is_unsafe_low_altitude()
+        return {
+            'position': position,
+            'speed': speed,
+            'altitude': altitude,
+            'speed_z': speed_z,
+            'is_out_of_bounds': bool(out_of_bounds),
+            'is_unsafe_low_altitude': bool(unsafe_low_altitude),
+        }
+
+    def _update_step_safety_minimum(
+        self,
+        min_altitude: float,
+        snapshot: dict[str, Any],
+    ) -> float:
+        """Track the lowest finite altitude observed during one env step."""
+        altitude = snapshot.get('altitude')
+        try:
+            altitude_value = float(altitude)
+        except (TypeError, ValueError):
+            return min_altitude
+        if not math.isfinite(altitude_value):
+            return min_altitude
+        if not math.isfinite(min_altitude):
+            return altitude_value
+        return min(min_altitude, altitude_value)
 
     @staticmethod
     def _reset_service_attempted_from_reason(reason: str) -> bool:
@@ -547,6 +610,24 @@ class AS2TestEnv(gym.Env):
         )
         self._episode_motion_command_steps = 0
         self._episode_motion_command_accepted_steps = 0
+        self._episode_action_steps = 0
+        self._episode_action_norm_sum = 0.0
+        self._episode_max_action_norm = 0.0
+        self._episode_xy_action_norm_sum = 0.0
+        self._episode_max_xy_action_norm = 0.0
+        self._episode_last_action = [0.0, 0.0, 0.0, 0.0]
+
+    def _update_episode_action_monitoring(self, sent_action: list[float]) -> None:
+        vx, vy, vz, vyaw = [float(value) for value in sent_action]
+        action_norm = math.sqrt(vx * vx + vy * vy + vz * vz + vyaw * vyaw)
+        xy_action_norm = math.hypot(vx, vy)
+
+        self._episode_action_steps += 1
+        self._episode_action_norm_sum += action_norm
+        self._episode_max_action_norm = max(self._episode_max_action_norm, action_norm)
+        self._episode_xy_action_norm_sum += xy_action_norm
+        self._episode_max_xy_action_norm = max(self._episode_max_xy_action_norm, xy_action_norm)
+        self._episode_last_action = [vx, vy, vz, vyaw]
 
     def _update_episode_monitoring(
         self,
@@ -586,6 +667,18 @@ class AS2TestEnv(gym.Env):
         command_steps = int(self._episode_motion_command_steps)
         accepted_steps = int(self._episode_motion_command_accepted_steps)
         acceptance_rate = float(accepted_steps / command_steps) if command_steps > 0 else 0.0
+        action_steps = int(self._episode_action_steps)
+        mean_action_norm = (
+            float(self._episode_action_norm_sum / action_steps)
+            if action_steps > 0
+            else 0.0
+        )
+        mean_xy_action_norm = (
+            float(self._episode_xy_action_norm_sum / action_steps)
+            if action_steps > 0
+            else 0.0
+        )
+        last_vx, last_vy, last_vz, last_vyaw = self._episode_last_action
 
         info['physical_displacement'] = float(physical_displacement)
         info['path_length'] = float(self._episode_path_length)
@@ -594,6 +687,14 @@ class AS2TestEnv(gym.Env):
         info['motion_command_steps'] = command_steps
         info['motion_command_accepted_steps'] = accepted_steps
         info['motion_command_acceptance_rate'] = acceptance_rate
+        info['mean_action_norm'] = mean_action_norm
+        info['max_action_norm'] = float(self._episode_max_action_norm)
+        info['mean_xy_action_norm'] = mean_xy_action_norm
+        info['max_xy_action_norm'] = float(self._episode_max_xy_action_norm)
+        info['last_action_vx'] = float(last_vx)
+        info['last_action_vy'] = float(last_vy)
+        info['last_action_vz'] = float(last_vz)
+        info['last_action_vyaw'] = float(last_vyaw)
         info['reset_method'] = self._last_reset_method
         info['reset_path'] = self._last_reset_path
         info['reset_service_attempted'] = bool(self._last_reset_service_attempted)
@@ -775,6 +876,24 @@ class AS2TestEnv(gym.Env):
             'message',
             'linear_speed_norm',
             'angular_speed_norm',
+            'post_reset_platform_reassertion_attempted',
+            'post_reset_platform_fsm_ready',
+            'post_reset_takeoff_ready',
+            'post_reset_takeoff_skipped',
+            'post_reset_takeoff_skip_reason',
+            'post_reset_takeoff_commanded_height',
+            'post_reset_takeoff_observed_z',
+            'post_reset_start_z',
+            'post_reset_offboard_ready',
+            'post_reset_controller_ready',
+            'post_reset_controller_hold_ready',
+            'post_reset_pose_ready',
+            'post_reset_pose_observed',
+            'post_reset_observed_pose',
+            'post_reset_observed_position_error',
+            'post_reset_actionability_ready',
+            'post_reset_actionability_recovered',
+            'post_reset_actionability',
             'last_command',
             'control_available',
             'state_error',
@@ -915,18 +1034,21 @@ class AS2TestEnv(gym.Env):
                 adjusted[idx] = math.copysign(self.reset_min_speed, float(error[idx]))
         return self._clip_reset_velocity(adjusted)
 
+    def _low_altitude_guard_height(self) -> float:
+        dynamic_margin = float(self.max_vel) * max(float(self.step_duration), 0.1) * 2.0
+        guard_margin = max(float(self.low_altitude_guard_margin), dynamic_margin)
+        return float(self.unsafe_low_altitude_threshold) + guard_margin
+
     def _apply_low_altitude_action_guard(self, vz: float) -> float:
         """Prevent policy actions from driving the vehicle into terminal ground contact."""
         self._last_low_altitude_guard_active = False
-        if vz >= 0.0:
+        if vz > 0.0:
             return vz
         try:
             current_z = float(self._drone.position[2])
         except Exception:
             return vz
-        dynamic_margin = float(self.max_vel) * max(float(self.step_duration), 0.1) * 2.0
-        guard_margin = max(float(self.low_altitude_guard_margin), dynamic_margin)
-        guard_height = float(self.unsafe_low_altitude_threshold) + guard_margin
+        guard_height = self._low_altitude_guard_height()
         if current_z <= guard_height:
             self._last_low_altitude_guard_active = True
             climb_speed = max(float(self.low_altitude_guard_climb_speed), float(self.reset_min_speed), 0.0)
@@ -1097,6 +1219,14 @@ class AS2TestEnv(gym.Env):
             'post_controller_reacquire_timeout',
             'post_controller_hold_timeout',
         }
+
+    def _required_service_reset_reason(self) -> str | None:
+        """Return why velocity reset must be skipped for the next episode reset."""
+        if self._terminal_reset_requires_service:
+            return 'terminal_out_of_bounds'
+        if self._is_out_of_bounds():
+            return 'current_state_out_of_bounds'
+        return None
 
     def _apply_start_pose_with_optional_service_fallback(self, start_pose: list[float]) -> bool:
         """Use bounded velocity reset first, then optional service fallback on timeout."""
@@ -1670,6 +1800,240 @@ class AS2TestEnv(gym.Env):
             return False
         return self._send_speed_command(twist, yaw_speed)
 
+    def _send_terminal_stop_command(self) -> bool:
+        """Best-effort zero motion reference for terminal or truncated steps."""
+        return self._send_reset_speed_command([0.0, 0.0, 0.0], 0.0)
+
+    def _post_reset_probe_command(self, start_pose: list[float]) -> tuple[list[float], float]:
+        """Build a small post-service-reset velocity probe toward the active target."""
+        target_xy = np.array(self._target_pose[:2], dtype=np.float32)
+        start_xy = np.array(start_pose[:2], dtype=np.float32)
+        direction_xy = target_xy - start_xy
+        direction_norm = float(np.linalg.norm(direction_xy))
+        if direction_norm <= 1e-6:
+            unit_xy = np.array([1.0, 0.0], dtype=np.float32)
+        else:
+            unit_xy = direction_xy / direction_norm
+
+        probe_speed = min(float(self.max_vel), 0.10)
+        return [float(unit_xy[0] * probe_speed), float(unit_xy[1] * probe_speed), 0.0], probe_speed
+
+    def _measure_post_reset_probe_effect(
+        self,
+        probe_twist: list[float],
+        probe_speed: float,
+    ) -> dict[str, Any]:
+        """Publish a non-zero probe and measure whether it changes the pose."""
+        before = self._current_position_xyz()
+        if before is None:
+            return {
+                'accepted': False,
+                'actionable': False,
+                'reason': 'state_unreadable_before_probe',
+            }
+
+        probe_sleep = min(0.05, self.step_duration) if self.step_duration > 0.0 else 0.0
+        probe_iterations = 3 if probe_sleep <= 0.0 else max(3, int(math.ceil(0.60 / probe_sleep)))
+        accepted = False
+        for _ in range(probe_iterations):
+            accepted = self._send_speed_command(probe_twist, 0.0) or accepted
+            if probe_sleep > 0.0:
+                time.sleep(probe_sleep)
+
+        after_command = self._current_position_xyz()
+        stop_accepted = False
+        stop_iterations = 1 if probe_sleep <= 0.0 else max(3, int(math.ceil(0.20 / probe_sleep)))
+        for _ in range(stop_iterations):
+            stop_accepted = self._send_reset_speed_command([0.0, 0.0, 0.0], 0.0) or stop_accepted
+            if probe_sleep > 0.0:
+                time.sleep(probe_sleep)
+        after_stop = self._current_position_xyz()
+        probe_xy = np.array(probe_twist[:2], dtype=np.float32)
+        probe_xy_norm = float(np.linalg.norm(probe_xy))
+        unit_xy = probe_xy / probe_xy_norm if probe_xy_norm > 1e-9 else np.array([1.0, 0.0], dtype=np.float32)
+        min_forward_delta = min(0.03, max(0.005, float(probe_speed) * 0.12))
+
+        after = after_stop if after_stop is not None else after_command
+        observation_timeout = max(0.20, min(float(self.reset_service_timeout), 1.25))
+        observation_started = time.time()
+        observation_samples = 0
+        best_after = after
+        best_forward_delta = float('-inf')
+        while time.time() - observation_started <= observation_timeout:
+            candidate = self._current_position_xyz()
+            if candidate is not None:
+                observation_samples += 1
+                candidate_delta = np.array(candidate, dtype=np.float32) - np.array(before, dtype=np.float32)
+                candidate_forward_delta = float(np.dot(candidate_delta[:2], unit_xy))
+                if candidate_forward_delta >= best_forward_delta:
+                    best_forward_delta = candidate_forward_delta
+                    best_after = candidate
+                if bool(accepted) and candidate_forward_delta >= min_forward_delta:
+                    after = candidate
+                    break
+            if probe_sleep <= 0.0:
+                break
+            time.sleep(probe_sleep)
+        else:
+            after = best_after
+
+        if after is None:
+            after = best_after
+        if after is None:
+            return {
+                'accepted': accepted,
+                'stop_accepted': stop_accepted,
+                'actionable': False,
+                'reason': 'state_unreadable_after_probe',
+            }
+
+        delta = np.array(after, dtype=np.float32) - np.array(before, dtype=np.float32)
+        forward_delta = float(np.dot(delta[:2], unit_xy))
+        delta_norm = float(np.linalg.norm(delta))
+        actionable = bool(accepted) and forward_delta >= min_forward_delta
+        return {
+            'accepted': bool(accepted),
+            'stop_accepted': bool(stop_accepted),
+            'actionable': actionable,
+            'reason': 'probe_motion_confirmed' if actionable else 'probe_motion_not_confirmed',
+            'probe_twist': [float(v) for v in probe_twist],
+            'twist_frame_id': self._last_speed_command_reference_frame,
+            'position_before': [float(v) for v in before],
+            'position_after': [float(v) for v in after],
+            'position_after_command': (
+                [float(v) for v in after_command] if after_command is not None else None
+            ),
+            'position_after_stop': (
+                [float(v) for v in after_stop] if after_stop is not None else None
+            ),
+            'position_delta': [float(v) for v in delta.tolist()],
+            'forward_delta': round(forward_delta, 5),
+            'delta_norm': round(delta_norm, 5),
+            'min_forward_delta': round(min_forward_delta, 5),
+            'probe_iterations': probe_iterations,
+            'stop_iterations': stop_iterations,
+            'observation_samples': observation_samples,
+            'observation_timeout': round(observation_timeout, 3),
+        }
+
+    def _post_probe_start_pose_tolerance(self) -> float:
+        """Residual tolerance after the actionability probe moves."""
+        return float(self.fixed_start_tolerance)
+
+    def _post_probe_start_pose_restored(
+        self,
+        start_pose: list[float],
+        tolerance: float,
+    ) -> tuple[bool, float, float, list[float] | None, float, list[float] | None]:
+        """Confirm that probe cleanup ended near the start pose and is not drifting."""
+        distance, yaw_error, pose = self._start_pose_error(start_pose)
+        speed = self._current_speed_xyz()
+        speed_norm = (
+            float(np.linalg.norm(np.array(speed, dtype=np.float32)))
+            if speed is not None else float('inf')
+        )
+        restored = (
+            distance <= tolerance
+            and self._reset_yaw_converged(yaw_error)
+            and speed_norm <= float(self.hover_speed_threshold)
+        )
+        return bool(restored), distance, yaw_error, pose, speed_norm, speed
+
+    def _restore_start_pose_after_actionability_probe(
+        self,
+        start_pose: list[float],
+        actionability: dict[str, Any],
+    ) -> bool:
+        """Restore or fail closed after a successful post-reset motion probe."""
+        tolerance = self._post_probe_start_pose_tolerance()
+        restored_before, distance_before, yaw_before, pose_before, speed_before_norm, speed_before = (
+            self._post_probe_start_pose_restored(start_pose, tolerance)
+        )
+        actionability['start_pose_restore_tolerance'] = round(tolerance, 4)
+        actionability['start_pose_error_before_restore'] = (
+            round(distance_before, 4) if math.isfinite(distance_before) else 'inf'
+        )
+        actionability['start_pose_speed_before_restore'] = speed_before
+        actionability['start_pose_speed_norm_before_restore'] = (
+            round(speed_before_norm, 4) if math.isfinite(speed_before_norm) else 'inf'
+        )
+
+        if restored_before:
+            actionability.update({
+                'start_pose_restored': True,
+                'start_pose_restore_method': 'already_within_tolerance',
+                'start_pose_error_after_restore': (
+                    round(distance_before, 4) if math.isfinite(distance_before) else 'inf'
+                ),
+                'start_pose_speed_after_restore': speed_before,
+                'start_pose_speed_norm_after_restore': (
+                    round(speed_before_norm, 4) if math.isfinite(speed_before_norm) else 'inf'
+                ),
+            })
+            return True
+
+        service_diagnostics = dict(self._last_reset_diagnostics)
+        restore_diagnostics: dict[str, Any] = {}
+        try:
+            self._apply_and_confirm_start_pose(start_pose)
+            restore_diagnostics = dict(self._last_reset_diagnostics)
+        except RuntimeError as exc:
+            restore_diagnostics = dict(self._last_reset_diagnostics)
+            actionability.update({
+                'start_pose_restored': False,
+                'start_pose_restore_method': 'velocity_restore_failed',
+                'start_pose_restore_error': str(exc),
+                'start_pose_restore_diagnostics': restore_diagnostics,
+            })
+            self._last_reset_diagnostics = service_diagnostics
+            return False
+
+        restored, distance_after, yaw_after, pose_after, speed_after_norm, speed_after = (
+            self._post_probe_start_pose_restored(start_pose, tolerance)
+        )
+        actionability.update({
+            'start_pose_restored': bool(restored),
+            'start_pose_restore_method': 'velocity_restore',
+            'start_pose_before_restore': pose_before,
+            'start_pose_after_restore': pose_after,
+            'start_pose_error_after_restore': (
+                round(distance_after, 4) if math.isfinite(distance_after) else 'inf'
+            ),
+            'start_pose_speed_after_restore': speed_after,
+            'start_pose_speed_norm_after_restore': (
+                round(speed_after_norm, 4) if math.isfinite(speed_after_norm) else 'inf'
+            ),
+            'start_pose_restore_diagnostics': restore_diagnostics,
+        })
+        self._last_reset_diagnostics = service_diagnostics
+        return bool(restored)
+
+    def _confirm_post_service_command_path(self, start_pose: list[float]) -> bool:
+        """Fail closed unless a non-zero post-reset reference produces motion."""
+        probe_twist, probe_speed = self._post_reset_probe_command(start_pose)
+        first_probe = self._measure_post_reset_probe_effect(probe_twist, probe_speed)
+        if bool(first_probe.get('actionable', False)):
+            restored = self._restore_start_pose_after_actionability_probe(start_pose, first_probe)
+            self._last_reset_diagnostics['post_reset_actionability'] = first_probe
+            self._last_reset_diagnostics['post_reset_actionability_recovered'] = False
+            return restored
+
+        recovered = self._recover_motion_reference_path()
+        second_probe = self._measure_post_reset_probe_effect(probe_twist, probe_speed) if recovered else {}
+        actionability = {
+            'first_probe': first_probe,
+            'recovery_attempted': True,
+            'recovery_ready': bool(recovered),
+            'second_probe': second_probe,
+        }
+        self._last_reset_diagnostics['post_reset_actionability'] = actionability
+        self._last_reset_diagnostics['post_reset_actionability_recovered'] = bool(
+            recovered and second_probe.get('actionable', False)
+        )
+        if not bool(recovered and second_probe.get('actionable', False)):
+            return False
+        return self._restore_start_pose_after_actionability_probe(start_pose, second_probe)
+
     def _send_speed_command(self, twist: list[float], yaw_speed: float) -> bool:
         """Send one speed/yaw-rate motion reference and report API acceptance."""
         if self._speed_handler is None or not hasattr(
@@ -1680,15 +2044,44 @@ class AS2TestEnv(gym.Env):
             return False
 
         try:
+            twist_frame_id = 'earth'
+            self._configure_speed_handler_reference_frame(twist_frame_id)
             accepted = self._speed_handler.send_speed_command_with_yaw_speed(
                 twist=twist,
-                twist_frame_id='earth',
+                twist_frame_id=twist_frame_id,
                 yaw_speed=float(yaw_speed),
             )
             return bool(accepted) if accepted is not None else True
         except Exception as e:
             logger.error(f"Error sending velocity command: {e}")
             return False
+
+    def _configure_speed_handler_reference_frame(self, twist_frame_id: str) -> None:
+        """Align AS2 control-mode reference frame with the twist message frame."""
+        desired_mode = getattr(self._speed_handler, 'desired_control_mode_', None)
+        if desired_mode is None or not hasattr(desired_mode, 'reference_frame'):
+            return
+
+        try:
+            from as2_msgs.msg import ControlMode
+            local_frame = ControlMode.LOCAL_ENU_FRAME
+            body_frame = ControlMode.BODY_FLU_FRAME
+            undefined_frame = ControlMode.UNDEFINED_FRAME
+        except Exception:
+            local_frame = 1
+            body_frame = 2
+            undefined_frame = 0
+
+        frame = str(twist_frame_id).strip()
+        if frame == 'earth':
+            reference_frame = local_frame
+        elif frame.endswith('/base_link') or frame == 'base_link':
+            reference_frame = body_frame
+        else:
+            reference_frame = undefined_frame
+
+        desired_mode.reference_frame = reference_frame
+        self._last_speed_command_reference_frame = frame
 
     def _ensure_offboard_after_reset(self) -> bool:
         """Reassert AS2 arm/offboard mode after simulator-backed state reset."""
@@ -1734,6 +2127,193 @@ class AS2TestEnv(gym.Env):
 
         self._speed_handler = SpeedMotion(self._drone)
         return self._send_speed_command([0.0, 0.0, 0.0], 0.0)
+
+    def _refresh_controller_mode_after_service_reset(self) -> bool:
+        """Force a non-speed mode before re-entering speed mode after simulator reset."""
+        if self._reset_aux_node is None:
+            return True
+
+        client = None
+        try:
+            from as2_msgs.msg import ControlMode
+            from as2_msgs.srv import SetControlMode
+
+            namespace = self.drone_namespace.strip().strip('/')
+            service_name = f'/{namespace}/controller/set_control_mode'
+            client = self._reset_aux_node.create_client(SetControlMode, service_name)
+            if hasattr(client, 'wait_for_service') and not client.wait_for_service(
+                timeout_sec=self.reset_service_timeout,
+            ):
+                self._last_reset_diagnostics.update({
+                    'post_reset_mode_refresh_ready': False,
+                    'post_reset_mode_refresh_reason': 'service_unavailable',
+                })
+                return False
+
+            request = SetControlMode.Request()
+            request.control_mode.control_mode = ControlMode.POSITION
+            request.control_mode.yaw_mode = ControlMode.YAW_ANGLE
+            request.control_mode.reference_frame = ControlMode.LOCAL_ENU_FRAME
+            future = client.call_async(request)
+            if not self._spin_reset_future_until_complete(future):
+                self._last_reset_diagnostics.update({
+                    'post_reset_mode_refresh_ready': False,
+                    'post_reset_mode_refresh_reason': 'timeout',
+                })
+                return False
+
+            result = future.result()
+            success = bool(getattr(result, 'success', False))
+            self._last_reset_diagnostics.update({
+                'post_reset_mode_refresh_ready': success,
+                'post_reset_mode_refresh_reason': 'success' if success else 'service_rejected',
+            })
+            return success
+        except Exception as e:
+            self._last_reset_diagnostics.update({
+                'post_reset_mode_refresh_ready': False,
+                'post_reset_mode_refresh_reason': 'exception',
+                'post_reset_mode_refresh_error': str(e),
+            })
+            logger.error('Unable to refresh controller mode after simulator reset: %s', e)
+            return False
+        finally:
+            if client is not None and hasattr(self._reset_aux_node, 'destroy_client'):
+                try:
+                    self._reset_aux_node.destroy_client(client)
+                except Exception as e:
+                    logger.warning('Unable to destroy controller mode refresh client: %s', e)
+
+    def _takeoff_after_service_reset(self, start_pose: list[float]) -> bool:
+        """Mark a service-reset pose as flying without issuing a conflicting takeoff."""
+        if self._is_flying:
+            return True
+        start_z = float(start_pose[2])
+        pose_ready_before_takeoff = self._wait_until_service_reset_pose_observed(start_pose)
+        if pose_ready_before_takeoff:
+            _, _, observed_pose = self._start_pose_error(start_pose)
+            observed_z = observed_pose[2] if observed_pose is not None and len(observed_pose) >= 3 else None
+            self._last_reset_diagnostics.update({
+                'post_reset_takeoff_skipped': True,
+                'post_reset_takeoff_skip_reason': 'service_reset_pose_already_observed',
+                'post_reset_start_z': round(start_z, 4),
+                'post_reset_takeoff_commanded_height': None,
+                'post_reset_takeoff_observed_z': (
+                    round(float(observed_z), 4) if observed_z is not None else None
+                ),
+                'post_reset_takeoff_ready_from_pose': True,
+            })
+            self._is_flying = True
+            return True
+
+        takeoff = getattr(self._drone, 'takeoff', None)
+        if takeoff is None or not callable(takeoff):
+            self._last_reset_diagnostics.update({
+                'post_reset_takeoff_skipped': True,
+                'post_reset_takeoff_skip_reason': 'takeoff_api_unavailable',
+                'post_reset_start_z': round(start_z, 4),
+                'post_reset_takeoff_commanded_height': None,
+            })
+            return True
+        try:
+            self._last_reset_diagnostics.update({
+                'post_reset_takeoff_skipped': False,
+                'post_reset_start_z': round(start_z, 4),
+                'post_reset_takeoff_commanded_height': round(start_z, 4),
+            })
+            success = bool(takeoff(height=start_z, speed=self.takeoff_speed))
+            if success:
+                success = self._wait_until_service_reset_pose_observed(start_pose)
+            pose_ready_after_rejected_takeoff = (
+                (not success) and self._wait_until_service_reset_pose_observed(start_pose)
+            )
+            if pose_ready_after_rejected_takeoff:
+                self._last_reset_diagnostics.update({
+                    'post_reset_takeoff_goal_accepted': False,
+                    'post_reset_takeoff_ready_from_pose': True,
+                })
+                success = True
+            self._is_flying = success
+            return success
+        except Exception as e:
+            self._last_reset_diagnostics.update({
+                'post_reset_takeoff_error': str(e),
+            })
+            logger.error('Unable to run takeoff after simulator reset: %s', e)
+            return False
+
+    def _hold_service_reset_start_pose(self, start_pose: list[float]) -> bool:
+        """Actively hold the requested start pose after recreating speed control."""
+        if self._speed_handler is None:
+            return self._wait_until_service_reset_pose_observed(start_pose)
+        return self._hold_start_pose_after_controller_reset(start_pose, 1)
+
+    def _wait_until_service_reset_pose_observed(self, start_pose: list[float]) -> bool:
+        """Wait until DroneInterface telemetry reflects a settled service reset pose."""
+        started = time.time()
+        timeout = max(float(self.reset_service_timeout), 0.5)
+        check_dt = max(0.05, min(float(self.step_duration), 0.1))
+        required_stable_time = min(0.30, max(0.15, check_dt))
+        stable_elapsed = 0.0
+        best_distance = float('inf')
+        last_distance = float('inf')
+        last_yaw_error = float('inf')
+        last_pose = None
+        last_speed = None
+        last_speed_norm = float('inf')
+
+        while time.time() - started < timeout:
+            last_distance, last_yaw_error, last_pose = self._start_pose_error(start_pose)
+            last_speed = self._current_speed_xyz()
+            last_speed_norm = (
+                float(np.linalg.norm(np.array(last_speed, dtype=np.float32)))
+                if last_speed is not None else float('inf')
+            )
+            if math.isfinite(last_distance):
+                best_distance = min(best_distance, last_distance)
+            pose_ready = (
+                last_distance <= self._reset_position_tolerance()
+                and self._reset_yaw_converged(last_yaw_error)
+            )
+            speed_ready = last_speed_norm <= float(self.hover_speed_threshold)
+            if pose_ready and speed_ready:
+                stable_elapsed += check_dt
+            else:
+                stable_elapsed = 0.0
+            if stable_elapsed >= required_stable_time:
+                self._last_reset_diagnostics.update({
+                    'post_reset_pose_observed': True,
+                    'post_reset_pose_observe_elapsed': round(time.time() - started, 3),
+                    'post_reset_pose_stable_elapsed': round(stable_elapsed, 3),
+                    'post_reset_observed_pose': last_pose,
+                    'post_reset_observed_position_error': round(last_distance, 4),
+                    'post_reset_observed_yaw_error': round(last_yaw_error, 4),
+                    'post_reset_observed_speed': last_speed,
+                    'post_reset_observed_speed_norm': round(last_speed_norm, 4),
+                })
+                return True
+            time.sleep(check_dt)
+
+        self._last_reset_diagnostics.update({
+            'post_reset_pose_observed': False,
+            'post_reset_pose_observe_elapsed': round(time.time() - started, 3),
+            'post_reset_pose_stable_elapsed': round(stable_elapsed, 3),
+            'post_reset_observed_pose': last_pose,
+            'post_reset_observed_position_error': (
+                round(last_distance, 4) if math.isfinite(last_distance) else 'inf'
+            ),
+            'post_reset_best_observed_position_error': (
+                round(best_distance, 4) if math.isfinite(best_distance) else 'inf'
+            ),
+            'post_reset_observed_yaw_error': (
+                round(last_yaw_error, 4) if math.isfinite(last_yaw_error) else 'inf'
+            ),
+            'post_reset_observed_speed': last_speed,
+            'post_reset_observed_speed_norm': (
+                round(last_speed_norm, 4) if math.isfinite(last_speed_norm) else 'inf'
+            ),
+        })
+        return False
 
     def _recover_motion_reference_path(self) -> bool:
         """Best-effort recovery when AS2 rejects a speed motion reference."""
@@ -1924,18 +2504,39 @@ class AS2TestEnv(gym.Env):
             }
             self._last_reset_service_status = str(self._last_reset_diagnostics['reason'])
             if bool(response.success):
+                takeoff_ready = self._takeoff_after_service_reset(start_pose)
                 offboard_ready = self._ensure_offboard_after_reset()
-                controller_ready = self._reset_velocity_controller()
-                self._is_flying = offboard_ready and controller_ready
+                mode_refresh_ready = bool(offboard_ready) and self._refresh_controller_mode_after_service_reset()
+                controller_ready = bool(mode_refresh_ready) and self._reset_velocity_controller()
+                controller_hold_ready = bool(takeoff_ready and offboard_ready and controller_ready) and self._hold_service_reset_start_pose(start_pose)
+                pose_observed = bool(takeoff_ready and offboard_ready and controller_hold_ready) and self._wait_until_service_reset_pose_observed(start_pose)
+                actionability_ready = bool(pose_observed) and self._confirm_post_service_command_path(start_pose)
+                self._last_reset_diagnostics.update({
+                    'post_reset_takeoff_ready': bool(takeoff_ready),
+                    'post_reset_offboard_ready': bool(offboard_ready),
+                    'post_reset_mode_refresh_ready': bool(mode_refresh_ready),
+                    'post_reset_controller_ready': bool(controller_ready),
+                    'post_reset_controller_hold_ready': bool(controller_hold_ready),
+                    'post_reset_pose_ready': bool(pose_observed),
+                    'post_reset_actionability_ready': bool(actionability_ready),
+                })
+                self._is_flying = offboard_ready and controller_ready and actionability_ready
                 if not self._is_flying:
                     self._last_reset_diagnostics.update({
                         'reason': 'service_post_reset_command_path_failed',
                         'failure_class': 'post_reset_command_path_failed',
+                        'takeoff_ready': takeoff_ready,
                         'offboard_ready': offboard_ready,
+                        'mode_refresh_ready': mode_refresh_ready,
                         'controller_ready': controller_ready,
+                        'controller_hold_ready': controller_hold_ready,
+                        'pose_observed': pose_observed,
+                        'actionability_ready': actionability_ready,
                     })
                     self._last_reset_service_status = 'service_post_reset_command_path_failed'
                     return False
+                self._last_reset_diagnostics['reason'] = 'service_success'
+                self._last_reset_diagnostics['failure_class'] = ''
             return bool(response.success)
         except Exception as e:
             self._last_reset_diagnostics = {
@@ -1954,6 +2555,14 @@ class AS2TestEnv(gym.Env):
             'Fresh service-backed reset failed before command path readiness; '
             'refusing velocity fallback to avoid accepted-but-ignored actions. '
             f'{self._format_reset_diagnostics()}'
+        )
+
+    def _raise_required_service_reset_failure(self, reason: str) -> None:
+        """Fail fast when unsafe state requires simulator service reset and it fails."""
+        raise RuntimeError(
+            'Simulator service reset is required after unsafe/out-of-bounds state; '
+            'refusing velocity reset flyback. '
+            f'required_reason={reason}. {self._format_reset_diagnostics()}'
         )
 
     def _set_platform_flying_after_service_reset(self) -> bool:
@@ -2048,12 +2657,16 @@ class AS2TestEnv(gym.Env):
         supports_in_air_reset = self.fixed_start_pose is not None or self.randomize_hover_start
         was_flying_at_reset_start = self._is_flying
         self._last_reset_diagnostics = {}
+        required_service_reset_reason = (
+            self._required_service_reset_reason()
+            if supports_in_air_reset and self.use_simulator_reset_service and was_flying_at_reset_start
+            else None
+        )
         use_service_for_this_reset = (
             supports_in_air_reset
             and self.use_simulator_reset_service
-            and not was_flying_at_reset_start
+            and (not was_flying_at_reset_start or required_service_reset_reason is not None)
         )
-        defer_takeoff_for_service_reset = use_service_for_this_reset
         self._last_reset_service_status = 'not_attempted'
 
         # If already flying, keep the episode reset in-air for training modes
@@ -2061,8 +2674,15 @@ class AS2TestEnv(gym.Env):
         # every episode is slow and can block AS2 land behavior indefinitely.
         if self._is_flying:
             if supports_in_air_reset:
-                logger.info("Keeping drone airborne for velocity reset...")
-                self._prepare_in_air_velocity_reset()
+                if use_service_for_this_reset:
+                    logger.warning(
+                        "Skipping velocity reset; simulator service reset required (%s)",
+                        required_service_reset_reason or 'fresh_reset',
+                    )
+                    self._send_terminal_stop_command()
+                else:
+                    logger.info("Keeping drone airborne for velocity reset...")
+                    self._prepare_in_air_velocity_reset()
             else:
                 logger.info("Landing before reset...")
                 self._run_close_operation(
@@ -2082,19 +2702,13 @@ class AS2TestEnv(gym.Env):
             success = self._drone.offboard()
             logger.info(f"  Offboard: {'OK' if success else 'FAILED'}")
 
-            if defer_takeoff_for_service_reset:
-                logger.info(
-                    "Deferring takeoff behavior; simulator reset service will establish flying state"
-                )
-            else:
-                # Takeoff
-                logger.info(f"Taking off to {self.takeoff_height}m...")
-                success = self._drone.takeoff(
-                    height=self.takeoff_height,
-                    speed=self.takeoff_speed
-                )
-                logger.info(f"  Takeoff: {'OK' if success else 'FAILED'}")
-                self._is_flying = success
+            logger.info(f"Taking off to {self.takeoff_height}m...")
+            success = self._drone.takeoff(
+                height=self.takeoff_height,
+                speed=self.takeoff_speed
+            )
+            logger.info(f"  Takeoff: {'OK' if success else 'FAILED'}")
+            self._is_flying = success
 
         hover_settled = True
 
@@ -2105,7 +2719,9 @@ class AS2TestEnv(gym.Env):
             if use_service_for_this_reset and self._try_service_backed_reset(self.fixed_start_pose):
                 self._mark_service_reset_success_if_unreported(self.fixed_start_pose)
                 hover_settled = True
-            elif defer_takeoff_for_service_reset and not was_flying_at_reset_start:
+            elif use_service_for_this_reset and required_service_reset_reason is not None:
+                self._raise_required_service_reset_failure(required_service_reset_reason)
+            elif use_service_for_this_reset and not was_flying_at_reset_start:
                 self._raise_fresh_service_reset_failure()
             else:
                 self._sync_reset_service_status_from_diagnostics()
@@ -2119,7 +2735,9 @@ class AS2TestEnv(gym.Env):
             if use_service_for_this_reset and self._try_service_backed_reset(sampled_start):
                 self._mark_service_reset_success_if_unreported(sampled_start)
                 hover_settled = True
-            elif defer_takeoff_for_service_reset and not was_flying_at_reset_start:
+            elif use_service_for_this_reset and required_service_reset_reason is not None:
+                self._raise_required_service_reset_failure(required_service_reset_reason)
+            elif use_service_for_this_reset and not was_flying_at_reset_start:
                 self._raise_fresh_service_reset_failure()
             else:
                 self._sync_reset_service_status_from_diagnostics()
@@ -2148,6 +2766,7 @@ class AS2TestEnv(gym.Env):
             or self._reset_service_attempted_from_reason(reset_reason)
         )
         self._last_reset_method = self._classify_reset_method(supports_in_air_reset, reset_reason)
+        self._terminal_reset_requires_service = False
         self._initialize_episode_monitoring(self._current_position_xyz())
         self._add_episode_monitor_info(info)
 
@@ -2172,6 +2791,48 @@ class AS2TestEnv(gym.Env):
         import time
 
         self._step_count += 1
+        pre_step_snapshot = self._step_safety_snapshot()
+        step_min_altitude = self._update_step_safety_minimum(
+            float('nan'),
+            pre_step_snapshot,
+        )
+
+        pre_step_out_of_bounds = bool(pre_step_snapshot['is_out_of_bounds'])
+        pre_step_unsafe_low_altitude = bool(pre_step_snapshot['is_unsafe_low_altitude'])
+        if pre_step_out_of_bounds or pre_step_unsafe_low_altitude:
+            obs = self._get_obs()
+            info = self._get_info()
+            terminal_reason = 'out_of_bounds' if pre_step_out_of_bounds else 'unsafe_low_altitude'
+            info['terminal_reason'] = terminal_reason
+            info['is_success'] = False
+            info['is_out_of_bounds'] = bool(pre_step_out_of_bounds)
+            info['is_unsafe_low_altitude'] = bool(pre_step_unsafe_low_altitude)
+            info['motion_command_accepted'] = False
+            info['motion_command_recovered'] = False
+            info['motion_command_publication_count'] = 0
+            info['motion_command_accepted_publication_count'] = 0
+            info['low_altitude_guard_active'] = False
+            info['step_altitude_before'] = pre_step_snapshot['altitude']
+            info['step_altitude_after'] = pre_step_snapshot['altitude']
+            info['step_min_altitude'] = step_min_altitude
+            info['step_speed_z_before'] = pre_step_snapshot['speed_z']
+            info['step_speed_z_after'] = pre_step_snapshot['speed_z']
+            info['step_safety_checked_after_publication'] = False
+            info['step_safety_terminal'] = True
+            self._terminal_reset_requires_service = True
+            if pre_step_unsafe_low_altitude and (self.fixed_start_pose is not None or self.randomize_hover_start):
+                try:
+                    self._recover_low_altitude_hover_before_velocity_reset(
+                        self._reset_recovery_hover_height()
+                    )
+                except Exception as exc:
+                    logger.warning(
+                        'Low-altitude terminal recovery failed before reset; '
+                        'preserving terminal stop and service reset requirement: %s',
+                        exc,
+                    )
+            info['terminal_stop_command_accepted'] = self._send_terminal_stop_command()
+            return obs, -self.oob_penalty, True, False, info
 
         # Clip action to valid range (per-dimension bounds)
         action = np.clip(action, self.action_space.low, self.action_space.high)
@@ -2184,26 +2845,103 @@ class AS2TestEnv(gym.Env):
         # Send velocity command with yaw rate via DroneInterface. If AS2 rejects
         # the command path after a simulator reset, reassert offboard and rebuild
         # the speed handler once so the first policy action is not silently lost.
-        motion_command_accepted = self._send_speed_command([vx, vy, vz], vyaw)
+        command_twist = [vx, vy, vz]
+        publication_count = 1
+        accepted_publication_count = 0
+        motion_command_accepted = self._send_speed_command(command_twist, vyaw)
+        if motion_command_accepted:
+            accepted_publication_count += 1
         motion_command_recovered = False
         if not motion_command_accepted:
             motion_command_recovered = self._recover_motion_reference_path()
             if motion_command_recovered:
-                motion_command_accepted = self._send_speed_command([vx, vy, vz], vyaw)
+                publication_count += 1
+                motion_command_accepted = self._send_speed_command(command_twist, vyaw)
+                if motion_command_accepted:
+                    accepted_publication_count += 1
+
+        post_publication_snapshot = self._step_safety_snapshot()
+        step_min_altitude = self._update_step_safety_minimum(
+            step_min_altitude,
+            post_publication_snapshot,
+        )
+        safety_terminal_reason = None
+        if post_publication_snapshot['is_out_of_bounds']:
+            safety_terminal_reason = 'out_of_bounds'
+        elif post_publication_snapshot['is_unsafe_low_altitude']:
+            safety_terminal_reason = 'unsafe_low_altitude'
 
         # Keep the motion reference fresh while the simulator advances. AS2's
         # controller treats motion references as live setpoints, not durable
         # commands, so one-shot publishes can be missed around reset/mode
         # transitions and leave the controller waiting for a reference.
         elapsed = 0.0
-        publish_period = min(0.05, self.step_duration) if self.step_duration > 0.0 else 0.0
-        while elapsed < self.step_duration:
-            sleep_dt = min(publish_period, self.step_duration - elapsed)
+        hold_duration = max(0.0, float(self.step_duration))
+        publish_period = min(
+            max(float(self.command_publication_interval), 1e-3),
+            hold_duration,
+        ) if hold_duration > 0.0 else 0.0
+        while elapsed < hold_duration and safety_terminal_reason is None:
+            sleep_dt = min(publish_period, hold_duration - elapsed)
             if sleep_dt > 0.0:
                 time.sleep(sleep_dt)
                 elapsed += sleep_dt
-            if elapsed < self.step_duration:
-                self._send_speed_command([vx, vy, vz], vyaw)
+                post_publication_snapshot = self._step_safety_snapshot()
+                step_min_altitude = self._update_step_safety_minimum(
+                    step_min_altitude,
+                    post_publication_snapshot,
+                )
+                if post_publication_snapshot['is_out_of_bounds']:
+                    safety_terminal_reason = 'out_of_bounds'
+                    break
+                if post_publication_snapshot['is_unsafe_low_altitude']:
+                    safety_terminal_reason = 'unsafe_low_altitude'
+                    break
+            if elapsed < hold_duration:
+                publication_count += 1
+                repeated_command_accepted = self._send_speed_command(command_twist, vyaw)
+                if repeated_command_accepted:
+                    accepted_publication_count += 1
+                    motion_command_accepted = True
+                post_publication_snapshot = self._step_safety_snapshot()
+                step_min_altitude = self._update_step_safety_minimum(
+                    step_min_altitude,
+                    post_publication_snapshot,
+                )
+                if post_publication_snapshot['is_out_of_bounds']:
+                    safety_terminal_reason = 'out_of_bounds'
+                    break
+                if post_publication_snapshot['is_unsafe_low_altitude']:
+                    safety_terminal_reason = 'unsafe_low_altitude'
+                    break
+
+        while publication_count < self.min_motion_command_publications and safety_terminal_reason is None:
+            publication_count += 1
+            repeated_command_accepted = self._send_speed_command(command_twist, vyaw)
+            if repeated_command_accepted:
+                accepted_publication_count += 1
+                motion_command_accepted = True
+            post_publication_snapshot = self._step_safety_snapshot()
+            step_min_altitude = self._update_step_safety_minimum(
+                step_min_altitude,
+                post_publication_snapshot,
+            )
+            if post_publication_snapshot['is_out_of_bounds']:
+                safety_terminal_reason = 'out_of_bounds'
+                break
+            if post_publication_snapshot['is_unsafe_low_altitude']:
+                safety_terminal_reason = 'unsafe_low_altitude'
+                break
+
+        post_step_snapshot = self._step_safety_snapshot()
+        step_min_altitude = self._update_step_safety_minimum(
+            step_min_altitude,
+            post_step_snapshot,
+        )
+        if post_step_snapshot['is_out_of_bounds']:
+            safety_terminal_reason = 'out_of_bounds'
+        elif post_step_snapshot['is_unsafe_low_altitude'] and safety_terminal_reason != 'out_of_bounds':
+            safety_terminal_reason = 'unsafe_low_altitude'
 
         # Read new state
         obs = self._get_obs()
@@ -2213,7 +2951,17 @@ class AS2TestEnv(gym.Env):
         info['raw_action'] = [vx, vy, raw_vz, vyaw]
         info['motion_command_accepted'] = motion_command_accepted
         info['motion_command_recovered'] = motion_command_recovered
+        info['motion_command_publication_count'] = int(publication_count)
+        info['motion_command_accepted_publication_count'] = int(accepted_publication_count)
         info['low_altitude_guard_active'] = self._last_low_altitude_guard_active
+        info['step_altitude_before'] = pre_step_snapshot['altitude']
+        info['step_altitude_after'] = post_step_snapshot['altitude']
+        info['step_min_altitude'] = step_min_altitude
+        info['step_speed_z_before'] = pre_step_snapshot['speed_z']
+        info['step_speed_z_after'] = post_step_snapshot['speed_z']
+        info['step_safety_checked_after_publication'] = True
+        info['step_safety_terminal'] = safety_terminal_reason in {'out_of_bounds', 'unsafe_low_altitude'}
+        self._update_episode_action_monitoring(info['action_sent'])
         self._update_episode_monitoring(
             self._current_position_xyz(),
             motion_command_accepted,
@@ -2244,22 +2992,24 @@ class AS2TestEnv(gym.Env):
         # --- Terminal conditions ---
 
         # Out-of-bounds: drone exceeded physical scenario limits.
-        if self._is_out_of_bounds():
+        if safety_terminal_reason == 'out_of_bounds' or self._is_out_of_bounds():
             terminated = True
             reward = -self.oob_penalty
             info['terminal_reason'] = 'out_of_bounds'
             info['is_success'] = False
             info['is_out_of_bounds'] = True
             info['is_unsafe_low_altitude'] = False
+            self._terminal_reset_requires_service = True
 
         # Unsafe low altitude: terminate training before physical ground/lower bound.
-        elif self._is_unsafe_low_altitude():
+        elif safety_terminal_reason == 'unsafe_low_altitude' or self._is_unsafe_low_altitude():
             terminated = True
             reward = -self.oob_penalty
             info['terminal_reason'] = 'unsafe_low_altitude'
             info['is_success'] = False
             info['is_out_of_bounds'] = False
             info['is_unsafe_low_altitude'] = True
+            self._terminal_reset_requires_service = True
             if self.fixed_start_pose is not None or self.randomize_hover_start:
                 self._recover_low_altitude_hover_before_velocity_reset(
                     self._reset_recovery_hover_height()
@@ -2282,14 +3032,30 @@ class AS2TestEnv(gym.Env):
             info['is_out_of_bounds'] = False
             info['is_unsafe_low_altitude'] = False
 
+        if terminated or truncated:
+            info['terminal_stop_command_accepted'] = self._send_terminal_stop_command()
+
         return obs, reward, terminated, truncated, info
 
     def _is_out_of_bounds(self) -> bool:
         """Check if the drone has exceeded the scenario boundaries."""
         try:
             pose = self._drone.position
-            terminal_min_height = float(self.height_bounds[0])
-            return any(abs(p) > self.pos_limit for p in pose) or float(pose[2]) < terminal_min_height
+            if len(pose) < 3:
+                return True
+            if not all(math.isfinite(float(p)) for p in pose[:3]):
+                return True
+            x, y, z = [float(value) for value in pose[:3]]
+            z_min, z_max = self.height_bounds
+            return (
+                abs(x) > float(self.scene_bounds_xy)
+                or abs(y) > float(self.scene_bounds_xy)
+                or abs(x) > float(self.pos_limit)
+                or abs(y) > float(self.pos_limit)
+                or z < float(z_min)
+                or z > float(z_max)
+                or abs(z) > float(self.pos_limit)
+            )
         except Exception:
             return False
 

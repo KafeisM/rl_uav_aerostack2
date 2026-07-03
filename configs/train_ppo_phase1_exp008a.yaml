@@ -20,7 +20,11 @@ environment:
   reset_xy_kp: 1.0
   reset_z_kp: 1.0
   max_yaw_vel: 1.5707963267948966
-  step_duration: 0.1
+  # Live AS2 needs a command window long enough for the controller and physics
+  # to react; the reset actionability probe confirms motion over about 0.6 s.
+  step_duration: 0.2
+  command_publication_interval: 0.05
+  min_motion_command_publications: 4
   fixed_start_pose: [0.0, 0.0, 1.6, 0.0]
   fixed_start_tolerance: 0.22
   fixed_start_timeout: 60.0
@@ -54,7 +58,7 @@ environment:
   target_marker_frame_id: earth
   target_marker_scale: 0.35
 
-  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active]
+  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, terminal_stop_command_accepted, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, mean_action_norm, max_action_norm, mean_xy_action_norm, max_xy_action_norm, last_action_vx, last_action_vy, last_action_vz, last_action_vyaw, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active]
 
   randomize_hover_start: false
   scene_bounds_xy: 5.0
