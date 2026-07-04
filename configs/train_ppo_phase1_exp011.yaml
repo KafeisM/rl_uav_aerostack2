@@ -1,5 +1,5 @@
 experiment:
-  name: ppo_phase1_exp010_tutor_reward_randomized_50k
+  name: ppo_phase1_exp011_safe_area_randomized_50k
   seed: 42
   output_root: runs/ppo
 
@@ -11,12 +11,20 @@ environment:
   use_sim_time: false
   verbose: false
 
-  # Exp010: tutor-spec minimal reward + full episode randomization on the
-  # certified reset stack (exp009 infrastructure).
-  #   - Continuous reward is exactly -d_norm (all shaping weights zeroed).
-  #   - Success terminal: +success_reward - terminal_yaw_penalty_weight * yaw_err_norm.
-  #   - Safety terminals (oob / unsafe low altitude) keep -oob_penalty.
-  #   - Start AND target pose fully randomized each episode (yaw included).
+  # Exp011: exp010 tutor-spec reward, unchanged, plus two episode-sampling
+  # fixes derived from the exp010 run analysis:
+  #   1. Safe inner sampling area. Exp010 spawned 0.3 m from the OOB frontier
+  #      (3 steps at max_vel); 93% of episodes died out_of_bounds in ~28 steps
+  #      and every death cost a ~22 s service teleport (fps ~1.4). The agent
+  #      cannot see the bounds (obs is purely relative), so boundary deaths
+  #      are unlearnable noise. XY margin 1.5 m keeps whole episodes away
+  #      from the frontier.
+  #   2. Observation anti-saturation cap. Obs = (drone - target)/pos_limit
+  #      clipped to [-1, 1]; exp010 pairs reached ~9.4 m of separation, so
+  #      initial observations saturated at +/-1.0 and lost the distance
+  #      gradient. Capping start-target distance below pos_limit guarantees
+  #      every obs component stays inside (-1, 1).
+  # Resilience: full service-reset retry (added after the exp010 crash) is on.
   pos_limit: 5.0
   max_vel: 0.5
   reset_max_vel: 1.0
@@ -44,13 +52,16 @@ environment:
   reset_min_speed: 0.20
   reset_ground_recovery_height: 1.4
   # Full service-reset retry: a transient dead command path after one teleport
-  # (~1 in 400 resets) re-runs the complete teleport + certification pipeline
-  # instead of killing the run. Backoff lets the simulator settle in between.
+  # (~1 in 400 resets, killed exp010 at 2h33m) re-runs the complete teleport +
+  # certification pipeline instead of killing the run. Backoff lets the
+  # simulator settle in between.
   reset_service_max_attempts: 3
   reset_service_retry_backoff_s: 2.0
   # Vertical safety geometry:
   #   floor 0.8 < unsafe 1.0 < guard 1.0+max(0.30, 2*max_vel*step_duration=0.20)=1.3
-  #   < randomized z range [0.8+margin, 2.5-margin] = [1.1, 2.2] < ceiling 2.5.
+  #   < randomized z range [1.0+0.4, 2.5-0.4] = [1.4, 2.1] < ceiling 2.5.
+  # The z margin keeps every sampled start/target ABOVE the low-altitude guard
+  # (1.3), so episodes never begin inside the guard band.
   # height_bounds floor stays 0.8 (deliberate deviation from the tutor's 0.1):
   # the unsafe threshold 1.0 must terminate training above the physical floor
   # with at least one step of descent margin, and the whole certified safety
@@ -68,8 +79,9 @@ environment:
   # every episode.
   target_pose: [1.0, 0.0, 1.6, 0.0]
   distance_threshold: 0.4
-  # Randomized start/target pairs can be ~14 m apart; at max_vel 0.5 m/s and
-  # step 0.2 s (0.1 m/step) 80 steps only covered 8 m. 200 steps cover 20 m.
+  # Start-target separation is capped at 5.0 m; at max_vel 0.5 m/s and step
+  # 0.2 s (0.1 m/step) a direct flight needs <= 50 steps, so 200 steps leave
+  # 4x slack for an immature policy.
   max_steps: 200
   success_reward: 20.0
   oob_penalty: 15.0
@@ -92,7 +104,8 @@ environment:
 
   monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, terminal_stop_command_accepted, terminal_yaw_error, terminal_yaw_penalty, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, mean_action_norm, max_action_norm, mean_xy_action_norm, max_xy_action_norm, last_action_vx, last_action_vy, last_action_vz, last_action_vyaw, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active]
 
-  # Full episode randomization (start pose, start yaw, target pose, target yaw).
+  # Full episode randomization (start pose, start yaw, target pose, target
+  # yaw) inside a safe inner area.
   randomize_hover_start: true
   randomize_yaw: true
   scene_bounds_xy: 5.0
@@ -100,10 +113,16 @@ environment:
   # min separation (1.0) must exceed distance_threshold (0.4) plus the reset
   # restore residual so episodes never spawn inside the success sphere.
   min_start_target_distance: 1.0
-  # Keep samples >= 0.3 m from every box face: the reset restore tolerance
-  # (~0.24 m) can push an edge-sampled start out of bounds and waste the
-  # episode on a pre-step terminal plus a forced service reset.
-  randomization_bounds_margin: 0.3
+  # Anti-saturation cap: strictly below pos_limit (5.0) so every relative-obs
+  # component stays inside (-1, 1) for the whole start-target segment.
+  max_start_target_distance: 5.0
+  # Safe inner XY area: samples stay >= 1.5 m from the OOB frontier, so an
+  # untrained policy has ~15 steps of exploration room in the worst direction
+  # before terminating (vs 3 steps with the exp010 margin of 0.3).
+  randomization_bounds_margin: 1.5
+  # Separate z margin (the 1.5 m XY margin would empty the height range):
+  # z is sampled in [1.4, 2.1], fully above the low-altitude guard (1.3).
+  randomization_bounds_margin_z: 0.4
   hover_speed_threshold: 0.05
   hover_settle_time: 1.0
   hover_timeout: 20.0
@@ -116,7 +135,7 @@ training:
   monitor_subdir: monitor
   checkpoints_subdir: checkpoints
   checkpoint_freq: 5000
-  checkpoint_prefix: ppo_phase1_exp010
+  checkpoint_prefix: ppo_phase1_exp011
 
 ppo:
   # Tutor's exact hyperparameter set (matches configs/train_ppo.yaml).

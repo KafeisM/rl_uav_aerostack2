@@ -118,16 +118,24 @@ class AS2TestEnv(gym.Env):
         reset_platform_state_timeout: float = 2.0,
         use_simulator_reset_service: bool = True,
         use_service_reset_after_velocity_timeout: bool = False,
+        reset_service_max_attempts: int = 3,
+        reset_service_retry_backoff_s: float = 2.0,
         randomize_hover_start: bool = False,
         scene_bounds_xy: float = 5.0,
         height_bounds: tuple[float, float] = (0.1, 2.0),
         min_start_target_distance: float | None = None,
+        max_start_target_distance: float | None = None,
         hover_speed_threshold: float = 0.05,
         hover_settle_time: float = 1.0,
         hover_timeout: float = 10.0,
         max_reset_sample_attempts: int = 100,
         randomize_yaw: bool = True,
         randomization_bounds_margin: float = 0.0,
+        randomization_bounds_margin_z: float | None = None,
+        bounds_action_guard: bool = False,
+        bounds_guard_margin_xy: float = 0.5,
+        bounds_guard_margin_ceiling: float = 0.3,
+        bounds_guard_push_speed: float = 0.2,
     ):
         """
         Initialize the test environment.
@@ -186,6 +194,22 @@ class AS2TestEnv(gym.Env):
                                          randomized start/target samples and
                                          every scene box face (XY faces and
                                          both height bounds). Default 0.0.
+            bounds_action_guard: When True, outward velocity commands are
+                                 replaced with an inward push once the drone
+                                 crosses a guard line near the XY bounds or
+                                 the ceiling, so boundary terminals (and
+                                 their slow service resets) ~never fire.
+                                 Terminals stay unchanged as a fail-closed
+                                 safety net. Default False (no behavior
+                                 change).
+            bounds_guard_margin_xy: Distance (m) between the XY guard lines
+                                    and scene_bounds_xy.
+            bounds_guard_margin_ceiling: Distance (m) between the ceiling
+                                         guard line and height_bounds[1].
+                                         The floor is already covered by the
+                                         low-altitude action guard.
+            bounds_guard_push_speed: Inward push speed (m/s) commanded while
+                                     the guard is active (capped at max_vel).
         """
         super().__init__()
 
@@ -241,16 +265,24 @@ class AS2TestEnv(gym.Env):
         self.reset_platform_state_timeout = float(reset_platform_state_timeout)
         self.use_simulator_reset_service = bool(use_simulator_reset_service)
         self.use_service_reset_after_velocity_timeout = bool(use_service_reset_after_velocity_timeout)
+        self.reset_service_max_attempts = int(reset_service_max_attempts)
+        self.reset_service_retry_backoff_s = float(reset_service_retry_backoff_s)
         self.randomize_hover_start = randomize_hover_start
         self.scene_bounds_xy = float(scene_bounds_xy)
         self.height_bounds = (float(height_bounds[0]), float(height_bounds[1]))
         self.min_start_target_distance = min_start_target_distance
+        self.max_start_target_distance = max_start_target_distance
         self.hover_speed_threshold = float(hover_speed_threshold)
         self.hover_settle_time = float(hover_settle_time)
         self.hover_timeout = float(hover_timeout)
         self.max_reset_sample_attempts = int(max_reset_sample_attempts)
         self.randomize_yaw = bool(randomize_yaw)
         self.randomization_bounds_margin = float(randomization_bounds_margin)
+        self.randomization_bounds_margin_z = randomization_bounds_margin_z
+        self.bounds_action_guard = bool(bounds_action_guard)
+        self.bounds_guard_margin_xy = float(bounds_guard_margin_xy)
+        self.bounds_guard_margin_ceiling = float(bounds_guard_margin_ceiling)
+        self.bounds_guard_push_speed = float(bounds_guard_push_speed)
         self._last_sample_attempts = 0
 
         self._validate_bounds()
@@ -312,6 +344,7 @@ class AS2TestEnv(gym.Env):
         self._last_reset_service_attempted = False
         self._last_reset_service_status = 'not_attempted'
         self._last_low_altitude_guard_active = False
+        self._last_bounds_guard_active = False
         self._terminal_reset_requires_service = False
         self._last_speed_command_reference_frame = 'unknown'
         self._pose_freshness_last_position: list[float] | None = None
@@ -818,11 +851,33 @@ class AS2TestEnv(gym.Env):
                 'randomization_bounds_margin must be < scene_bounds_xy '
                 'so the XY sampling range stays non-empty'
             )
-        if z_min + self.randomization_bounds_margin > z_max - self.randomization_bounds_margin:
+        if self.randomization_bounds_margin_z is not None:
+            z_margin = float(self.randomization_bounds_margin_z)
+            if z_margin < 0.0:
+                raise ValueError('randomization_bounds_margin_z must be >= 0')
+            if z_min + z_margin > z_max - z_margin:
+                raise ValueError(
+                    'randomization_bounds_margin_z must leave a non-empty '
+                    'height sampling range within height_bounds'
+                )
+        elif z_min + self.randomization_bounds_margin > z_max - self.randomization_bounds_margin:
             raise ValueError(
                 'randomization_bounds_margin must leave a non-empty '
                 'height sampling range within height_bounds'
             )
+        if self.max_start_target_distance is not None:
+            effective_min_distance = max(
+                self.distance_threshold,
+                float(self.min_start_target_distance)
+                if self.min_start_target_distance is not None
+                else self.distance_threshold,
+            )
+            if float(self.max_start_target_distance) <= effective_min_distance:
+                raise ValueError(
+                    'max_start_target_distance must exceed the effective '
+                    'minimum start-target distance '
+                    f'({effective_min_distance})'
+                )
         if self.reset_max_vel <= 0.0:
             raise ValueError('reset_max_vel must be > 0')
         if self.reset_xy_kp <= 0.0:
@@ -852,6 +907,10 @@ class AS2TestEnv(gym.Env):
             raise ValueError('reset_service_timeout must be > 0')
         if self.reset_platform_state_timeout <= 0.0:
             raise ValueError('reset_platform_state_timeout must be > 0')
+        if self.reset_service_max_attempts < 1:
+            raise ValueError('reset_service_max_attempts must be >= 1')
+        if self.reset_service_retry_backoff_s < 0.0:
+            raise ValueError('reset_service_retry_backoff_s must be >= 0')
         if self.pos_limit < self.scene_bounds_xy:
             raise ValueError(
                 'pos_limit must be >= scene_bounds_xy to preserve normalization budget'
@@ -860,6 +919,48 @@ class AS2TestEnv(gym.Env):
             raise ValueError(
                 'pos_limit must be >= max(abs(height_bounds)) to preserve normalization budget'
             )
+        if self.bounds_action_guard:
+            if self.bounds_guard_push_speed <= 0.0:
+                raise ValueError(
+                    'bounds_guard_push_speed must be > 0 when bounds_action_guard is enabled'
+                )
+            if self.bounds_guard_margin_xy <= 0.0:
+                raise ValueError(
+                    'bounds_guard_margin_xy must be > 0 when bounds_action_guard is enabled'
+                )
+            if self.bounds_guard_margin_xy >= self.scene_bounds_xy:
+                raise ValueError(
+                    'bounds_guard_margin_xy must be < scene_bounds_xy so the '
+                    'guarded XY interior stays non-empty'
+                )
+            if self.bounds_guard_margin_ceiling <= 0.0:
+                raise ValueError(
+                    'bounds_guard_margin_ceiling must be > 0 when bounds_action_guard is enabled'
+                )
+            ceiling_guard_line = z_max - self.bounds_guard_margin_ceiling
+            if ceiling_guard_line <= self._low_altitude_guard_height():
+                raise ValueError(
+                    'bounds_guard_margin_ceiling leaves the ceiling guard line '
+                    'at or below the low-altitude guard height; no unguarded '
+                    'flyable band remains'
+                )
+            if self.randomize_hover_start:
+                if self.bounds_guard_margin_xy >= self.randomization_bounds_margin:
+                    raise ValueError(
+                        'bounds_guard_margin_xy must be < randomization_bounds_margin '
+                        'so randomized spawns land strictly inside the XY guard lines'
+                    )
+                effective_z_margin = (
+                    float(self.randomization_bounds_margin_z)
+                    if self.randomization_bounds_margin_z is not None
+                    else self.randomization_bounds_margin
+                )
+                if self.bounds_guard_margin_ceiling >= effective_z_margin:
+                    raise ValueError(
+                        'bounds_guard_margin_ceiling must be < the effective z '
+                        'sampling margin so randomized spawns land strictly '
+                        'below the ceiling guard line'
+                    )
 
     def _validate_pose(self, name: str, pose: list[float] | None) -> None:
         if pose is None:
@@ -886,14 +987,19 @@ class AS2TestEnv(gym.Env):
         # bound — because a restored start below the unsafe threshold also
         # terminates immediately.
         margin = float(self.randomization_bounds_margin)
+        z_margin = (
+            float(self.randomization_bounds_margin_z)
+            if self.randomization_bounds_margin_z is not None
+            else margin
+        )
         xy_low = -self.scene_bounds_xy + margin
         xy_high = self.scene_bounds_xy - margin
         effective_floor = max(
             float(self.height_bounds[0]),
             float(self.unsafe_low_altitude_threshold),
         )
-        z_low = effective_floor + margin
-        z_high = self.height_bounds[1] - margin
+        z_low = effective_floor + z_margin
+        z_high = self.height_bounds[1] - z_margin
         if z_low > z_high:
             raise ValueError(
                 'randomization_bounds_margin leaves no height sampling range '
@@ -917,7 +1023,14 @@ class AS2TestEnv(gym.Env):
                 target_yaw,
             ]
             distance = math.dist(start_pose[:3], target_pose[:3])
-            if distance > min_distance:
+            # Strict upper cap: keeping the separation below pos_limit
+            # guarantees every relative-obs component stays inside (-1, 1),
+            # so the policy never loses the distance gradient to clipping.
+            distance_within_cap = (
+                self.max_start_target_distance is None
+                or distance < float(self.max_start_target_distance)
+            )
+            if distance > min_distance and distance_within_cap:
                 self._last_sample_attempts = attempt
                 return start_pose, target_pose, attempt
 
@@ -988,6 +1101,8 @@ class AS2TestEnv(gym.Env):
         for key in [
             'reason',
             'failure_class',
+            'reset_service_attempts',
+            'reset_service_attempt_failures',
             'elapsed',
             'recovery_timeout',
             'reacquire_timeout',
@@ -1187,6 +1302,50 @@ class AS2TestEnv(gym.Env):
             climb_speed = max(float(self.low_altitude_guard_climb_speed), float(self.reset_min_speed), 0.0)
             return min(float(self.max_vel), climb_speed)
         return vz
+
+    def _apply_bounds_action_guard(
+        self, vx: float, vy: float, vz: float
+    ) -> tuple[float, float, float]:
+        """Replace outward commands with an inward push near the XY bounds and ceiling.
+
+        Keeps episodes away from the out-of-bounds terminals (whose service
+        resets degrade the simulator) without touching the terminal checks
+        themselves. The floor is already covered by the low-altitude action
+        guard, so only the XY faces and the ceiling are guarded here.
+        """
+        self._last_bounds_guard_active = False
+        if not self.bounds_action_guard:
+            return vx, vy, vz
+        try:
+            x, y, z = [float(value) for value in self._drone.position[:3]]
+        except Exception:
+            return vx, vy, vz
+
+        push = min(float(self.max_vel), max(float(self.bounds_guard_push_speed), 0.0))
+        clamped = False
+
+        xy_line = float(self.scene_bounds_xy) - float(self.bounds_guard_margin_xy)
+        if x >= xy_line and vx >= 0.0:
+            vx = -push
+            clamped = True
+        elif x <= -xy_line and vx <= 0.0:
+            vx = push
+            clamped = True
+        if y >= xy_line and vy >= 0.0:
+            vy = -push
+            clamped = True
+        elif y <= -xy_line and vy <= 0.0:
+            vy = push
+            clamped = True
+
+        ceiling_line = float(self.height_bounds[1]) - float(self.bounds_guard_margin_ceiling)
+        if z >= ceiling_line and vz >= 0.0:
+            vz = -push
+            clamped = True
+
+        if clamped:
+            self._last_bounds_guard_active = True
+        return vx, vy, vz
 
     def _compute_vertical_safety_penalty(self, raw_vz: float) -> float:
         """Penalize unsafe altitude and downward commands only near the unsafe band."""
@@ -2824,6 +2983,50 @@ class AS2TestEnv(gym.Env):
             self._last_reset_service_status = 'service_error'
             return False
 
+    def _service_backed_reset_with_retries(self, start_pose: list[float]) -> bool:
+        """Run the full service reset up to ``reset_service_max_attempts`` times.
+
+        Each retry re-invokes the complete teleport + certification pipeline
+        (service call, FSM/offboard confirmation, controller refresh, pose
+        observation, actionability probe), so a transient dead command path
+        after one teleport gets a fresh simulator state instead of killing a
+        long training run. ``service_disabled`` is not retryable.
+        """
+        attempts = self.reset_service_max_attempts
+        attempt_failures: list[dict[str, Any]] = []
+        for attempt in range(1, attempts + 1):
+            if self._try_service_backed_reset(start_pose):
+                self._last_reset_diagnostics['reset_service_attempts'] = attempt
+                if attempt_failures:
+                    self._last_reset_diagnostics['reset_service_attempt_failures'] = (
+                        attempt_failures
+                    )
+                return True
+
+            reason = str(self._last_reset_diagnostics.get('reason', 'unknown'))
+            attempt_failures.append({
+                'attempt': attempt,
+                'reason': reason,
+                'failure_class': str(
+                    self._last_reset_diagnostics.get('failure_class', '')
+                ),
+            })
+            if reason == 'service_disabled':
+                break
+            if attempt < attempts:
+                logger.warning(
+                    'Service reset attempt %d/%d failed (%s); retrying full teleport...',
+                    attempt,
+                    attempts,
+                    reason,
+                )
+                if self.reset_service_retry_backoff_s > 0.0:
+                    time.sleep(self.reset_service_retry_backoff_s)
+
+        self._last_reset_diagnostics['reset_service_attempts'] = len(attempt_failures)
+        self._last_reset_diagnostics['reset_service_attempt_failures'] = attempt_failures
+        return False
+
     def _raise_fresh_service_reset_failure(self) -> None:
         """Fail fast when a fresh service-backed reset cannot prove command readiness."""
         raise RuntimeError(
@@ -2991,7 +3194,7 @@ class AS2TestEnv(gym.Env):
         start_pose = list(self._drone.position) + [float(self._drone.orientation[2])]
         sample_attempts = 0
         if self.fixed_start_pose is not None:
-            if use_service_for_this_reset and self._try_service_backed_reset(self.fixed_start_pose):
+            if use_service_for_this_reset and self._service_backed_reset_with_retries(self.fixed_start_pose):
                 self._mark_service_reset_success_if_unreported(self.fixed_start_pose)
                 hover_settled = True
             elif use_service_for_this_reset and required_service_reset_reason is not None:
@@ -3007,7 +3210,7 @@ class AS2TestEnv(gym.Env):
 
         if self.randomize_hover_start:
             sampled_start, sampled_target, sample_attempts = self._sample_randomized_episode()
-            if use_service_for_this_reset and self._try_service_backed_reset(sampled_start):
+            if use_service_for_this_reset and self._service_backed_reset_with_retries(sampled_start):
                 self._mark_service_reset_success_if_unreported(sampled_start)
                 hover_settled = True
             elif use_service_for_this_reset and required_service_reset_reason is not None:
@@ -3089,6 +3292,7 @@ class AS2TestEnv(gym.Env):
             info['motion_command_publication_count'] = 0
             info['motion_command_accepted_publication_count'] = 0
             info['low_altitude_guard_active'] = False
+            info['bounds_guard_active'] = False
             # No action is processed on this early return; the keys must still
             # exist because SB3 Monitor reads every monitor_info_keywords entry
             # at episode end.
@@ -3135,6 +3339,10 @@ class AS2TestEnv(gym.Env):
         vertical_safety_penalty = self._compute_vertical_safety_penalty(raw_vz)
         vz = raw_vz
         vz = self._apply_low_altitude_action_guard(vz)
+        # Applied after the low-altitude guard: a forced climb starts at or
+        # below the floor guard height, which the validated geometry keeps
+        # strictly below the ceiling guard line, so both guards never fight.
+        vx, vy, vz = self._apply_bounds_action_guard(vx, vy, vz)
         vyaw = float(action[3])
 
         # Send velocity command with yaw rate via DroneInterface. If AS2 rejects
@@ -3249,6 +3457,7 @@ class AS2TestEnv(gym.Env):
         info['motion_command_publication_count'] = int(publication_count)
         info['motion_command_accepted_publication_count'] = int(accepted_publication_count)
         info['low_altitude_guard_active'] = self._last_low_altitude_guard_active
+        info['bounds_guard_active'] = self._last_bounds_guard_active
         info['step_altitude_before'] = pre_step_snapshot['altitude']
         info['step_altitude_after'] = post_step_snapshot['altitude']
         info['step_min_altitude'] = step_min_altitude

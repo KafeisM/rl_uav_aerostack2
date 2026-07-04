@@ -119,17 +119,54 @@ def build_env_kwargs(env_cfg: dict[str, Any]) -> dict[str, Any]:
         'target_marker_scale': env_cfg.get('target_marker_scale', 0.35),
         'close_operation_timeout': env_cfg.get('close_operation_timeout', 10.0),
         'use_service_reset_after_velocity_timeout': env_cfg.get('use_service_reset_after_velocity_timeout', False),
+        'reset_service_max_attempts': env_cfg.get('reset_service_max_attempts', 3),
+        'reset_service_retry_backoff_s': env_cfg.get('reset_service_retry_backoff_s', 2.0),
         'randomize_hover_start': env_cfg.get('randomize_hover_start', False),
         'scene_bounds_xy': env_cfg.get('scene_bounds_xy', 5.0),
         'height_bounds': env_cfg.get('height_bounds', [0.1, 2.0]),
         'min_start_target_distance': env_cfg.get('min_start_target_distance'),
+        'max_start_target_distance': env_cfg.get('max_start_target_distance'),
         'hover_speed_threshold': env_cfg.get('hover_speed_threshold', 0.05),
         'hover_settle_time': env_cfg.get('hover_settle_time', 1.0),
         'hover_timeout': env_cfg.get('hover_timeout', 10.0),
         'max_reset_sample_attempts': env_cfg.get('max_reset_sample_attempts', 100),
         'randomize_yaw': env_cfg.get('randomize_yaw', True),
         'randomization_bounds_margin': env_cfg.get('randomization_bounds_margin', 0.0),
+        'randomization_bounds_margin_z': env_cfg.get('randomization_bounds_margin_z'),
+        'bounds_action_guard': env_cfg.get('bounds_action_guard', False),
+        'bounds_guard_margin_xy': env_cfg.get('bounds_guard_margin_xy', 0.5),
+        'bounds_guard_margin_ceiling': env_cfg.get('bounds_guard_margin_ceiling', 0.3),
+        'bounds_guard_push_speed': env_cfg.get('bounds_guard_push_speed', 0.2),
     }
+
+
+def resolve_resume_checkpoint(
+    resume_from: str,
+    config: dict[str, Any],
+    output_root: Path | str = 'runs/ppo',
+) -> Path:
+    """Resolve the checkpoint to resume from.
+
+    ``resume_from`` is either an explicit checkpoint ``.zip`` path or the
+    literal ``'latest'``, which picks the newest checkpoint matching the
+    config's ``checkpoint_prefix`` under ``<output_root>/*/checkpoints/``.
+    """
+    if resume_from != 'latest':
+        checkpoint = Path(resume_from)
+        if checkpoint.is_file():
+            return checkpoint
+        raise FileNotFoundError(f'Resume checkpoint not found: {checkpoint}')
+
+    prefix = config['training']['checkpoint_prefix']
+    root = Path(output_root)
+    pattern = f'*/checkpoints/{prefix}_*_steps.zip'
+    candidates = sorted(root.glob(pattern), key=lambda path: path.stat().st_mtime)
+    if not candidates:
+        raise FileNotFoundError(
+            f"No checkpoint matching '{prefix}_*_steps.zip' found under "
+            f"'{root}/*/checkpoints/'"
+        )
+    return candidates[-1]
 
 
 def build_vec_env(

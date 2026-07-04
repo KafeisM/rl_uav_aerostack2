@@ -7,6 +7,7 @@ import argparse
 import logging
 from pathlib import Path
 
+from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 
 from rl_uav.training import (
@@ -14,6 +15,7 @@ from rl_uav.training import (
     build_vec_env,
     load_training_config,
     prepare_run_paths,
+    resolve_resume_checkpoint,
 )
 
 
@@ -42,6 +44,15 @@ def _build_parser() -> argparse.ArgumentParser:
         action='store_true',
         help='Build config/env/model and print summary without calling learn()',
     )
+    parser.add_argument(
+        '--resume-from',
+        type=str,
+        default=None,
+        help=(
+            "Checkpoint .zip path to resume from, or 'latest' to pick the "
+            "newest checkpoint matching the config's checkpoint_prefix"
+        ),
+    )
     return parser
 
 
@@ -56,6 +67,13 @@ def main() -> int:
     logger = logging.getLogger('train_ppo')
 
     config = load_training_config(args.config)
+    resume_checkpoint = None
+    if args.resume_from is not None:
+        resume_checkpoint = resolve_resume_checkpoint(
+            args.resume_from,
+            config,
+            output_root=config['experiment']['output_root'],
+        )
     paths = prepare_run_paths(config)
     vec_env = None
 
@@ -65,7 +83,20 @@ def main() -> int:
             monitor_dir=paths.monitor_dir,
             num_envs_override=args.num_envs,
         )
-        model = build_ppo_model(config=config, vec_env=vec_env, tensorboard_dir=paths.tensorboard_dir)
+        if resume_checkpoint is not None:
+            model = PPO.load(
+                str(resume_checkpoint),
+                env=vec_env,
+                device=config['training'].get('device', 'cpu'),
+            )
+            model.tensorboard_log = str(paths.tensorboard_dir)
+            logger.info(
+                'Resuming from %s at num_timesteps=%d',
+                resume_checkpoint,
+                model.num_timesteps,
+            )
+        else:
+            model = build_ppo_model(config=config, vec_env=vec_env, tensorboard_dir=paths.tensorboard_dir)
 
         checkpoint_cb = CheckpointCallback(
             save_freq=config['training']['checkpoint_freq'],
@@ -94,6 +125,12 @@ def main() -> int:
         logger.info('Total timesteps: %d', total_timesteps)
 
         if args.dry_run:
+            if resume_checkpoint is not None:
+                logger.info(
+                    'Dry-run resume summary: checkpoint=%s num_timesteps=%d',
+                    resume_checkpoint,
+                    model.num_timesteps,
+                )
             logger.info('Dry-run enabled: model/env built successfully, skipping learn().')
             return 0
 
@@ -102,6 +139,7 @@ def main() -> int:
             total_timesteps=total_timesteps,
             callback=checkpoint_cb,
             progress_bar=False,
+            reset_num_timesteps=resume_checkpoint is None,
         )
         model.save(str(paths.run_dir / 'model_final'))
         logger.info('Training completed. Final model saved at: %s', paths.run_dir / 'model_final.zip')

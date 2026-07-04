@@ -6,6 +6,7 @@ from rl_uav.training.ppo_setup import (
     build_vec_env,
     load_training_config,
     prepare_run_paths,
+    resolve_resume_checkpoint,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     'build_vec_env',
     'load_training_config',
     'prepare_run_paths',
+    'resolve_resume_checkpoint',
 ]
