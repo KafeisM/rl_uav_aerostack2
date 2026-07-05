@@ -136,6 +136,9 @@ class AS2TestEnv(gym.Env):
         bounds_guard_margin_xy: float = 0.5,
         bounds_guard_margin_ceiling: float = 0.3,
         bounds_guard_push_speed: float = 0.2,
+        bounds_guard_lookahead_s: float = 0.0,
+        bounds_guard_vertical_push_speed: float | None = None,
+        low_altitude_guard_lookahead_s: float = 0.0,
     ):
         """
         Initialize the test environment.
@@ -210,6 +213,24 @@ class AS2TestEnv(gym.Env):
                                          low-altitude action guard.
             bounds_guard_push_speed: Inward push speed (m/s) commanded while
                                      the guard is active (capped at max_vel).
+            bounds_guard_lookahead_s: Prediction horizon (s) for the bounds
+                                      guard. Each axis also triggers when
+                                      position + measured velocity * lookahead
+                                      crosses the guard line, so momentum
+                                      cannot coast the vehicle past the
+                                      terminal bound before the clamp acts.
+                                      0.0 (default) keeps the guard purely
+                                      position-reactive.
+            bounds_guard_vertical_push_speed: Dedicated downward push speed
+                                              (m/s) for the ceiling clamp
+                                              (capped at max_vel). None
+                                              (default) falls back to
+                                              bounds_guard_push_speed.
+            low_altitude_guard_lookahead_s: Prediction horizon (s) for the
+                                            low-altitude guard, using the
+                                            measured vertical speed. 0.0
+                                            (default) keeps the guard purely
+                                            position-reactive.
         """
         super().__init__()
 
@@ -283,6 +304,13 @@ class AS2TestEnv(gym.Env):
         self.bounds_guard_margin_xy = float(bounds_guard_margin_xy)
         self.bounds_guard_margin_ceiling = float(bounds_guard_margin_ceiling)
         self.bounds_guard_push_speed = float(bounds_guard_push_speed)
+        self.bounds_guard_lookahead_s = float(bounds_guard_lookahead_s)
+        self.bounds_guard_vertical_push_speed = (
+            float(bounds_guard_vertical_push_speed)
+            if bounds_guard_vertical_push_speed is not None
+            else None
+        )
+        self.low_altitude_guard_lookahead_s = float(low_altitude_guard_lookahead_s)
         self._last_sample_attempts = 0
 
         self._validate_bounds()
@@ -919,6 +947,17 @@ class AS2TestEnv(gym.Env):
             raise ValueError(
                 'pos_limit must be >= max(abs(height_bounds)) to preserve normalization budget'
             )
+        # Lookaheads are plain floats with safe defaults: validate them
+        # unconditionally, independent of the guard toggles.
+        if not 0.0 <= self.bounds_guard_lookahead_s <= 5.0:
+            raise ValueError('bounds_guard_lookahead_s must be in [0, 5] seconds')
+        if not 0.0 <= self.low_altitude_guard_lookahead_s <= 5.0:
+            raise ValueError('low_altitude_guard_lookahead_s must be in [0, 5] seconds')
+        if (
+            self.bounds_guard_vertical_push_speed is not None
+            and self.bounds_guard_vertical_push_speed <= 0.0
+        ):
+            raise ValueError('bounds_guard_vertical_push_speed must be > 0 when set')
         if self.bounds_action_guard:
             if self.bounds_guard_push_speed <= 0.0:
                 raise ValueError(
@@ -1288,19 +1327,49 @@ class AS2TestEnv(gym.Env):
         return float(self.unsafe_low_altitude_threshold) + guard_margin
 
     def _apply_low_altitude_action_guard(self, vz: float) -> float:
-        """Prevent policy actions from driving the vehicle into terminal ground contact."""
+        """Prevent policy actions from driving the vehicle into terminal ground contact.
+
+        Besides the position trigger (already at/below the guard height), a
+        predictive trigger fires when the measured vertical speed would coast
+        the vehicle to the guard height within ``low_altitude_guard_lookahead_s``
+        seconds: the platform reverses vertical velocity slowly, so a purely
+        position-reactive clamp lets momentum carry the drone past the
+        terminal floor before the climb takes effect.
+        """
         self._last_low_altitude_guard_active = False
-        if vz > 0.0:
-            return vz
         try:
             current_z = float(self._drone.position[2])
         except Exception:
             return vz
         guard_height = self._low_altitude_guard_height()
-        if current_z <= guard_height:
+
+        vz_estimate: float | None = None
+        lookahead = float(self.low_altitude_guard_lookahead_s)
+        if lookahead > 0.0:
+            speed = self._current_speed_xyz()
+            if speed is not None:
+                vz_estimate = float(speed[2])
+
+        position_trigger = current_z <= guard_height
+        predictive_trigger = (
+            vz_estimate is not None
+            and current_z + vz_estimate * lookahead <= guard_height
+        )
+        if not (position_trigger or predictive_trigger):
+            return vz
+
+        climb_speed = max(float(self.low_altitude_guard_climb_speed), float(self.reset_min_speed), 0.0)
+        climb = min(float(self.max_vel), climb_speed)
+        if vz <= 0.0:
+            # The guard replaces the COMMAND: outward (downward) commands are
+            # swapped for the forced climb; inward commands pass through.
             self._last_low_altitude_guard_active = True
-            climb_speed = max(float(self.low_altitude_guard_climb_speed), float(self.reset_min_speed), 0.0)
-            return min(float(self.max_vel), climb_speed)
+            return climb
+        if predictive_trigger and vz_estimate is not None and vz_estimate < -climb:
+            # Falling faster than the climb authority: a small positive
+            # command cannot arrest the fall in time, so force the climb.
+            self._last_low_altitude_guard_active = True
+            return climb
         return vz
 
     def _apply_bounds_action_guard(
@@ -1312,6 +1381,14 @@ class AS2TestEnv(gym.Env):
         resets degrade the simulator) without touching the terminal checks
         themselves. The floor is already covered by the low-altitude action
         guard, so only the XY faces and the ceiling are guarded here.
+
+        Each axis triggers on the CURRENT coordinate crossing the guard line
+        OR on the PREDICTED coordinate (position + measured velocity *
+        ``bounds_guard_lookahead_s``) crossing it: momentum reverses slowly on
+        this platform, so a purely position-reactive clamp lets the vehicle
+        coast past the terminal bound before the replaced command takes
+        effect. Only outward commands are replaced; inward commands always
+        pass through.
         """
         self._last_bounds_guard_active = False
         if not self.bounds_action_guard:
@@ -1321,26 +1398,46 @@ class AS2TestEnv(gym.Env):
         except Exception:
             return vx, vy, vz
 
+        # Predicted position after the lookahead horizon; degrades gracefully
+        # to the current position when the speed is unreadable or the
+        # lookahead is zero.
+        px, py, pz = x, y, z
+        lookahead = float(self.bounds_guard_lookahead_s)
+        if lookahead > 0.0:
+            speed = self._current_speed_xyz()
+            if speed is not None:
+                px = x + float(speed[0]) * lookahead
+                py = y + float(speed[1]) * lookahead
+                pz = z + float(speed[2]) * lookahead
+
         push = min(float(self.max_vel), max(float(self.bounds_guard_push_speed), 0.0))
+        # The ceiling clamp gets full authority through a dedicated speed:
+        # exp012 showed the 0.2 m/s push cannot arrest vertical momentum.
+        vertical_push_setting = (
+            self.bounds_guard_vertical_push_speed
+            if self.bounds_guard_vertical_push_speed is not None
+            else self.bounds_guard_push_speed
+        )
+        vertical_push = min(float(self.max_vel), max(float(vertical_push_setting), 0.0))
         clamped = False
 
         xy_line = float(self.scene_bounds_xy) - float(self.bounds_guard_margin_xy)
-        if x >= xy_line and vx >= 0.0:
+        if (x >= xy_line or px >= xy_line) and vx >= 0.0:
             vx = -push
             clamped = True
-        elif x <= -xy_line and vx <= 0.0:
+        elif (x <= -xy_line or px <= -xy_line) and vx <= 0.0:
             vx = push
             clamped = True
-        if y >= xy_line and vy >= 0.0:
+        if (y >= xy_line or py >= xy_line) and vy >= 0.0:
             vy = -push
             clamped = True
-        elif y <= -xy_line and vy <= 0.0:
+        elif (y <= -xy_line or py <= -xy_line) and vy <= 0.0:
             vy = push
             clamped = True
 
         ceiling_line = float(self.height_bounds[1]) - float(self.bounds_guard_margin_ceiling)
-        if z >= ceiling_line and vz >= 0.0:
-            vz = -push
+        if (z >= ceiling_line or pz >= ceiling_line) and vz >= 0.0:
+            vz = -vertical_push
             clamped = True
 
         if clamped:

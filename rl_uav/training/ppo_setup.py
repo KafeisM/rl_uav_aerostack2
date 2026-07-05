@@ -137,6 +137,9 @@ def build_env_kwargs(env_cfg: dict[str, Any]) -> dict[str, Any]:
         'bounds_guard_margin_xy': env_cfg.get('bounds_guard_margin_xy', 0.5),
         'bounds_guard_margin_ceiling': env_cfg.get('bounds_guard_margin_ceiling', 0.3),
         'bounds_guard_push_speed': env_cfg.get('bounds_guard_push_speed', 0.2),
+        'bounds_guard_lookahead_s': env_cfg.get('bounds_guard_lookahead_s', 0.0),
+        'bounds_guard_vertical_push_speed': env_cfg.get('bounds_guard_vertical_push_speed'),
+        'low_altitude_guard_lookahead_s': env_cfg.get('low_altitude_guard_lookahead_s', 0.0),
     }
 
 
