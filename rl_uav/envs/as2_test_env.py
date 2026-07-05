@@ -139,6 +139,7 @@ class AS2TestEnv(gym.Env):
         bounds_guard_lookahead_s: float = 0.0,
         bounds_guard_vertical_push_speed: float | None = None,
         low_altitude_guard_lookahead_s: float = 0.0,
+        idle_command_watchdog_s: float = 0.0,
     ):
         """
         Initialize the test environment.
@@ -231,6 +232,22 @@ class AS2TestEnv(gym.Env):
                                             measured vertical speed. 0.0
                                             (default) keeps the guard purely
                                             position-reactive.
+            idle_command_watchdog_s: When > 0, a daemon watchdog thread
+                                     publishes a zero-velocity hover hold
+                                     if no motion reference of any kind has
+                                     been sent for this many seconds while
+                                     the vehicle is flying, and keeps
+                                     republishing it every
+                                     command_publication_interval seconds
+                                     until any other command arrives. The
+                                     AS2 controller holds the last velocity
+                                     reference as a live setpoint
+                                     indefinitely, so a vectorized sibling
+                                     env blocked by another env's long
+                                     reset would otherwise fly away on its
+                                     stale reference. 0.0 (default)
+                                     disables the watchdog entirely (no
+                                     thread is created).
         """
         super().__init__()
 
@@ -311,7 +328,17 @@ class AS2TestEnv(gym.Env):
             else None
         )
         self.low_altitude_guard_lookahead_s = float(low_altitude_guard_lookahead_s)
+        self.idle_command_watchdog_s = float(idle_command_watchdog_s)
         self._last_sample_attempts = 0
+
+        # Idle-command hover watchdog state. The thread is created lazily on
+        # the first step() with the feature enabled, so the default path stays
+        # thread-free (and ROS-free harnesses construct without side effects).
+        self._command_lock = threading.Lock()
+        self._last_command_monotonic = time.monotonic()
+        self._idle_watchdog_thread: threading.Thread | None = None
+        self._idle_watchdog_stop = threading.Event()
+        self._watchdog_publish_local = threading.local()
 
         self._validate_bounds()
         self._validate_pose('fixed_start_pose', self.fixed_start_pose)
@@ -953,6 +980,13 @@ class AS2TestEnv(gym.Env):
             raise ValueError('bounds_guard_lookahead_s must be in [0, 5] seconds')
         if not 0.0 <= self.low_altitude_guard_lookahead_s <= 5.0:
             raise ValueError('low_altitude_guard_lookahead_s must be in [0, 5] seconds')
+        if self.idle_command_watchdog_s < 0.0:
+            raise ValueError('idle_command_watchdog_s must be >= 0')
+        if 0.0 < self.idle_command_watchdog_s <= float(self.step_duration):
+            raise ValueError(
+                'idle_command_watchdog_s must be > step_duration when enabled, '
+                'otherwise the watchdog would fire mid-step-hold'
+            )
         if (
             self.bounds_guard_vertical_push_speed is not None
             and self.bounds_guard_vertical_push_speed <= 0.0
@@ -2442,8 +2476,80 @@ class AS2TestEnv(gym.Env):
             return False
         return self._restore_start_pose_after_actionability_probe(start_pose, second_probe)
 
+    def _ensure_idle_watchdog_started(self) -> None:
+        """Lazily start the idle-command watchdog thread (feature enabled)."""
+        if self.idle_command_watchdog_s <= 0.0 or self._idle_watchdog_thread is not None:
+            return
+        self._idle_watchdog_stop.clear()
+        thread = threading.Thread(
+            target=self._idle_watchdog_loop,
+            name=f'idle-command-watchdog-{self.drone_namespace}',
+            daemon=True,
+        )
+        self._idle_watchdog_thread = thread
+        thread.start()
+
+    def _idle_watchdog_loop(self) -> None:
+        """Publish a hover hold while no motion reference has been sent.
+
+        The AS2 controller holds the last velocity reference as a live
+        setpoint indefinitely; when this env stops being stepped (e.g. a
+        vectorized sibling is blocked by another env's long certified reset),
+        the vehicle would keep flying its stale reference out of bounds. Once
+        the idle threshold elapses while flying, this loop publishes
+        zero-velocity references at command_publication_interval cadence
+        until any other command resets the idle clock.
+        """
+        # Mark this thread so its own publishes never reset the idle clock.
+        self._watchdog_publish_local.active = True
+        threshold = float(self.idle_command_watchdog_s)
+        idle_poll = min(0.05, threshold / 4.0)
+        republish_period = max(float(self.command_publication_interval), 1e-3)
+        engaged = False
+        while not self._idle_watchdog_stop.is_set():
+            with self._command_lock:
+                last_command = self._last_command_monotonic
+            idle_for = time.monotonic() - last_command
+            if idle_for < threshold:
+                engaged = False
+                self._idle_watchdog_stop.wait(idle_poll)
+                continue
+            if not self._is_flying:
+                self._idle_watchdog_stop.wait(idle_poll)
+                continue
+            if not engaged:
+                logger.info('Idle command watchdog engaged: publishing hover hold')
+                engaged = True
+            self._send_speed_command([0.0, 0.0, 0.0], 0.0)
+            self._idle_watchdog_stop.wait(republish_period)
+
+    def _stop_idle_watchdog(self) -> None:
+        """Stop the watchdog thread; safe to call repeatedly."""
+        self._idle_watchdog_stop.set()
+        thread = self._idle_watchdog_thread
+        if thread is not None:
+            thread.join(timeout=1.0)
+            if thread.is_alive():
+                logger.warning('Idle command watchdog thread did not stop within 1 s')
+            self._idle_watchdog_thread = None
+
+    def _record_motion_command_activity(self) -> None:
+        """Reset the idle-command clock, except for the watchdog's own sends.
+
+        Every motion reference (step commands, reset commands, probes) resets
+        the idle clock. The watchdog thread marks itself via a thread-local
+        flag so its own zero publishes do NOT count as activity — otherwise a
+        single hover-hold publish would permanently satisfy the timer and
+        republishing would stop.
+        """
+        if getattr(self._watchdog_publish_local, 'active', False):
+            return
+        with self._command_lock:
+            self._last_command_monotonic = time.monotonic()
+
     def _send_speed_command(self, twist: list[float], yaw_speed: float) -> bool:
         """Send one speed/yaw-rate motion reference and report API acceptance."""
+        self._record_motion_command_activity()
         if self._speed_handler is None or not hasattr(
             self._speed_handler,
             'send_speed_command_with_yaw_speed',
@@ -3367,6 +3473,7 @@ class AS2TestEnv(gym.Env):
         """
         import time
 
+        self._ensure_idle_watchdog_started()
         self._step_count += 1
         pre_step_snapshot = self._step_safety_snapshot()
         step_min_altitude = self._update_step_safety_minimum(
@@ -3716,6 +3823,10 @@ class AS2TestEnv(gym.Env):
     def close(self):
         """Land the drone and release only this environment's ROS resources."""
         logger.info("Closing environment...")
+
+        # Stop the idle watchdog first so it cannot publish hover holds while
+        # landing/shutdown are in progress. Idempotent by construction.
+        self._stop_idle_watchdog()
 
         self._destroy_reset_client_resources()
 

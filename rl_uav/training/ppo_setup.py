@@ -140,6 +140,7 @@ def build_env_kwargs(env_cfg: dict[str, Any]) -> dict[str, Any]:
         'bounds_guard_lookahead_s': env_cfg.get('bounds_guard_lookahead_s', 0.0),
         'bounds_guard_vertical_push_speed': env_cfg.get('bounds_guard_vertical_push_speed'),
         'low_altitude_guard_lookahead_s': env_cfg.get('low_altitude_guard_lookahead_s', 0.0),
+        'idle_command_watchdog_s': env_cfg.get('idle_command_watchdog_s', 0.0),
     }
 
 
