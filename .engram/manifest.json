@@ -40,6 +40,14 @@
       "sessions": 8,
       "memories": 34,
       "prompts": 3
+    },
+    {
+      "id": "3861929e",
+      "created_by": "jordi",
+      "created_at": "2026-07-05T22:30:37Z",
+      "sessions": 2,
+      "memories": 15,
+      "prompts": 0
     }
   ]
 }
