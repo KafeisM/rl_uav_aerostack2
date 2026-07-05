@@ -122,6 +122,16 @@ def main() -> int:
             if args.total_timesteps is not None
             else config['training']['total_timesteps']
         )
+        if resume_checkpoint is not None:
+            # SB3 treats total_timesteps as ADDITIONAL steps when
+            # reset_num_timesteps=False (it adds the checkpoint's counter), so
+            # pass only the remainder to land exactly on the configured total
+            # instead of growing the target by +total on every crash-resume.
+            total_timesteps = max(0, total_timesteps - model.num_timesteps)
+            logger.info(
+                'Resume remainder: %d steps to reach the configured total',
+                total_timesteps,
+            )
         logger.info('Total timesteps: %d', total_timesteps)
 
         if args.dry_run:
@@ -132,6 +142,14 @@ def main() -> int:
                     model.num_timesteps,
                 )
             logger.info('Dry-run enabled: model/env built successfully, skipping learn().')
+            return 0
+
+        if total_timesteps <= 0:
+            # A checkpoint can legitimately overshoot the configured total
+            # (PPO rollouts land on n_steps boundaries); a zero-remainder
+            # learn() would still trigger a live env reset for nothing.
+            logger.info('Nothing left to train (remainder 0); saving final model as-is.')
+            model.save(str(paths.run_dir / 'model_final'))
             return 0
 
         logger.info('Starting PPO learn() ...')
