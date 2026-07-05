@@ -1,0 +1,168 @@
+experiment:
+  name: ppo_phase1_exp016_curriculum_full_150k
+  seed: 42
+  output_root: runs/ppo
+
+environment:
+  env_id: AS2TestEnv-v0
+  num_envs: 1
+  vec_env: dummy
+  namespace_prefix: drone
+  use_sim_time: false
+  verbose: false
+
+  # Exp016: curriculum stage 3 — the tutor's ORIGINAL full task (only two
+  # deltas vs exp015: max_start_target_distance 3.5 -> 5.0 and
+  # total_timesteps 100k -> 150k; everything else identical, tutor
+  # reward/hyperparams). Exp015 (stage 2, targets <= 3.5 m) reached 65%
+  # overall success with a 90% peak decile and 0.5-1.0 m final distances.
+  # Stage 3 restores the full 5.0 m separation cap (still strictly below
+  # pos_limit so the relative observation never clips). Launch with the
+  # supervisor's INITIAL_RESUME pointing at exp015's model_final.
+  pos_limit: 5.0
+  max_vel: 0.5
+  reset_max_vel: 1.0
+  reset_xy_kp: 1.0
+  reset_z_kp: 1.0
+  max_yaw_vel: 1.5707963267948966
+  # Live AS2 needs a command window long enough for the controller and physics
+  # to react; the reset actionability probe confirms motion over about 0.6 s.
+  step_duration: 0.2
+  command_publication_interval: 0.05
+  min_motion_command_publications: 4
+  # DroneInterface executor spin rate (Hz). Must exceed the combined inbound
+  # telemetry rate (~130 msg/s) so observed pose stays fresh within one step.
+  interface_spin_rate: 300.0
+  # Randomized episodes: no fixed start pose. reset() takes the
+  # randomize_hover_start branch (fixed_start_pose and randomize_hover_start
+  # are mutually exclusive in the env constructor).
+  fixed_start_pose: null
+  fixed_start_tolerance: 0.22
+  fixed_start_timeout: 60.0
+  # Position reset remains the hard gate; yaw is diagnostic only (exp009 reset
+  # settings preserved).
+  reset_yaw_tolerance: 1.2
+  reset_yaw_required: false
+  reset_min_speed: 0.20
+  reset_ground_recovery_height: 1.4
+  # Full service-reset retry: a transient dead command path after one teleport
+  # (~1 in 400 resets, killed exp010 at 2h33m) re-runs the complete teleport +
+  # certification pipeline instead of killing the run. Backoff lets the
+  # simulator settle in between.
+  reset_service_max_attempts: 3
+  reset_service_retry_backoff_s: 2.0
+  # Vertical safety geometry (predictive corridor vs exp012):
+  #   floor 0.3 < unsafe 0.5 < guard 0.5+max(0.45, 2*max_vel*step_duration=0.20)=0.95
+  #   < randomized z range [0.5+0.5, 2.5-0.5] = [1.0, 2.0]
+  #   < ceiling guard line 2.5-0.4=2.1 < ceiling 2.5.
+  # The z margin keeps every sampled start/target ABOVE the low-altitude guard
+  # (0.95) and BELOW the ceiling guard line (2.1), so episodes never begin
+  # inside either guard band.
+  unsafe_low_altitude_threshold: 0.5
+  low_altitude_guard_margin: 0.45
+  low_altitude_guard_climb_speed: 0.5
+  # Predictive floor guard: also triggers when z + measured_vz * lookahead (1.0 s) crosses
+  # the guard height, and forces the climb on small positive commands when the
+  # measured fall speed exceeds the 0.5 m/s climb authority.
+  low_altitude_guard_lookahead_s: 1.0
+  # Tutor-spec reward: the vertical safety shaping is fully disabled (weights
+  # and band zeroed). The low-altitude guard stays active as an ACTION clamp
+  # only; it never touches the reward with these weights.
+  vertical_safety_band: 0.0
+  vertical_safety_penalty_weight: 0.0
+  vertical_descent_penalty_weight: 0.0
+  # Bounds action guard: outward commands are replaced with an inward push at
+  # the guard lines (XY 4.5, ceiling 2.1), triggering on position + velocity
+  # * lookahead (1.0 s). XY keeps the 0.2 m/s push; the ceiling clamp gets full authority
+  # (0.5 m/s = max_vel) because exp012 showed 0.2 m/s cannot arrest vertical
+  # momentum. The floor is covered by the low-altitude guard.
+  bounds_action_guard: true
+  bounds_guard_margin_xy: 0.5
+  bounds_guard_margin_ceiling: 0.4
+  bounds_guard_push_speed: 0.2
+  bounds_guard_lookahead_s: 1.0
+  bounds_guard_vertical_push_speed: 0.5
+  # Placeholder only: the randomized reset path overwrites the target pose on
+  # every episode.
+  target_pose: [1.0, 0.0, 1.6, 0.0]
+  distance_threshold: 0.4
+  # Start-target separation is capped at 5.0 m; at max_vel 0.5 m/s and step
+  # 0.2 s (0.1 m/step) a direct flight needs <= 50 steps, so 200 steps leave
+  # 4x slack for an immature policy.
+  max_steps: 200
+  success_reward: 20.0
+  oob_penalty: 15.0
+  # Tutor-spec minimal reward: continuous term is exactly -d_norm.
+  path_facing_weight: 0.0
+  progress_reward_weight: 0.0
+  # Terminal yaw reduction on success. Worst-case arrival (yaw_err_norm = 1)
+  # still nets +10 (> 0), so the policy is never incentivized to avoid arrival.
+  terminal_yaw_penalty_weight: 10.0
+  speed_deadband: 0.05
+
+  close_operation_timeout: 10.0
+  # Last-resort stabilization for live gates: velocity reset remains primary.
+  use_service_reset_after_velocity_timeout: true
+
+  publish_target_marker: true
+  target_marker_topic: visualization_marker
+  target_marker_frame_id: earth
+  target_marker_scale: 0.35
+
+  monitor_info_keywords: [is_success, final_distance, is_out_of_bounds, is_unsafe_low_altitude, altitude, terminal_reason, terminal_stop_command_accepted, terminal_yaw_error, terminal_yaw_penalty, physical_displacement, path_length, max_physical_displacement, min_altitude, motion_command_steps, motion_command_accepted_steps, motion_command_acceptance_rate, mean_action_norm, max_action_norm, mean_xy_action_norm, max_xy_action_norm, last_action_vx, last_action_vy, last_action_vz, last_action_vyaw, reset_method, reset_path, reset_service_attempted, reset_failure_class, reset_position_error, reset_yaw_error, reset_service_status, vertical_safety_penalty, low_altitude_guard_active, bounds_guard_active]
+
+  # Full episode randomization (start pose, start yaw, target pose, target
+  # yaw) inside a safe inner area.
+  randomize_hover_start: true
+  randomize_yaw: true
+  scene_bounds_xy: 5.0
+  height_bounds: [0.3, 2.5]
+  # min separation (1.0) must exceed distance_threshold (0.4) plus the reset
+  # restore residual so episodes never spawn inside the success sphere.
+  min_start_target_distance: 1.0
+  # Anti-saturation cap: strictly below pos_limit (5.0) so every relative-obs
+  # component stays inside (-1, 1) for the whole start-target segment.
+  max_start_target_distance: 5.0
+  # Safe inner XY area: samples stay >= 1.5 m from the OOB frontier, so an
+  # untrained policy has ~15 steps of exploration room in the worst direction
+  # before terminating (vs 3 steps with the exp010 margin of 0.3).
+  randomization_bounds_margin: 1.5
+  # Separate z margin (the 1.5 m XY margin would empty the height range):
+  # z is sampled in [1.0, 2.0], fully above the low-altitude guard (0.95) and
+  # below the ceiling guard line (2.1).
+  randomization_bounds_margin_z: 0.5
+  hover_speed_threshold: 0.05
+  hover_settle_time: 1.0
+  hover_timeout: 20.0
+  max_reset_sample_attempts: 100
+
+training:
+  total_timesteps: 150000
+  device: cpu
+  tensorboard_log_subdir: tensorboard
+  monitor_subdir: monitor
+  checkpoints_subdir: checkpoints
+  checkpoint_freq: 5000
+  checkpoint_prefix: ppo_phase1_exp016
+
+ppo:
+  # Tutor's exact hyperparameter set (matches configs/train_ppo.yaml).
+  policy: MlpPolicy
+  learning_rate: 3.0e-05
+  n_steps: 512
+  batch_size: 32
+  n_epochs: 5
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  normalize_advantage: true
+  use_sde: true
+  sde_sample_freq: 8
+  policy_kwargs:
+    activation_fn: ReLU
+    net_arch:
+      pi: [128, 128]
+      vf: [128, 128]
