@@ -27,6 +27,9 @@ RECYCLE_SECONDS="${RECYCLE_SECONDS:-0}"
 # Warm start: checkpoint used ONLY when no checkpoint matching this config's
 # prefix exists yet (e.g. curriculum stage N+1 seeding from stage N's model).
 INITIAL_RESUME="${INITIAL_RESUME:-}"
+# Comma-separated drone namespaces. More than one implies the swarm world
+# (launch_as2.bash -m), which must define every listed namespace.
+DRONE_NAMESPACES="${DRONE_NAMESPACES:-drone0}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
@@ -45,12 +48,19 @@ log() {
 
 restart_sim_stack() {
     (cd "$SIM_DIR" && ./stop.bash) >/dev/null 2>&1 || true
-    tmux kill-session -t drone0 2>/dev/null || true
+    local ns
+    for ns in $(echo "$DRONE_NAMESPACES" | tr ',' ' '); do
+        tmux kill-session -t "$ns" 2>/dev/null || true
+    done
     tmux kill-session -t ground_station 2>/dev/null || true
     pkill -f 'as2_' 2>/dev/null || true
     pkill -f 'ros2 launch' 2>/dev/null || true
     sleep 3
-    (cd "$SIM_DIR" && ./launch_as2.bash -n drone0 </dev/null >/dev/null 2>&1) || true
+    local swarm_flag=""
+    case "$DRONE_NAMESPACES" in
+        *,*) swarm_flag="-m" ;;
+    esac
+    (cd "$SIM_DIR" && ./launch_as2.bash $swarm_flag -n "$DRONE_NAMESPACES" </dev/null >/dev/null 2>&1) || true
     if [ -n "${DISPLAY:-}" ]; then
         (cd "$SIM_DIR" && DISPLAY="${DISPLAY:-:0}" ./launch_ground_station.bash </dev/null >/dev/null 2>&1) || true
     fi
@@ -65,8 +75,17 @@ wait_for_sim_health() {
     source /home/jordi/as2_rl_ws/install/setup.bash
     set -u
     local waited=0
+    local services ns healthy
     while [ "$waited" -lt 60 ]; do
-        if timeout 10 ros2 service list 2>/dev/null | grep -q reset_simulator_state; then
+        services="$(timeout 10 ros2 service list 2>/dev/null || true)"
+        healthy=1
+        for ns in $(echo "$DRONE_NAMESPACES" | tr ',' ' '); do
+            if ! echo "$services" | grep -q "/${ns}/platform/reset_simulator_state"; then
+                healthy=0
+                break
+            fi
+        done
+        if [ "$healthy" -eq 1 ]; then
             return 0
         fi
         sleep 5

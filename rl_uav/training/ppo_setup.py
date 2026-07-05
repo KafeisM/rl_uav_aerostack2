@@ -188,6 +188,10 @@ def build_vec_env(
 
     def _make_env(ns: str, rank: int):
         def _thunk():
+            # SubprocVecEnv ships this thunk to a fresh process via
+            # cloudpickle, which bypasses module imports — re-import here so
+            # the Gymnasium env registration runs in the child process too.
+            import rl_uav  # noqa: F401
             return gym.make(env_cfg['env_id'], drone_namespace=ns, **env_kwargs)
 
         return _thunk
