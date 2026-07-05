@@ -17,6 +17,16 @@ fi
 
 CONFIG="$1"
 MAX_ATTEMPTS="${2:-10}"
+# Preventive recycle: the AS2 platform degrades gradually once teleports
+# accumulate, so restarting stack+training on a fresh checkpoint BEFORE
+# degradation sets in keeps every training segment on a healthy simulator.
+# 0 disables. A recycle is recognized by the attempt having run for at least
+# RECYCLE_SECONDS (exit code alone is ambiguous: 137 can also be the OOM
+# killer); healthy recycles do not consume the failure-attempt budget.
+RECYCLE_SECONDS="${RECYCLE_SECONDS:-0}"
+# Warm start: checkpoint used ONLY when no checkpoint matching this config's
+# prefix exists yet (e.g. curriculum stage N+1 seeding from stage N's model).
+INITIAL_RESUME="${INITIAL_RESUME:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
@@ -86,11 +96,13 @@ EOF
 
 LAST_EXIT=1
 ATTEMPTS_USED=0
+RECYCLES_USED=0
+attempt=1
 
-for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
     ATTEMPTS_USED=$attempt
     ATTEMPT_LOG="$LOG_DIR/supervise_${CONFIG_STEM}_attempt${attempt}_$(date +%Y%m%d_%H%M%S).log"
-    log "=== Attempt $attempt/$MAX_ATTEMPTS (log: $ATTEMPT_LOG) ==="
+    log "=== Attempt $attempt/$MAX_ATTEMPTS, recycle $RECYCLES_USED (log: $ATTEMPT_LOG) ==="
 
     log "Restarting simulator stack ..."
     restart_sim_stack
@@ -98,31 +110,52 @@ for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
     log "Waiting for reset_simulator_state service ..."
     if ! wait_for_sim_health; then
         log "Simulator never became healthy within 60s; retrying."
+        attempt=$((attempt + 1))
         continue
     fi
     log "Simulator healthy."
 
     RESUME="$(resolve_resume_checkpoint)"
-    if [ -n "$RESUME" ]; then
+    if [ -z "$RESUME" ] && [ -n "$INITIAL_RESUME" ] && [ -f "$INITIAL_RESUME" ]; then
+        RESUME="$INITIAL_RESUME"
+        log "Warm start from external checkpoint: $RESUME"
+    elif [ -n "$RESUME" ]; then
         log "Resuming from checkpoint: $RESUME"
     else
         log "No matching checkpoint found; starting fresh."
     fi
 
     log "Launching training ..."
-    (cd "$REPO_DIR" && PYTHONUNBUFFERED=1 "$PY" scripts/train_ppo.py \
+    TIMEOUT_PREFIX=""
+    if [ "$RECYCLE_SECONDS" -gt 0 ]; then
+        TIMEOUT_PREFIX="timeout --signal=TERM --kill-after=120 $RECYCLE_SECONDS"
+    fi
+    ATTEMPT_STARTED=$(date +%s)
+    (cd "$REPO_DIR" && PYTHONUNBUFFERED=1 $TIMEOUT_PREFIX "$PY" scripts/train_ppo.py \
         --config "$CONFIG" ${RESUME:+--resume-from "$RESUME"} \
         >> "$ATTEMPT_LOG" 2>&1)
     LAST_EXIT=$?
+    ATTEMPT_ELAPSED=$(( $(date +%s) - ATTEMPT_STARTED ))
 
     if [ "$LAST_EXIT" -eq 0 ]; then
         log "Training completed successfully on attempt $attempt."
         break
     fi
 
-    log "Training exited with code $LAST_EXIT; retrying in 10s."
+    # A recycle is a kill that fires at (or after) the recycle horizon; an
+    # exit-code check alone would misread an early OOM kill (also 137) as
+    # healthy. Healthy recycles do not consume the failure-attempt budget.
+    if [ "$RECYCLE_SECONDS" -gt 0 ] && [ "$ATTEMPT_ELAPSED" -ge "$RECYCLE_SECONDS" ] \
+        && { [ "$LAST_EXIT" -eq 124 ] || [ "$LAST_EXIT" -eq 137 ]; }; then
+        RECYCLES_USED=$((RECYCLES_USED + 1))
+        log "Preventive recycle #$RECYCLES_USED after ${ATTEMPT_ELAPSED}s (exit $LAST_EXIT); restarting on a fresh stack."
+        continue
+    fi
+
+    log "Training exited with code $LAST_EXIT after ${ATTEMPT_ELAPSED}s; retrying in 10s."
+    attempt=$((attempt + 1))
     sleep 10
 done
 
-log "=== Supervisor done: attempts used $ATTEMPTS_USED, last exit code $LAST_EXIT ==="
+log "=== Supervisor done: attempts used $ATTEMPTS_USED, recycles $RECYCLES_USED, last exit code $LAST_EXIT ==="
 exit "$LAST_EXIT"
