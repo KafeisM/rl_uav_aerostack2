@@ -8,10 +8,12 @@ from rl_uav.evaluation.harness import (
     summarize,
     write_outputs,
 )
+from rl_uav.evaluation.pid import PIDController
 
 __all__ = [
     'Controller',
     'EpisodeRecord',
+    'PIDController',
     'PPOController',
     'run_evaluation',
     'summarize',

@@ -251,15 +251,24 @@ def test_write_outputs_produces_csv_json_metadata() -> None:
 
 def test_ppo_controller_wraps_predict() -> None:
     class FakeModel:
+        def __init__(self):
+            self.last_deterministic = None
+
         def predict(self, obs, deterministic=False):
-            assert deterministic is True
+            self.last_deterministic = deterministic
             return np.array([0.1, 0.2, 0.3, 0.4], dtype=np.float32), None
 
-    controller = PPOController(FakeModel(), name='fake-ppo')
+    model = FakeModel()
+    controller = PPOController(model, name='fake-ppo')
     controller.reset_episode()
     action = controller.act(np.zeros(4, dtype=np.float32))
     assert np.allclose(action, [0.1, 0.2, 0.3, 0.4])
     assert controller.name == 'fake-ppo'
+    assert model.last_deterministic is True
+
+    stochastic = PPOController(model, name='fake-ppo-s', deterministic=False)
+    stochastic.act(np.zeros(4, dtype=np.float32))
+    assert model.last_deterministic is False
 
 
 def test_cli_help_exits_zero() -> None:

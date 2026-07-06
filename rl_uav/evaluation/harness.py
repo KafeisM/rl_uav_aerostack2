@@ -39,25 +39,36 @@ class Controller(ABC):
 
 
 class PPOController(Controller):
-    """Deterministic wrapper over a loaded SB3 PPO model."""
+    """Wrapper over a loaded SB3 PPO model (deterministic by default)."""
 
-    def __init__(self, model: Any, name: str = 'ppo'):
+    def __init__(self, model: Any, name: str = 'ppo', deterministic: bool = True):
         self._model = model
         self._name = name
+        self._deterministic = bool(deterministic)
 
     @property
     def name(self) -> str:
         return self._name
 
     @classmethod
-    def from_checkpoint(cls, path: str | Path, device: str = 'cpu') -> 'PPOController':
+    def from_checkpoint(
+        cls,
+        path: str | Path,
+        device: str = 'cpu',
+        deterministic: bool = True,
+    ) -> 'PPOController':
         from stable_baselines3 import PPO
 
         model = PPO.load(str(path), device=device)
-        return cls(model, name=f'ppo:{Path(path).stem}')
+        mode = 'det' if deterministic else 'stoch'
+        return cls(
+            model,
+            name=f'ppo:{Path(path).stem}:{mode}',
+            deterministic=deterministic,
+        )
 
     def act(self, obs: np.ndarray) -> np.ndarray:
-        action, _ = self._model.predict(obs, deterministic=True)
+        action, _ = self._model.predict(obs, deterministic=self._deterministic)
         return action
 
 
