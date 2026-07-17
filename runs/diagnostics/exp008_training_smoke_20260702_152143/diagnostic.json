@@ -1,0 +1,23 @@
+{
+  "action": [
+    0.5,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "episodes": [],
+  "episodes_requested": 1,
+  "error": "Fresh service-backed reset failed before command path readiness; refusing velocity fallback to avoid accepted-but-ignored actions. Reset diagnostics: reason=service_client_create_failed, failure_class=service_client_unavailable, service_name=/drone0/platform/reset_simulator_state, state_error=No module named 'as2_platform_multirotor_simulator'",
+  "min_distance_reduction": 0.05,
+  "min_position_delta": 0.03,
+  "monitor_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_152143/monitor",
+  "namespaces": [
+    "drone0"
+  ],
+  "reason": "diagnostic_error",
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_152143",
+  "steps_requested": 8,
+  "success": false,
+  "vec_env_num_envs": 1
+}

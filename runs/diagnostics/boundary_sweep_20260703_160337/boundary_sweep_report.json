@@ -1,0 +1,393 @@
+{
+  "boundary_params": {
+    "distance_threshold": 0.4,
+    "guard_climb_speed": 0.5,
+    "low_altitude_guard_height": 1.3,
+    "max_vel": 0.5,
+    "oob_penalty": 15.0,
+    "path_facing_weight": 0.05,
+    "pos_limit": 5.0,
+    "progress_reward_weight": 2.0,
+    "speed_deadband": 0.05,
+    "start_pose": [
+      0.0,
+      0.0,
+      1.6,
+      0.0
+    ],
+    "success_reward": 20.0,
+    "target_pose": [
+      0.5,
+      0.0,
+      1.6,
+      0.0
+    ],
+    "unsafe_low_altitude_threshold": 1.0,
+    "vertical_descent_penalty_weight": 8.0,
+    "vertical_safety_band": 0.3,
+    "vertical_safety_penalty_weight": 6.0,
+    "xy_limit": 5.0,
+    "z_max": 2.5,
+    "z_min": 0.8
+  },
+  "component_tolerance": 0.05,
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "epsilon": 0.05,
+  "error": "'vertical_safety_penalty'",
+  "namespaces": [
+    "drone0"
+  ],
+  "obs_tolerance": 0.02,
+  "points": [
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.8999923121243973,
+            0.0,
+            0.05474937776313995,
+            0.0
+          ],
+          "observed": [
+            0.8999922871589661,
+            0.0,
+            0.05474937707185745,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.8999999999709871,
+            0.0,
+            0.059762424248630056,
+            0.0
+          ],
+          "observed": [
+            0.8999922871589661,
+            0.0,
+            0.05474937707185745,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -8.636187380576178,
+          "observed": -8.636187553405762,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.5205713707867762,
+          "observed": -0.5205713707867762,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -8.115616009789402,
+          "observed": -8.115616009789402,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 4.5099100525948685,
+        "distance_norm": 0.5207595565773294,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          0.8999999999709871,
+          0.0,
+          0.059762424248630056,
+          0.0
+        ],
+        "expected_reward": -8.639635039871738,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.118875483294408,
+          "reward_distance": -0.5207595565773294,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_on_x_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.8999922871589661,
+          0.0,
+          0.05474937707185745,
+          0.0
+        ],
+        "position": [
+          4.999961560621987,
+          0.0,
+          1.8737468888156998
+        ],
+        "reward": -8.636187553405762,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.115616009789402,
+          "reward_distance": -0.5205713707867762,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        4.999999999854936,
+        0.0,
+        1.8988121212431504
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        5.0,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          4.999999999854936,
+          0.0,
+          1.8988121212431504
+        ],
+        "position_error": 0.0011878787568495675,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.889975590012188,
+            0.0,
+            0.0547294679308961,
+            0.0
+          ],
+          "observed": [
+            0.8899756073951721,
+            0.0,
+            0.05472946912050247,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.8899999817816321,
+            0.0,
+            0.05892294971166838,
+            0.0
+          ],
+          "observed": [
+            0.8899756073951721,
+            0.0,
+            0.05472946912050247,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -8.584894580006932,
+          "observed": -8.584894180297852,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.5147982988438421,
+          "observed": -0.5147982988438421,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -8.070096281163089,
+          "observed": -8.070096281163089,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 4.459741813081866,
+        "distance_norm": 0.514966627259809,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          0.8899999817816321,
+          0.0,
+          0.05892294971166838,
+          0.0
+        ],
+        "expected_reward": -8.587978442111021,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.073011814851212,
+          "reward_distance": -0.514966627259809,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_inside_x_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.8899756073951721,
+          0.0,
+          0.05472946912050247,
+          0.0
+        ],
+        "position": [
+          4.94987795006094,
+          0.0,
+          1.8736473396544806
+        ],
+        "reward": -8.584894180297852,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.070096281163089,
+          "reward_distance": -0.5147982988438421,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        4.94999990890816,
+        0.0,
+        1.894614748558342
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        4.95,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          4.94999990890816,
+          0.0,
+          1.894614748558342
+        ],
+        "position_error": 0.005385251442428324,
+        "settled": true
+      }
+    }
+  ],
+  "points_requested": 32,
+  "reward_tolerance": 1e-06,
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/boundary_sweep_20260703_160337",
+  "success": false
+}

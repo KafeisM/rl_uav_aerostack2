@@ -1,0 +1,4388 @@
+{
+  "boundary_params": {
+    "distance_threshold": 0.4,
+    "guard_climb_speed": 0.5,
+    "low_altitude_guard_height": 1.3,
+    "max_vel": 0.5,
+    "oob_penalty": 15.0,
+    "path_facing_weight": 0.05,
+    "pos_limit": 5.0,
+    "progress_reward_weight": 2.0,
+    "speed_deadband": 0.05,
+    "start_pose": [
+      0.0,
+      0.0,
+      1.6,
+      0.0
+    ],
+    "success_reward": 20.0,
+    "target_pose": [
+      1.0,
+      0.0,
+      1.6,
+      0.0
+    ],
+    "unsafe_low_altitude_threshold": 1.0,
+    "vertical_descent_penalty_weight": 8.0,
+    "vertical_safety_band": 0.3,
+    "vertical_safety_penalty_weight": 6.0,
+    "xy_limit": 5.0,
+    "z_max": 2.5,
+    "z_min": 0.8
+  },
+  "component_tolerance": 0.05,
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "epsilon": 0.05,
+  "error": "Low-altitude velocity hover recovery timed out; hard AS2 reset required. Reset diagnostics: reason=hard_reset_required, failure_class=low_altitude_velocity_recovery_timeout, elapsed=20.107, recovery_timeout=20.0, target_pose=[1.1482102024729102e-07, 1.0946440198722485e-07, 1.6, -6.364135808413882e-11], final_pose=[1.1482102024729102e-07, 1.0946440198722485e-07, 1.050130844116211, -6.364135808413882e-11], position_error=0.5499, initial_position_error=0.575, best_position_error=0.547, error_reduction=0.028, dominant_axis=z, last_command=[0.0, 0.0, 0.5499, 0.0], control_available=True",
+  "namespaces": [
+    "drone0"
+  ],
+  "obs_tolerance": 0.02,
+  "points": [
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.7999926519465618,
+            0.0,
+            0.05477300272043837,
+            0.0
+          ],
+          "observed": [
+            0.7999926805496216,
+            0.0,
+            0.0547730028629303,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.79999999999999,
+            0.0,
+            0.05996027892346989,
+            0.0
+          ],
+          "observed": [
+            0.7999926805496216,
+            0.0,
+            0.0547730028629303,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -6.594459958704964,
+          "observed": -6.5944600105285645,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.46295727844496476,
+          "observed": -0.46295727844496476,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -6.131502680259999,
+          "observed": -6.131502680259999,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 4.011219375229197,
+        "distance_norm": 0.46317571721344386,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          0.79999999999999,
+          0.0,
+          0.05996027892346989,
+          0.0
+        ],
+        "expected_reward": -6.598461867926929,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -6.135286150713485,
+          "reward_distance": -0.46317571721344386,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_on_x_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.7999926805496216,
+          0.0,
+          0.0547730028629303,
+          0.0
+        ],
+        "position": [
+          4.999963259732809,
+          0.0,
+          1.873865013602192
+        ],
+        "reward": -6.5944600105285645,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -6.131502680259999,
+          "reward_distance": -0.46295727844496476,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        4.99999999999995,
+        0.0,
+        1.8998013946173495
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        5.0,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          4.99999999999995,
+          0.0,
+          1.8998013946173495
+        ],
+        "position_error": 0.0001986053826503742,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.7899890874207802,
+            0.0,
+            0.05474475816570816,
+            0.0
+          ],
+          "observed": [
+            0.7899891138076782,
+            0.0,
+            0.05474475771188736,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.7899999999358288,
+            0.0,
+            0.059723538449506196,
+            0.0
+          ],
+          "observed": [
+            0.7899891138076782,
+            0.0,
+            0.05474475771188736,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -6.5026959787294825,
+          "observed": -6.5026960372924805,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.45719425003330155,
+          "observed": -0.45719425003330155,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -6.0455017286961805,
+          "observed": -6.0455017286961805,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 3.961271579125632,
+        "distance_norm": 0.45740824250827955,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          0.7899999999358288,
+          0.0,
+          0.059723538449506196,
+          0.0
+        ],
+        "expected_reward": -6.506616429595454,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -6.049208187087174,
+          "reward_distance": -0.45740824250827955,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_inside_x_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.7899891138076782,
+          0.0,
+          0.05474475771188736,
+          0.0
+        ],
+        "position": [
+          4.949945437103901,
+          0.0,
+          1.873723790828541
+        ],
+        "reward": -6.5026960372924805,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -6.0455017286961805,
+          "reward_distance": -0.45719425003330155,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        4.949999999679144,
+        0.0,
+        1.898617692247531
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        4.95,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          4.949999999679144,
+          0.0,
+          1.898617692247531
+        ],
+        "position_error": 0.0013823077524688738,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_outside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.809999996358213,
+            0.0,
+            0.059133181793364464,
+            0.0
+          ],
+          "observed": [
+            0.8100000023841858,
+            0.0,
+            0.05913318321108818,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.809999996358213,
+            0.0,
+            0.059133181793364464,
+            0.0
+          ],
+          "observed": [
+            0.8100000023841858,
+            0.0,
+            0.05913318321108818,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          0.809999996358213,
+          0.0,
+          0.059133181793364464,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_outside_x_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.8100000023841858,
+          0.0,
+          0.05913318321108818,
+          0.0
+        ],
+        "position": [
+          5.049999981791065,
+          0.0,
+          1.8956659089668224
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        5.049999981791065,
+        0.0,
+        1.8956659089668224
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "out_of_bounds",
+      "requested_position": [
+        5.05,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          5.049999981791065,
+          0.0,
+          1.8956659089668224
+        ],
+        "position_error": 0.004334091033215752,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            0.0,
+            0.0547343858181597,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            0.0,
+            0.05473438650369644,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            0.0,
+            0.059953622515273294,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            0.0,
+            0.05473438650369644,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -10.8295054716661,
+          "observed": -10.829505920410156,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.6935405972715688,
+          "observed": -0.6935405972715688,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -10.13596487439453,
+          "observed": -10.13596487439453,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 6.007483742909138,
+        "distance_norm": 0.6936844712241784,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -1.0,
+          0.0,
+          0.059953622515273294,
+          0.0
+        ],
+        "expected_reward": -10.832141315576765,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -10.138456844352586,
+          "reward_distance": -0.6936844712241784,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_on_x_neg",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          0.0,
+          0.05473438650369644,
+          0.0
+        ],
+        "position": [
+          -4.999999640001076,
+          0.0,
+          1.8736719290907986
+        ],
+        "reward": -10.829505920410156,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -10.13596487439453,
+          "reward_distance": -0.6935405972715688,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -4.999999999999999,
+        0.0,
+        1.8997681125763666
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        -5.0,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -4.999999999999999,
+          0.0,
+          1.8997681125763666
+        ],
+        "position_error": 0.0002318874236333368,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            0.0,
+            0.05480576100841032,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            0.0,
+            0.05480575934052467,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            0.0,
+            0.05710676227002485,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            0.0,
+            0.05480575934052467,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -10.434108129870712,
+          "observed": -10.434107780456543,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.6877686556569489,
+          "observed": -0.6877686556569489,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -9.746339474213762,
+          "observed": -9.746339474213762,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 5.9568460262854535,
+        "distance_norm": 0.6878373313594119,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -1.0,
+          0.0,
+          0.05710676227002485,
+          0.0
+        ],
+        "expected_reward": -10.43536630363229,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -9.747528972272878,
+          "reward_distance": -0.6878373313594119,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_inside_x_neg",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          0.0,
+          0.05480575934052467,
+          0.0
+        ],
+        "position": [
+          -4.9499443267832115,
+          0.0,
+          1.8740288050420517
+        ],
+        "reward": -10.434107780456543,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -9.746339474213762,
+          "reward_distance": -0.6877686556569489,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -4.949998741466142,
+        0.0,
+        1.8855338113501243
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        -4.95,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -4.949998741466142,
+          0.0,
+          1.8855338113501243
+        ],
+        "position_error": 0.014466188704620743,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_outside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            0.0,
+            0.059999357780624686,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            0.0,
+            0.05999935790896416,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            0.0,
+            0.059999357780624686,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            0.0,
+            0.05999935790896416,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -1.0,
+          0.0,
+          0.059999357780624686,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_outside_x_neg",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          0.0,
+          0.05999935790896416,
+          0.0
+        ],
+        "position": [
+          -5.05,
+          0.0,
+          1.8999967889031235
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -5.05,
+        0.0,
+        1.8999967889031235
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "out_of_bounds",
+      "requested_position": [
+        -5.05,
+        0.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -5.05,
+          0.0,
+          1.8999967889031235
+        ],
+        "position_error": 3.2110968763987557e-06,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2000003051835632,
+            1.0,
+            0.05473719386209579,
+            0.0
+          ],
+          "observed": [
+            -0.20000030100345612,
+            1.0,
+            0.05473719537258148,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.2000000020965278,
+            1.0,
+            0.05796822614501349,
+            0.0
+          ],
+          "observed": [
+            -0.20000030100345612,
+            1.0,
+            0.05473719537258148,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -8.92583300650131,
+          "observed": -8.925832748413086,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.5896316031968366,
+          "observed": -0.5896316031968366,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -8.336201403304473,
+          "observed": -8.336201403304473,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 5.107250522739732,
+        "distance_norm": 0.5897344928245283,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -0.2000000020965278,
+          1.0,
+          0.05796822614501349,
+          0.0
+        ],
+        "expected_reward": -8.92771799675634,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.337983503931811,
+          "reward_distance": -0.5897344928245283,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_on_y_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000030100345612,
+          1.0,
+          0.05473719537258148,
+          0.0
+        ],
+        "position": [
+          -1.5259178160329084e-06,
+          5.0,
+          1.873685969310479
+        ],
+        "reward": -8.925832748413086,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.336201403304473,
+          "reward_distance": -0.5896316031968366,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -1.0482638891694148e-08,
+        5.0,
+        1.8898411307250675
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        5.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -1.0482638891694148e-08,
+          5.0,
+          1.8898411307250675
+        ],
+        "position_error": 0.010158869274937778,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.19999999999338042,
+            0.9900002103634208,
+            0.05474965081715446,
+            2.461161714497937e-12
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.9900001883506775,
+            0.05474964901804924,
+            2.4611616997877173e-12
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.19999999999997123,
+            0.9900000009141852,
+            0.058241837205602075,
+            1.6823944822678882e-12
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.9900001883506775,
+            0.05474964901804924,
+            2.4611616997877173e-12
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -8.68814807467286,
+          "observed": -8.688148498535156,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.583980005588539,
+          "observed": -0.583980005588539,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -8.10416806908432,
+          "observed": -8.10416806908432,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 5.058389351886525,
+        "distance_norm": 0.5840924907955245,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -0.19999999999997123,
+          0.9900000009141852,
+          0.058241837205602075,
+          1.6823944822678882e-12
+        ],
+        "expected_reward": -8.690208860815831,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.106116370020306,
+          "reward_distance": -0.5840924907955245,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_inside_y_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          0.9900001883506775,
+          0.05474964901804924,
+          2.4611616997877173e-12
+        ],
+        "position": [
+          3.309791066075448e-11,
+          4.950001051817104,
+          1.8737482540857724
+        ],
+        "reward": -8.688148498535156,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.10416806908432,
+          "reward_distance": -0.583980005588539,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        1.4383481200556597e-13,
+        4.950000004570926,
+        1.8912091860280105
+      ],
+      "observed_pre_step_yaw": 5.285398145932801e-12,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        4.95,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          1.4383481200556597e-13,
+          4.950000004570926,
+          1.8912091860280105
+        ],
+        "position_error": 0.00879081397199063,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_outside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2,
+            1.0,
+            0.05932204971350412,
+            -1.459854373242871e-17
+          ],
+          "observed": [
+            -0.20000000298023224,
+            1.0,
+            0.0593220479786396,
+            -1.4598543362756412e-17
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.2,
+            1.0,
+            0.05932204971350412,
+            -1.459854373242871e-17
+          ],
+          "observed": [
+            -0.20000000298023224,
+            1.0,
+            0.0593220479786396,
+            -1.4598543362756412e-17
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -0.2,
+          1.0,
+          0.05932204971350412,
+          -1.459854373242871e-17
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_outside_y_pos",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          1.0,
+          0.0593220479786396,
+          -1.4598543362756412e-17
+        ],
+        "position": [
+          -7.715570467060957e-20,
+          5.050000002529905,
+          1.8966102485675207
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -7.715570467060957e-20,
+        5.050000002529905,
+        1.8966102485675207
+      ],
+      "observed_pre_step_yaw": -4.5862677742907356e-17,
+      "passed": true,
+      "requested_classification": "out_of_bounds",
+      "requested_position": [
+        0.0,
+        5.05,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -7.715570467060957e-20,
+          5.050000002529905,
+          1.8966102485675207
+        ],
+        "position_error": 0.0033897514324801596,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2000000605970452,
+            -0.9999999999999712,
+            0.05473812498445794,
+            -2.1563558612324525e-15
+          ],
+          "observed": [
+            -0.20000006258487701,
+            -1.0,
+            0.0547381266951561,
+            -2.156355936571027e-15
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.20000000000253468,
+            -1.0,
+            0.05956780408699771,
+            -5.636452057296275e-16
+          ],
+          "observed": [
+            -0.20000006258487701,
+            -1.0,
+            0.0547381266951561,
+            -2.156355936571027e-15
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -8.925768607328576,
+          "observed": -8.925768852233887,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.5896316043557984,
+          "observed": -0.5896316043557984,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -8.336137002972778,
+          "observed": -8.336137002972778,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 5.107710649803787,
+        "distance_norm": 0.5897876237213869,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -0.20000000000253468,
+          -1.0,
+          0.05956780408699771,
+          -5.636452057296275e-16
+        ],
+        "expected_reward": -8.928626961375805,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.338839337654418,
+          "reward_distance": -0.5897876237213869,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_on_y_neg",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000006258487701,
+          -1.0,
+          0.0547381266951561,
+          -2.156355936571027e-15
+        ],
+        "position": [
+          -3.0298522596238875e-07,
+          -4.999999999999856,
+          1.8736906249222898
+        ],
+        "reward": -8.925768852233887,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.336137002972778,
+          "reward_distance": -0.5896316043557984,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -1.267332517185063e-11,
+        -5.0,
+        1.8978390204349886
+      ],
+      "observed_pre_step_yaw": -1.7707436375513053e-15,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        -5.0,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -1.267332517185063e-11,
+          -5.0,
+          1.8978390204349886
+        ],
+        "position_error": 0.0021609795650112673,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.19999999999786988,
+            -0.9900005237011845,
+            0.05475260671249216,
+            -3.009696219183881e-13
+          ],
+          "observed": [
+            -0.20000000298023224,
+            -0.9900005459785461,
+            0.05475260689854622,
+            -3.0096961706714553e-13
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.2,
+            -0.9900000000001059,
+            0.05990602371638474,
+            -4.038154503572201e-14
+          ],
+          "observed": [
+            -0.20000000298023224,
+            -0.9900005459785461,
+            0.05475260689854622,
+            -3.0096961706714553e-13
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -8.687637044890872,
+          "observed": -8.687637329101562,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.5839802750292115,
+          "observed": -0.5839802750292115,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -8.10365676986166,
+          "observed": -8.10365676986166,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 5.058875200273569,
+        "distance_norm": 0.5841485917349335,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -0.2,
+          -0.9900000000001059,
+          0.05990602371638474,
+          -4.038154503572201e-14
+        ],
+        "expected_reward": -8.690720692457324,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.10657210072239,
+          "reward_distance": -0.5841485917349335,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_inside_y_neg",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          -0.9900005459785461,
+          0.05475260689854622,
+          -3.0096961706714553e-13
+        ],
+        "position": [
+          1.065058445725075e-11,
+          -4.9500026185059225,
+          1.8737630335624609
+        ],
+        "reward": -8.687637329101562,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -8.10365676986166,
+          "reward_distance": -0.5839802750292115,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        2.1517479730433282e-18,
+        -4.9500000000005295,
+        1.8995301185819238
+      ],
+      "observed_pre_step_yaw": -1.2686236522482965e-13,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        -4.95,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          2.1517479730433282e-18,
+          -4.9500000000005295,
+          1.8995301185819238
+        ],
+        "position_error": 0.0004698814180761346,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_outside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2,
+            -1.0,
+            0.05985741103099333,
+            3.5921184515936665e-18
+          ],
+          "observed": [
+            -0.20000000298023224,
+            -1.0,
+            0.059857409447431564,
+            3.5921182503855345e-18
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.2,
+            -1.0,
+            0.05985741103099333,
+            3.5921184515936665e-18
+          ],
+          "observed": [
+            -0.20000000298023224,
+            -1.0,
+            0.059857409447431564,
+            3.5921182503855345e-18
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -0.2,
+          -1.0,
+          0.05985741103099333,
+          3.5921184515936665e-18
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_outside_y_neg",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          -1.0,
+          0.059857409447431564,
+          3.5921182503855345e-18
+        ],
+        "position": [
+          -1.4110456009146164e-21,
+          -5.050000000004422,
+          1.8992870551549668
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -1.4110456009146164e-21,
+        -5.050000000004422,
+        1.8992870551549668
+      ],
+      "observed_pre_step_yaw": 1.1284972938351006e-17,
+      "passed": true,
+      "requested_classification": "out_of_bounds",
+      "requested_position": [
+        0.0,
+        -5.05,
+        1.9
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -1.4110456009146164e-21,
+          -5.050000000004422,
+          1.8992870551549668
+        ],
+        "position_error": 0.0007129448450331477,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.20000001100582057,
+            1.2924533001807499e-15,
+            0.17485723535952663,
+            -5.3666308692082033e-17
+          ],
+          "observed": [
+            -0.20000001788139343,
+            1.292453269380973e-15,
+            0.1748572289943695,
+            -5.366631016341551e-17
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.20000000046931246,
+            5.503380149244212e-17,
+            0.17663156365912336,
+            -1.8262542623790276e-17
+          ],
+          "observed": [
+            -0.20000001788139343,
+            1.292453269380973e-15,
+            0.1748572289943695,
+            -5.366631016341551e-17
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -0.9331592152202639,
+          "observed": -0.9331592321395874,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.15337867861375568,
+          "observed": -0.15337867861375568,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -0.7797805366065083,
+          "observed": -0.7797805366065083,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 1.3341543151786446,
+        "distance_norm": 0.15405487060177828,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -0.20000000046931246,
+          5.503380149244212e-17,
+          0.17663156365912336,
+          -1.8262542623790276e-17
+        ],
+        "expected_reward": -0.9455473959975481,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -0.7914925253957699,
+          "reward_distance": -0.15405487060177828,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_on_z_top",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000001788139343,
+          1.292453269380973e-15,
+          0.1748572289943695,
+          -5.366631016341551e-17
+        ],
+        "position": [
+          -5.502910292954977e-08,
+          6.462266500903749e-15,
+          2.474286176797633
+        ],
+        "reward": -0.9331592321395874,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -0.7797805366065083,
+          "reward_distance": -0.15337867861375568,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -2.3465621878056787e-09,
+        2.751690074622106e-16,
+        2.483157818295617
+      ],
+      "observed_pre_step_yaw": -5.737346974277e-17,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        0.0,
+        2.5
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -2.3465621878056787e-09,
+          2.751690074622106e-16,
+          2.483157818295617
+        ],
+        "position_error": 0.016842181704383286,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2000000000013399,
+            0.0,
+            0.1648082060390065,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            0.16480819880962372,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.20000000000002943,
+            0.0,
+            0.1671411512729133,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            0.16480819880962372,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -0.7217338814981247,
+          "observed": -0.7217338681221008,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.14962368883116023,
+          "observed": -0.14962368883116023,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -0.5721101926669645,
+          "observed": -0.5721101926669645,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 1.303228341934431,
+        "distance_norm": 0.1504838468062787,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -0.20000000000002943,
+          0.0,
+          0.1671411512729133,
+          0.0
+        ],
+        "expected_reward": -0.7374924126276506,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -0.587008565821372,
+          "reward_distance": -0.1504838468062787,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "face_inside_z_top",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          0.0,
+          0.16480819880962372,
+          0.0
+        ],
+        "position": [
+          -6.6994847306270285e-12,
+          0.0,
+          2.4240410301950326
+        ],
+        "reward": -0.7217338681221008,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -0.5721101926669645,
+          "reward_distance": -0.14962368883116023,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -1.4722102757159647e-13,
+        0.0,
+        2.4357057563645665
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        0.0,
+        2.45
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -1.4722102757159647e-13,
+          0.0,
+          2.4357057563645665
+        ],
+        "position_error": 0.014294243635433634,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_outside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2,
+            0.0,
+            0.1870276724217593,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            0.1870276778936386,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.2,
+            0.0,
+            0.1870276724217593,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            0.1870276778936386,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -0.2,
+          0.0,
+          0.1870276724217593,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_outside_z_top",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          0.0,
+          0.1870276778936386,
+          0.0
+        ],
+        "position": [
+          8.275697783070225e-19,
+          0.0,
+          2.5351383621087966
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        8.275697783070225e-19,
+        0.0,
+        2.5351383621087966
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "out_of_bounds",
+      "requested_position": [
+        0.0,
+        0.0,
+        2.55
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          8.275697783070225e-19,
+          0.0,
+          2.5351383621087966
+        ],
+        "position_error": 0.014861637891203205,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_on",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.1999999998984914,
+            0.0,
+            -0.16175899395949161,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            -0.16175898909568787,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.1999999998984914,
+            0.0,
+            -0.16175899395949161,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            -0.16175898909568787,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -0.1999999998984914,
+          0.0,
+          -0.16175899395949161,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_on_z_bottom",
+      "notes": [
+        "teleport landed in a different region than requested (requested=unsafe_low_altitude, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          0.0,
+          -0.16175898909568787,
+          0.0
+        ],
+        "position": [
+          5.075430401646107e-10,
+          0.0,
+          0.791205030202542
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        5.075430401646107e-10,
+        0.0,
+        0.791205030202542
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "unsafe_low_altitude",
+      "requested_position": [
+        0.0,
+        0.0,
+        0.8
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          5.075430401646107e-10,
+          0.0,
+          0.791205030202542
+        ],
+        "position_error": 0.0087949697974581,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_inside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "unsafe_low_altitude",
+          "observed": "unsafe_low_altitude",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.19999999971063268,
+            0.0,
+            -0.15185035420307874,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            -0.1518503576517105,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.19999999971063268,
+            0.0,
+            -0.15185035420307874,
+            0.0
+          ],
+          "observed": [
+            -0.20000000298023224,
+            0.0,
+            -0.1518503576517105,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "unsafe_low_altitude",
+        "expected_obs": [
+          -0.19999999971063268,
+          0.0,
+          -0.15185035420307874,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": true,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "unsafe_low_altitude",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_inside_z_bottom",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": true,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000000298023224,
+          0.0,
+          -0.1518503576517105,
+          0.0
+        ],
+        "position": [
+          1.4468366259119214e-09,
+          0.0,
+          0.8407482289846064
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "unsafe_low_altitude"
+      },
+      "observed_pre_step_position": [
+        1.4468366259119214e-09,
+        0.0,
+        0.8407482289846064
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "unsafe_low_altitude",
+      "requested_position": [
+        0.0,
+        0.0,
+        0.8500000000000001
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          1.4468366259119214e-09,
+          0.0,
+          0.8407482289846064
+        ],
+        "position_error": 0.009251771015393763,
+        "settled": true
+      }
+    },
+    {
+      "category": "face_outside",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.2000000177807953,
+            0.0,
+            -0.17442189839248173,
+            0.0
+          ],
+          "observed": [
+            -0.20000001788139343,
+            0.0,
+            -0.17442189157009125,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.2000000177807953,
+            0.0,
+            -0.17442189839248173,
+            0.0
+          ],
+          "observed": [
+            -0.20000001788139343,
+            0.0,
+            -0.17442189157009125,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -0.2000000177807953,
+          0.0,
+          -0.17442189839248173,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "face_outside_z_bottom",
+      "notes": [],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -0.20000001788139343,
+          0.0,
+          -0.17442189157009125,
+          0.0
+        ],
+        "position": [
+          -8.890397640579745e-08,
+          0.0,
+          0.7278905080375915
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -8.890397640579745e-08,
+        0.0,
+        0.7278905080375915
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "out_of_bounds",
+      "requested_position": [
+        0.0,
+        0.0,
+        0.75
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -8.890397640579745e-08,
+          0.0,
+          0.7278905080375915
+        ],
+        "position_error": 0.02210949196258727,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.8000000052446608,
+            1.0,
+            -0.16386832397438916,
+            0.0
+          ],
+          "observed": [
+            0.800000011920929,
+            1.0,
+            -0.16386832296848297,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.8000000052446608,
+            1.0,
+            -0.16386832397438916,
+            0.0
+          ],
+          "observed": [
+            0.800000011920929,
+            1.0,
+            -0.16386832296848297,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          0.8000000052446608,
+          1.0,
+          -0.16386832397438916,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "corner_px_py_bottom",
+      "notes": [
+        "teleport landed in a different region than requested (requested=unsafe_low_altitude, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.800000011920929,
+          1.0,
+          -0.16386832296848297,
+          0.0
+        ],
+        "position": [
+          5.0000000262233035,
+          5.0,
+          0.7806583801280542
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        5.0000000262233035,
+        5.0,
+        0.7806583801280542
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "unsafe_low_altitude",
+      "requested_position": [
+        5.0,
+        5.0,
+        0.8
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          5.0000000262233035,
+          5.0,
+          0.7806583801280542
+        ],
+        "position_error": 0.019341619871963603,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.7999999862401557,
+            1.0,
+            0.17478554193826926,
+            0.0
+          ],
+          "observed": [
+            0.800000011920929,
+            1.0,
+            0.1747855395078659,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.8,
+            1.0,
+            0.17999001406719756,
+            0.0
+          ],
+          "observed": [
+            0.800000011920929,
+            1.0,
+            0.1747855395078659,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -11.79207720670016,
+          "observed": -11.79207706451416,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.7462238188941492,
+          "observed": -0.7462238188941492,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -11.04585338780601,
+          "observed": -11.04585338780601,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 6.466058314699748,
+        "distance_norm": 0.7466361017175436,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          0.8,
+          1.0,
+          0.17999001406719756,
+          0.0
+        ],
+        "expected_reward": -11.799630437495624,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -11.05299433577808,
+          "reward_distance": -0.7466361017175436,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "corner_px_py_top",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.800000011920929,
+          1.0,
+          0.1747855395078659,
+          0.0
+        ],
+        "position": [
+          4.999999931200779,
+          5.0,
+          2.4739277096913463
+        ],
+        "reward": -11.79207706451416,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -11.04585338780601,
+          "reward_distance": -0.7462238188941492,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        5.0,
+        5.0,
+        2.499950070335988
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        5.0,
+        5.0,
+        2.5
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          5.0,
+          5.0,
+          2.499950070335988
+        ],
+        "position_error": 4.9929664012182684e-05,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.8,
+            -1.0,
+            -0.16000496138371204,
+            1.8094687989793027e-09
+          ],
+          "observed": [
+            0.800000011920929,
+            -1.0,
+            -0.16000495851039886,
+            1.809468797020486e-09
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.8,
+            -1.0,
+            -0.16000496138371204,
+            1.8094687989793027e-09
+          ],
+          "observed": [
+            0.800000011920929,
+            -1.0,
+            -0.16000495851039886,
+            1.809468797020486e-09
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          0.8,
+          -1.0,
+          -0.16000496138371204,
+          1.8094687989793027e-09
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "corner_px_ny_bottom",
+      "notes": [
+        "teleport landed in a different region than requested (requested=unsafe_low_altitude, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.800000011920929,
+          -1.0,
+          -0.16000495851039886,
+          1.809468797020486e-09
+        ],
+        "position": [
+          5.0,
+          -5.0,
+          0.7999751930814399
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        5.0,
+        -5.0,
+        0.7999751930814399
+      ],
+      "observed_pre_step_yaw": 5.6846138857733234e-09,
+      "passed": true,
+      "requested_classification": "unsafe_low_altitude",
+      "requested_position": [
+        5.0,
+        -5.0,
+        0.8
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          5.0,
+          -5.0,
+          0.7999751930814399
+        ],
+        "position_error": 2.4806918560105196e-05,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            0.8000000000543798,
+            -1.0,
+            0.1776560290756871,
+            -5.3116449041034884e-17
+          ],
+          "observed": [
+            0.800000011920929,
+            -1.0,
+            0.17765602469444275,
+            -5.311645012302701e-17
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            0.8000000000543798,
+            -1.0,
+            0.1776560290756871,
+            -5.3116449041034884e-17
+          ],
+          "observed": [
+            0.800000011920929,
+            -1.0,
+            0.17765602469444275,
+            -5.311645012302701e-17
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          0.8000000000543798,
+          -1.0,
+          0.1776560290756871,
+          -5.3116449041034884e-17
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "corner_px_ny_top",
+      "notes": [
+        "teleport landed in a different region than requested (requested=safe, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          0.800000011920929,
+          -1.0,
+          0.17765602469444275,
+          -5.311645012302701e-17
+        ],
+        "position": [
+          5.000000000271899,
+          -5.0,
+          2.4882801453784356
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        5.000000000271899,
+        -5.0,
+        2.4882801453784356
+      ],
+      "observed_pre_step_yaw": -1.668702460920918e-16,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        5.0,
+        -5.0,
+        2.5
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          5.000000000271899,
+          -5.0,
+          2.4882801453784356
+        ],
+        "position_error": 0.011719854621564444,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            1.0,
+            -0.16524132708459185,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            1.0,
+            -0.1652413308620453,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            1.0,
+            -0.16524132708459185,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            1.0,
+            -0.1652413308620453,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -1.0,
+          1.0,
+          -0.16524132708459185,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "corner_nx_py_bottom",
+      "notes": [
+        "teleport landed in a different region than requested (requested=unsafe_low_altitude, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          1.0,
+          -0.1652413308620453,
+          0.0
+        ],
+        "position": [
+          -5.000000010878766,
+          5.0,
+          0.7737933645770408
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -5.000000010878766,
+        5.0,
+        0.7737933645770408
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "unsafe_low_altitude",
+      "requested_position": [
+        -5.0,
+        5.0,
+        0.8
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -5.000000010878766,
+          5.0,
+          0.7737933645770408
+        ],
+        "position_error": 0.02620663542296146,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            1.0,
+            0.17520838536226985,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            1.0,
+            0.17520838975906372,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            1.0,
+            0.17520838536226985,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            1.0,
+            0.17520838975906372,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -1.0,
+          1.0,
+          0.17520838536226985,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "corner_nx_py_top",
+      "notes": [
+        "teleport landed in a different region than requested (requested=safe, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          1.0,
+          0.17520838975906372,
+          0.0
+        ],
+        "position": [
+          -5.000000009210638,
+          5.0,
+          2.4760419268113494
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -5.000000009210638,
+        5.0,
+        2.4760419268113494
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        -5.0,
+        5.0,
+        2.5
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -5.000000009210638,
+          5.0,
+          2.4760419268113494
+        ],
+        "position_error": 0.02395807318865239,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": "out_of_bounds",
+          "observed": "out_of_bounds",
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            -1.0,
+            -0.165267362614194,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            -1.0,
+            -0.16526736319065094,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            -1.0,
+            -0.165267362614194,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            -1.0,
+            -0.16526736319065094,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_exact_oob_penalty",
+          "expected": -15.0,
+          "observed": -15.0,
+          "passed": true
+        },
+        {
+          "check": "is_out_of_bounds_flag",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "is_unsafe_low_altitude_flag",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "no_motion_command_before_terminal",
+          "expected": 0,
+          "observed": 0,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "out_of_bounds",
+        "expected_obs": [
+          -1.0,
+          -1.0,
+          -0.165267362614194,
+          0.0
+        ],
+        "expected_reward": -15.0,
+        "guard_active": false,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "motion_command_publication_count": 0,
+        "reward_exact": true,
+        "terminal_reason": "out_of_bounds",
+        "terminated": true,
+        "truncated": false
+      },
+      "name": "corner_nx_ny_bottom",
+      "notes": [
+        "teleport landed in a different region than requested (requested=unsafe_low_altitude, observed=out_of_bounds)"
+      ],
+      "observed": {
+        "action_sent": null,
+        "done": true,
+        "is_out_of_bounds": true,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          -1.0,
+          -0.16526736319065094,
+          0.0
+        ],
+        "position": [
+          -5.000000120703737,
+          -5.0,
+          0.7736631869290301
+        ],
+        "reward": -15.0,
+        "reward_components": {
+          "path_facing_reward": null,
+          "progress_reward": null,
+          "reward_distance": null,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": "out_of_bounds"
+      },
+      "observed_pre_step_position": [
+        -5.000000120703737,
+        -5.0,
+        0.7736631869290301
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "unsafe_low_altitude",
+      "requested_position": [
+        -5.0,
+        -5.0,
+        0.8
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -5.000000120703737,
+          -5.0,
+          0.7736631869290301
+        ],
+        "position_error": 0.02633681307124651,
+        "settled": true
+      }
+    },
+    {
+      "category": "corner",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -1.0,
+            -1.0,
+            0.1747291041706366,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            -1.0,
+            0.1747291088104248,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -1.0,
+            -1.0,
+            0.1747291041706366,
+            0.0
+          ],
+          "observed": [
+            -1.0,
+            -1.0,
+            0.1747291088104248,
+            0.0
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -14.748131200669935,
+          "observed": -14.748130798339844,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.9074745595819625,
+          "observed": -0.9074745595819625,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -13.840656641087973,
+          "observed": -13.840656641087973,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": 0.0,
+          "observed": 0.0,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 7.858960218860746,
+        "distance_norm": 0.9074745595819625,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "expected_obs": [
+          -1.0,
+          -1.0,
+          0.1747291041706366,
+          0.0
+        ],
+        "expected_reward": -14.748131200669935,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -13.840656641087973,
+          "reward_distance": -0.9074745595819625,
+          "vertical_safety_penalty": 0.0
+        },
+        "guard_active": false,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "corner_nx_ny_top",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": false,
+        "obs": [
+          -1.0,
+          -1.0,
+          0.1747291088104248,
+          0.0
+        ],
+        "position": [
+          -4.9999999354607425,
+          -5.0,
+          2.473645520853183
+        ],
+        "reward": -14.748130798339844,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -13.840656641087973,
+          "reward_distance": -0.9074745595819625,
+          "vertical_safety_penalty": 0.0
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        -4.9999999354607425,
+        -5.0,
+        2.473645520853183
+      ],
+      "observed_pre_step_yaw": 0.0,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        -5.0,
+        -5.0,
+        2.5
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          -4.9999999354607425,
+          -5.0,
+          2.473645520853183
+        ],
+        "position_error": 0.026354479146895902,
+        "settled": true
+      }
+    },
+    {
+      "category": "unsafe_low_altitude_pair",
+      "checks": [
+        {
+          "check": "terminated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "terminal_reason",
+          "expected": null,
+          "observed": null,
+          "passed": true
+        },
+        {
+          "check": "not_truncated",
+          "expected": false,
+          "observed": false,
+          "passed": true
+        },
+        {
+          "check": "obs_matches_env_reported_state",
+          "expected": [
+            -0.19999999980719774,
+            1.8380774105248662e-10,
+            -0.11049954366529695,
+            4.6430624005180116e-08
+          ],
+          "observed": [
+            -0.20000000298023224,
+            1.8380774680082368e-10,
+            -0.1104995459318161,
+            4.6430624678350796e-08
+          ],
+          "passed": true
+        },
+        {
+          "check": "obs_matches_teleport_state",
+          "expected": [
+            -0.19999999980719774,
+            1.8380774105248662e-10,
+            -0.11049954366529695,
+            4.6430624005180116e-08
+          ],
+          "observed": [
+            -0.20000000298023224,
+            1.8380774680082368e-10,
+            -0.1104995459318161,
+            4.6430624678350796e-08
+          ],
+          "passed": true
+        },
+        {
+          "check": "reward_equals_component_sum",
+          "expected": -5.3154397415793,
+          "observed": -5.315439701080322,
+          "passed": true
+        },
+        {
+          "check": "reward_distance_matches_position",
+          "expected": -0.1319218822802823,
+          "observed": -0.1319218822802823,
+          "passed": true
+        },
+        {
+          "check": "progress_reward_matches_distances",
+          "expected": -0.13356349276932367,
+          "observed": -0.13356349276932367,
+          "passed": true
+        },
+        {
+          "check": "vertical_safety_penalty_matches_altitude",
+          "expected": -5.049954366529694,
+          "observed": -5.049954366529694,
+          "passed": true
+        },
+        {
+          "check": "low_altitude_guard_active",
+          "expected": true,
+          "observed": true,
+          "passed": true
+        },
+        {
+          "check": "guard_climb_speed_applied",
+          "expected": 0.5,
+          "observed": 0.5,
+          "passed": true
+        }
+      ],
+      "expected": {
+        "classification": "safe",
+        "distance": 1.1424770136978464,
+        "distance_norm": 0.1319218822802823,
+        "expected_action_sent": [
+          0.0,
+          0.0,
+          0.5,
+          0.0
+        ],
+        "expected_obs": [
+          -0.19999999980719774,
+          1.8380774105248662e-10,
+          -0.11049954366529695,
+          4.6430624005180116e-08
+        ],
+        "expected_reward": -5.3154397415793,
+        "expected_reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -0.13356349276932367,
+          "reward_distance": -0.1319218822802823,
+          "vertical_safety_penalty": -5.049954366529694
+        },
+        "guard_active": true,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "reward_exact": false,
+        "terminal_reason": null,
+        "terminated": false,
+        "truncated": false
+      },
+      "name": "unsafe_threshold_above",
+      "notes": [],
+      "observed": {
+        "action_sent": [
+          0.0,
+          0.0,
+          0.5,
+          0.0
+        ],
+        "done": false,
+        "is_out_of_bounds": false,
+        "is_unsafe_low_altitude": false,
+        "low_altitude_guard_active": true,
+        "obs": [
+          -0.20000000298023224,
+          1.8380774680082368e-10,
+          -0.1104995459318161,
+          4.6430624678350796e-08
+        ],
+        "position": [
+          9.640113196660779e-10,
+          9.190387052624331e-10,
+          1.0475022816735153
+        ],
+        "reward": -5.315439701080322,
+        "reward_components": {
+          "path_facing_reward": 0.0,
+          "progress_reward": -0.13356349276932367,
+          "reward_distance": -0.1319218822802823,
+          "vertical_safety_penalty": -5.049954366529694
+        },
+        "terminal_reason": null
+      },
+      "observed_pre_step_position": [
+        9.640113196660779e-10,
+        9.190387052624331e-10,
+        1.0475022816735153
+      ],
+      "observed_pre_step_yaw": 1.4586610727626375e-07,
+      "passed": true,
+      "requested_classification": "safe",
+      "requested_position": [
+        0.0,
+        0.0,
+        1.05
+      ],
+      "requested_yaw": 0.0,
+      "teleport": {
+        "position": [
+          9.640113196660779e-10,
+          9.190387052624331e-10,
+          1.0475022816735153
+        ],
+        "position_error": 0.0024977183264850654,
+        "settled": true
+      }
+    }
+  ],
+  "points_requested": 32,
+  "reward_tolerance": 1e-06,
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/boundary_sweep_20260703_161633",
+  "success": false
+}

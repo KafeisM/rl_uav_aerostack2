@@ -1,0 +1,4 @@
+#{"t_start": 1782813169.6806183, "env_id": "None"}
+r,l,t,is_success,final_distance,is_out_of_bounds,is_unsafe_low_altitude,altitude,terminal_reason
+-19.765457,200,31.448295,False,2.3169618072019205,False,False,3.306445432424003,max_steps
+-46.187828,200,55.989999,False,2.000000200362671,False,False,1.0000867198761398,max_steps

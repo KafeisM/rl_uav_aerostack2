@@ -1,0 +1,2181 @@
+16:34:16 [INFO] train_ppo: Resuming from runs/ppo/ppo_phase1_exp016_curriculum_full_150k_20260705_150025/model_final.zip at num_timesteps=150296
+16:34:16 [INFO] train_ppo: === PPO infrastructure ready ===
+16:34:16 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp017.yaml
+16:34:16 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp017_vectorized_2env_200k_20260705_163413
+16:34:16 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp017_vectorized_2env_200k_20260705_163413/tensorboard
+16:34:16 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp017_vectorized_2env_200k_20260705_163413/monitor
+16:34:16 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp017_vectorized_2env_200k_20260705_163413/checkpoints
+16:34:16 [INFO] train_ppo: Num envs: 2
+16:34:16 [INFO] train_ppo: Namespaces: ['drone0', 'drone1']
+16:34:16 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+16:34:16 [INFO] train_ppo: Checkpoint callback: every 5000 steps
+16:34:16 [INFO] train_ppo: Resume remainder: 49704 steps to reach the configured total
+16:34:16 [INFO] train_ppo: Total timesteps: 49704
+16:34:16 [INFO] train_ppo: Starting PPO learn() ...
+[INFO] [1783262056.670129945] [drone0.drone0_interface]: Starting drone0
+[INFO] [1783262056.677616017] [drone1.drone1_interface]: Starting drone1
+[INFO] [1783262057.219538024] [drone0.drone0_interface]: drone0 interface initialized
+[INFO] [1783262057.229003195] [drone1.drone1_interface]: drone1 interface initialized
+[ERROR] [1783262060.889031858] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262060.917424894] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262061.182834191] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262061.214423221] [drone1.drone1_interface]: Service returned failure
+Logging to runs/ppo/ppo_phase1_exp017_vectorized_2env_200k_20260705_163413/tensorboard/PPO_0
+[ERROR] [1783262066.897402487] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262066.926364498] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262076.027447165] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262076.062934516] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262079.968185094] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262080.093728166] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262084.081457977] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262084.138703584] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262088.138051029] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262088.201783131] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262092.276958286] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262092.319371071] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262096.408204804] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262096.486852157] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262100.490935873] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262100.569790568] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262104.619031548] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262104.708448674] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262108.806133004] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262108.901299371] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262113.027778015] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262113.126591354] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262117.280561224] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262117.427231224] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262121.539043327] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262121.648539581] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262125.897207827] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262126.017220795] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262130.249728038] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262130.379912277] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262134.626810218] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262134.754464110] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262139.049190354] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262139.190436058] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262143.430222555] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262143.571753054] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262147.856376682] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262148.007858176] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262152.435073756] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262152.583387007] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262156.968313987] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262157.120195041] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262161.747233411] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262161.898577255] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262166.381404710] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262166.536209498] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262171.157008206] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262171.311935490] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262175.785324608] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262175.947127819] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262180.667947369] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262180.826769605] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262185.393681315] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262185.563118464] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262190.179322933] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262190.372911154] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262194.903962584] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262195.109216551] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262199.890289621] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262200.095196527] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262204.820739956] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262205.035277337] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262209.697251108] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262209.911723917] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262214.632135317] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262214.857320509] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262219.710779741] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262219.935938713] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262224.842407252] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262225.078156058] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262229.819460311] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262230.055948412] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262234.854026894] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262235.100151195] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262240.031584015] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262240.277815251] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262245.267313183] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262245.524871822] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262250.442667103] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262250.699779008] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262255.680646431] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262255.948151859] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262260.953540877] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262261.221567226] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262266.299992474] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262266.574729978] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262271.465073122] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262271.743988784] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262276.790589484] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262277.080001396] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262282.175587940] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262282.464004537] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262287.807505329] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262288.106894698] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262293.286318025] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262293.586201557] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262298.716642267] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262299.026849817] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262304.393713339] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262304.703243111] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262309.929148978] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262310.250710682] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262315.503784607] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262315.824913401] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262321.135863320] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262321.467522701] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262326.917738318] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262327.249362828] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262332.647234569] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262332.988543460] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262338.426870599] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262338.924971449] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262344.361076722] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262344.712533408] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262350.138283724] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262350.491094847] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262355.873597075] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262356.236565930] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262361.847191916] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262362.210206339] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262367.879552550] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262368.253161651] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262373.858658307] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262374.232501732] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262379.492365622] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262379.876287472] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262385.569988717] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262385.954657791] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262391.803363256] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262392.198509796] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262397.881435064] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262398.276122462] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262403.912949856] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262404.513372712] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262410.389623663] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262410.795326219] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262416.624169270] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262417.039984893] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262422.702490459] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262423.118308441] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262428.936921484] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262429.365013862] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262435.212178881] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262435.638478216] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262441.645179290] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262442.081769970] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262448.118120467] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262448.555913859] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262454.754385035] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262455.200961501] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262461.232075159] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262461.680565790] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262467.764539397] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262468.222453176] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262474.344841126] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262474.803062537] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262480.974998500] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262481.443547100] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262487.554556735] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262488.023054155] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262494.186149210] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262494.665788962] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262500.765551055] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262501.244657327] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262507.497850520] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262507.987348173] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262514.073033254] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262514.563355660] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262520.808210589] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262521.308405138] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262527.686163542] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262528.187302637] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262534.317199451] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262534.828608805] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262541.195916457] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262541.706223838] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262547.830445962] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262548.352037111] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262554.708029734] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262555.229877195] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262561.739116233] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262562.271541722] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262568.620965469] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262569.153677757] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262575.749257793] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262576.292340280] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262582.632679223] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262583.176542629] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262589.762617979] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262590.317125366] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262596.938729707] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262597.494914351] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262603.975925276] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262604.540087232] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262611.150011136] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262611.715335851] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262618.183783901] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262618.759442237] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262625.360814768] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262625.935973001] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262632.188306053] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262632.774809464] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262639.766497466] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262640.352588951] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262647.309345985] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262647.907048314] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262654.579247769] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262655.174988736] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262661.911794149] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262662.518505872] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262669.591182581] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262670.197118238] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262677.123701884] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262677.740880947] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262684.801278510] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262685.418538157] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262692.333070955] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262692.963563606] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262700.011576806] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262700.639645016] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262707.647920950] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262708.286623423] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262715.322081092] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262715.959332402] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262722.957395240] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262723.607109260] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262730.631892601] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262731.280983080] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262738.466165611] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262739.126132902] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262746.145173818] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262746.805022563] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262753.975125004] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262754.645203589] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262761.660456974] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262762.330344680] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262769.593069358] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262770.274552708] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262777.669353955] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262778.354874107] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262785.701217353] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262786.393101479] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262793.780654116] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262794.472427894] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262801.810356204] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262802.512422863] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262809.884989308] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262810.587857570] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262818.121583501] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262818.834639236] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262826.199208580] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262826.916262501] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262834.322292278] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262835.048042617] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262842.510034624] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262843.232212774] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262850.639742010] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262851.374175092] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262858.715148229] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262859.449588093] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262867.252229566] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262867.997712132] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262875.429041736] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262876.172913802] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262884.061718456] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262884.815570340] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262892.739950759] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262893.494609255] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262900.972908804] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262901.739695984] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262909.651682729] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262910.417919701] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262917.986888489] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262918.765636801] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262926.661027609] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262927.437305391] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262935.096452820] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262935.883237915] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262943.772452348] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262944.560001246] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262952.305498565] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262953.103621977] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262960.980267102] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262961.778609440] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262969.613001576] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262970.422479155] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262978.195413812] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262979.004563493] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262986.927800656] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783262987.747136853] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783262996.001839236] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783262996.822258231] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263004.833858104] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263005.663900465] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263013.914080732] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263014.743753471] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263022.746726777] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263023.587153413] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263031.822526639] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263032.662706494] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263040.760088204] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263041.610529475] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263049.835639882] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263050.687158427] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263058.966980629] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263059.828457622] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263068.143200212] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263069.007671117] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263076.877050917] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263077.750675650] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263085.959019192] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263086.831139974] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263095.189493052] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263096.071572306] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263104.365987983] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263105.248785855] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263113.500169790] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263114.394818976] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263122.676751665] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263123.568843300] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263131.910096011] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263132.810669847] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263141.188739015] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263142.092676762] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263150.422410519] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263151.336685704] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263159.698180247] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263160.613514599] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263169.129837086] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263170.054440866] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263178.308822345] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263179.234330967] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263187.754575038] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263188.688716893] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263197.020232511] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263197.959938317] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263206.453685739] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263207.398865815] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263216.331024920] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263217.276926526] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263225.964177297] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263226.921876732] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263235.839391944] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263236.796231476] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263245.471373948] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263246.438332851] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263255.353494965] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263256.320232510] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263265.082421381] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263266.060673458] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263274.962184638] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263275.940473302] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263284.695956571] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263285.684425293] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263294.571512067] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263295.560340488] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263304.503673493] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263305.502992637] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263314.282856414] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263315.282995051] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263324.417289294] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263325.426239845] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263334.166415175] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263335.178814061] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263344.326001986] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263345.346105940] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263354.803012473] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263355.825195312] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263365.431368180] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263366.463964974] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263375.915083331] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263376.946483665] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263386.144964922] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263387.189749493] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263396.624165085] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263397.667136399] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263406.957102740] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263408.010653916] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263417.434866093] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263418.489997757] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263427.880019607] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263428.947596539] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263438.354139327] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263439.418923658] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263448.979678539] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263450.053910799] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263460.058705727] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263461.133820743] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263470.688641911] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263471.774906210] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263481.869251988] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263482.955832479] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263492.501679365] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263493.599043897] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263500.177242496] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263501.273189935] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263508.106833522] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263509.209475708] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263519.285077047] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263520.390054605] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263530.116654987] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263531.231426281] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263537.800252875] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263538.914254447] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263548.629136732] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263549.760845433] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263556.306387104] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263557.431788787] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263564.333252796] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263565.462046800] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263572.017441150] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263573.149911618] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263582.841216236] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263583.974036981] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263590.627467052] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263591.769017167] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263598.746377632] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263599.888477887] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263606.434063551] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263607.589893073] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263614.553332790] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263615.701529976] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263622.240731992] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263623.395981257] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263630.361283243] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263631.516746666] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263638.246757432] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263639.409255964] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263646.167985882] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263647.330883636] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263654.152890401] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263655.324709970] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263662.078316075] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263663.249714003] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263670.260690306] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263671.439635128] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263678.688509029] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263679.866343815] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263686.459529271] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263687.642730516] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263694.588699152] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263695.771830645] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263702.773896271] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263703.965994547] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263711.388809279] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263712.577101151] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263723.383678030] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263724.584248352] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263735.201743876] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263736.405793103] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263743.993077491] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263745.202504827] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263752.413006792] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263753.622585276] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263760.700954855] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263761.916992077] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263769.122983714] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263770.339381230] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263781.406230896] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263782.632275876] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263789.744698625] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263790.974692095] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263798.220337220] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263799.451596557] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263806.540544851] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263807.773665513] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263815.019879152] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263816.257313859] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263823.345348675] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263824.585541488] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263831.826738545] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263833.071761544] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263843.353898065] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263844.602211836] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263851.140928661] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263852.396138351] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263859.460097184] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263860.714781505] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263871.247477238] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263872.510762422] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263882.870129380] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263884.135995206] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263894.733242224] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263896.010191890] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263903.880765450] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263905.157724600] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263912.562797220] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263913.842657926] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263921.687410957] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263922.970106841] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263930.375026257] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263931.662357460] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263941.894152186] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263943.184583407] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263953.180280444] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263954.480010726] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263962.306663328] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263963.606712245] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263971.087890691] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263972.394386671] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263982.612952719] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783263983.928695067] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783263994.003844335] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783263995.320589551] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264005.725151262] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264007.043328958] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264017.783295261] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264019.112845155] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264029.448735506] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264030.782197923] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264041.018892614] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264042.358537512] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264053.249139473] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264054.590564251] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264064.929026134] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264066.277684545] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264077.257416302] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264078.609542469] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264089.748080035] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264091.107180879] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264102.060733554] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264103.425132911] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264114.553206692] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264115.927561513] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264126.879702617] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264128.251597786] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264139.565429790] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264140.946563591] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264151.894491666] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264153.280970383] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264164.776929001] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264166.167532752] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264176.999862711] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264178.394252506] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264189.088006903] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264190.489235805] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264201.313284394] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264202.719943276] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264214.396034803] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264215.810082008] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264226.620220632] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264228.036275038] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264239.708919419] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264241.131230525] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264279.035740477] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264280.459762392] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264297.618752741] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264299.055030958] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264310.743851998] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264312.181756306] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264324.030317273] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264325.475579168] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264337.154385626] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264338.608961730] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264349.637924274] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264351.092549692] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264362.763704270] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264364.223749947] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264375.351294368] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264376.817680121] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264388.483320523] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264389.964623894] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264401.259341565] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264402.738346023] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264414.285894570] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264415.767746292] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264427.070184755] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264428.558895373] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264440.094303306] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264441.585185827] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264453.080842692] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264454.580170017] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264466.297005455] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264467.799786372] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264479.988087292] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264481.497743266] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264493.213689440] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264494.726789833] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264506.603933991] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264508.134786988] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264520.826452185] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264522.349764522] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264534.517288600] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264536.050064975] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264548.639946533] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264550.172134772] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264561.425490155] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264562.967287672] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264575.550911069] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264577.094706448] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264589.436040414] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264590.987644057] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264603.662118434] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264605.218733088] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264617.545448943] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264619.109868682] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264631.769954965] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264633.335056314] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264645.655438282] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264647.229256736] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264659.881689445] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264661.459494255] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264673.969167077] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264675.555624246] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264688.100401085] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264689.701074617] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264702.377633925] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264703.973404491] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264716.503949656] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264718.102660191] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264730.790857120] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264732.394343732] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264745.014763003] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264746.623424425] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264759.300620910] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264760.916488175] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264773.522718869] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264775.140653859] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264787.908369248] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264789.536651566] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264802.038918356] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264803.667901438] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264816.521386937] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264818.164663760] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264830.646389701] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264832.288601934] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264845.277280318] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264846.926544970] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264859.455657870] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264861.104778460] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264869.753603613] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264871.411062010] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264880.561516298] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264882.218754306] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264895.448568773] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264897.115210039] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264906.370361350] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264908.036919850] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264917.352929096] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264919.028931806] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264931.482326898] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264933.159719937] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264946.865696865] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264948.553807987] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264957.691893729] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264959.375751875] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264967.772264627] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264969.462076486] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264978.671417947] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783264980.365501596] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783264989.796057546] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783264991.494250511] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265005.107423304] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265006.807563121] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265016.188687308] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265017.897069432] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265027.111201972] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265028.820146854] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265037.298831687] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265039.015713191] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265048.124981656] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265049.848825510] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265058.308954298] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265060.030339247] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265069.128124848] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265070.852036032] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265079.413692399] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265081.144428335] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265090.133102267] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265091.864756622] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265100.518408956] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265102.253947756] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265111.340842990] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265113.076416365] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265121.624194729] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265123.367678863] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265132.444590699] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265134.185393818] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265142.837134232] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265144.586622163] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265153.554727867] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265155.304942597] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265164.038968888] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265165.795763263] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265174.761655173] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265176.519313858] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265185.246377648] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265187.012329357] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265195.966891154] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265197.730243365] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265206.455539663] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265208.226213877] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265217.178914896] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265218.952640190] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265227.773101522] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265229.560978467] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265238.486849291] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265240.265546879] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265249.066591492] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265250.852590622] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265259.792567505] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265261.580031062] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265270.477301289] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265272.269842871] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265281.100524287] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265282.893814767] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265291.884166389] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265293.683077712] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265301.406771462] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265303.204952236] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265312.188931234] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265313.997919257] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265322.816575516] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265324.623747462] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265333.593257350] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265335.408901141] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265345.463079794] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265347.285960867] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265356.304865129] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265358.132539561] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265368.026180124] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265369.849789256] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265379.199812133] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265381.029932197] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265390.632434844] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265392.465476446] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265402.009870960] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265405.046844260] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265414.529588574] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265416.369886893] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265426.324673652] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265428.168770892] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265437.538966828] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265439.382703269] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265448.531512086] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265450.381152251] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265459.755031917] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265461.603438914] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265471.239600689] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265473.096806344] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265482.255987591] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265484.113028264] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265494.050970844] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265495.916919566] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265505.969736404] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265507.835999127] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265518.056238059] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265519.925220634] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265529.989428908] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265531.861175626] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265542.062846077] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265544.021138524] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265553.985989661] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265555.865859712] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265564.968287230] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265566.854225707] [drone1.drone1_interface]: Service returned failure
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 2        |
+|    ep_rew_mean     | -15.4    |
+|    success_rate    | 0        |
+| time/              |          |
+|    fps             | 0        |
+|    iterations      | 1        |
+|    time_elapsed    | 3517     |
+|    total_timesteps | 151320   |
+---------------------------------
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265576.788606367] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265578.676786521] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265587.889367347] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265589.796366058] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265599.778727568] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265601.672981210] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265611.984406652] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265613.889138591] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265622.705018937] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265624.603550310] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265633.792511134] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265635.702026190] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265645.609205617] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265647.522104610] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265656.796463427] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265658.720349415] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265668.617375303] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265670.532923949] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265681.001912540] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265682.924184139] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265692.926906379] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265694.849814440] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265705.209448851] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265707.147047739] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265717.131868153] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265719.066473950] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265728.425332250] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265730.363305641] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265740.237618869] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265742.174279786] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265751.525836307] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265753.473126437] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265763.446331041] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265765.390292191] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265775.833474834] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265777.787831960] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265787.756882520] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265789.706519525] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265799.144262713] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265801.101915138] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265810.962006220] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265812.919182533] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265822.349954753] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265824.317986838] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265834.165795569] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265836.134284820] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265845.657567264] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265847.627094455] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265857.576839955] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265859.552807766] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265869.067312552] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265871.048206305] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265880.881990557] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265882.860009530] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265892.372536521] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265894.359366514] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265904.192440303] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265906.177480839] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265915.771550337] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265917.765910053] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265927.596654818] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265929.590857657] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265939.193011472] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265941.196590510] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265951.006148303] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265953.004713680] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265962.788958054] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265964.797025587] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265974.416863233] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783265976.427399642] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265986.195414596] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783265988.210336801] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783265999.018201009] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266001.033428547] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266011.099853796] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266013.123765546] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266023.826332653] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266025.848350900] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266036.113330829] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266038.146189772] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266048.636149387] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266050.664138812] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266061.319404665] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266063.355489459] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266073.540529686] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266075.577726618] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266085.519955882] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266087.567260797] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266097.635139920] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266099.678369089] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266110.029220397] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266112.083827738] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266123.054580471] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266125.106312768] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266136.038202857] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266138.100898762] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266148.760594736] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266150.816476920] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266160.850796287] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266162.915843072] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266173.465129605] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266175.530588029] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266185.656199284] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266187.740925039] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266198.281890018] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266200.353748276] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266210.462650767] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266212.540240743] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266223.081107455] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266225.162904120] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266235.370289610] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266237.457637709] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266247.895999272] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266249.999266346] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266260.274399874] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266262.367151050] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266272.798001044] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266274.892730169] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266285.280711875] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266287.382442211] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266297.705248321] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266299.805434303] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266310.299822092] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266312.410722726] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266322.714635627] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266324.818942212] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266335.297019318] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266337.415247887] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266347.717977839] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266349.832634233] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266360.400736916] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266362.526274439] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266372.732724788] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266374.854429534] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266385.507414497] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266387.637210923] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266397.832856669] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266399.964045958] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266410.621027414] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266412.757058602] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266422.943345587] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266425.080377093] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266435.826820171] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266437.973080894] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266449.349195715] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266451.493361983] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266462.338081480] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266464.489698879] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266475.857213068] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266478.007232806] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266488.853472560] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266491.022336336] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266502.360727852] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266504.516983054] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266515.444770193] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266517.613096272] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266528.867860837] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266531.031946974] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266541.956730220] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266544.131122565] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266555.475787290] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266557.650604446] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266568.565960321] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266570.744063828] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266582.080294459] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266584.257270661] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266595.366574241] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266597.553160052] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266608.695889592] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266610.896216131] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266621.973564777] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266624.163923164] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266634.198341701] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266636.390387103] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266647.378774141] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266649.578545032] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266660.906923841] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266663.108149631] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266674.191118409] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266676.400682438] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266686.311888523] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266688.517818733] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266699.692777837] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266701.909992455] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266713.114769410] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266715.327048178] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266726.505071722] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266728.737494034] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266740.122879261] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266742.343043873] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266753.909452564] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266756.138594725] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266766.927825692] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266769.157819546] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266779.912335009] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266782.147032621] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266792.935379636] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266795.175616719] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266806.314573774] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266808.560303108] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266820.344403631] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266822.587266935] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266834.228442722] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266836.482646855] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266848.060635671] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266850.321858804] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266860.937995933] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266863.200383783] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266874.559351474] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266876.820070197] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266887.746198876] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266890.010491172] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266901.168208634] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266903.439795285] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266914.552422681] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266916.824386965] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266926.573082205] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266928.843324539] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266938.661707605] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266940.939864671] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266952.060259680] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266954.339406792] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266965.568974523] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266967.862068582] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266978.892837694] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783266981.178018516] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783266992.574242011] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783266996.298773206] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267007.194540354] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267009.489950620] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267020.883892704] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267023.185225210] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267034.103204549] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267036.404769141] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267047.887931756] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267050.197927217] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267062.511488236] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267064.821163844] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267076.398230639] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267078.715287484] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267090.921337583] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267093.243310230] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267104.800889587] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267107.127800513] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267119.329745456] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267121.652479323] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267133.307467495] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267135.639697359] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267147.849281301] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267150.189328191] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267161.920041992] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267164.257391394] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267176.339747723] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267178.674056854] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267190.425776462] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267192.770301935] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267204.846601082] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267207.273128983] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267219.039686577] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267221.388578498] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267233.455441888] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267235.803119402] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267247.739012748] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267250.097684471] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267262.063113830] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267264.420161945] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267276.344935548] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267278.714375565] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267290.664589183] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267293.109806071] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267304.951669640] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267307.326450445] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267319.376234284] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267321.747066967] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267333.659838279] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267336.052718668] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267348.084136452] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267350.463526892] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267362.366146372] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267364.755127154] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267376.887640430] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267379.272714964] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267391.091482860] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267393.565114380] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267405.597229843] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267407.987562101] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267419.983748672] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267422.390531868] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267434.406391831] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267436.808808805] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267448.903097660] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267452.817298439] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267464.710118345] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267467.119109994] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267479.299388929] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267481.718475024] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267493.621996198] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267496.038398619] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267508.507691986] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267510.942789316] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267522.628161950] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267525.049045612] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267536.486203597] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267538.920339942] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267550.532044032] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267552.967005017] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267564.616686615] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267567.058171860] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267578.633525491] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267581.069743977] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267593.118168235] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267595.566462869] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267608.148597378] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267612.191456620] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267624.727986861] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267627.261254027] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267639.652068722] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267642.104682197] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267653.534041334] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267655.991452668] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267668.164224241] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267670.621671292] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267682.348973560] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267684.892840375] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267696.967526207] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267699.444256258] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267711.253976960] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267713.725742231] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267725.772560937] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267728.251829384] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267740.061579174] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267742.542322852] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267754.684886511] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267757.167866120] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267769.068845624] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267771.557282438] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267783.594476679] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267786.082032504] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267797.979317342] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267800.473494401] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267812.600569925] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267815.095476179] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267826.883980989] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267829.393955777] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267841.510737253] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267844.015728660] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267855.992164863] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267858.502946062] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267870.523090796] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267873.032363160] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267884.998952251] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267887.518309389] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267899.620039336] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267902.136222741] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267914.081840957] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267916.610501112] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267928.636035748] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267932.713135600] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267944.610329824] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267947.143032464] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267959.331536372] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267961.862029721] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267973.714986377] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783267976.253043038] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783267994.443564765] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783267996.981676517] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268009.028138141] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268011.581738857] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268023.647673279] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268026.188906056] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268044.235371371] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268046.792968370] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268064.860124472] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268067.414099016] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268079.645608260] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268082.212348445] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268094.166581803] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268096.728802481] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268108.970942307] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268113.135735345] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268126.373709015] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268128.942565780] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268141.464039554] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268144.042806546] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268157.181336181] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268159.759565661] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268176.769306391] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268179.367387088] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268192.693368616] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268195.283222587] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268207.778029570] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268210.375657703] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268223.599220978] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268226.192299837] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268238.793575431] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268241.394934583] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268254.610821173] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268257.217571508] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268269.976478772] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268272.589106866] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268285.610447331] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268288.226924015] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268301.296305806] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268303.916034588] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268316.717936991] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268319.340010182] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268333.000249092] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268335.628949986] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268348.127917038] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268350.764809698] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268363.401554293] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268366.031604048] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268379.731847190] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268382.362278897] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268395.493439018] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268398.131896326] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268411.551151056] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268414.189248192] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268427.727033495] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268430.373059480] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268443.551724592] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268446.199947234] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268458.432714205] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268461.085944137] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268474.253732328] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268476.906189346] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268494.137955486] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268496.800534001] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268509.763915885] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268512.424224112] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268524.947122850] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268527.617810697] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268540.575602122] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268543.244727611] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268555.854467231] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268558.528029556] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268571.486299018] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268574.162135205] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268586.761673757] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268589.465112833] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268608.788431148] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268611.469648750] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268624.171914008] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268626.863010104] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268639.695650922] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268642.390460359] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268655.077849411] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268657.779179748] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268670.701278472] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268673.400742508] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268686.189874656] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268688.896475853] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268701.709885386] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268704.416158536] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268717.191064359] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268719.913899665] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268732.818120161] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268735.533251666] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268754.706059621] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268757.427551138] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268770.243776608] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268772.966651909] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268790.612280628] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268793.342342143] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268811.040193146] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268813.776974145] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268831.433342492] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268834.172486459] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268851.849211756] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268854.591891657] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268872.333605301] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268875.082698651] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268892.858010412] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268895.613025172] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268913.342503290] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268916.101746428] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268933.869232846] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268936.635650875] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268954.455450047] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268957.310171628] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268974.988332759] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783268977.768620856] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783268995.665164936] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783268998.449977389] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269016.781832893] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269019.578157931] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269037.574731910] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269042.060007090] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269060.414438196] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269063.213589130] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269081.785703859] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269084.593610346] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269103.105437115] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269105.923011188] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269124.390537223] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269127.214225110] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269139.108093714] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269141.926900966] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269160.603801032] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269163.425680416] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269181.935851996] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269184.776977364] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269203.510183412] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269206.343842264] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269225.046883292] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269227.890433768] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269246.524099398] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269249.387693358] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269268.155484552] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269271.007843201] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269289.635942908] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269292.494778530] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269311.288886989] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269314.158265478] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269332.848613966] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269335.714967980] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269354.479842660] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269357.360937076] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269375.959863029] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269378.844015252] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269397.794025463] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269400.679923173] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269419.366869401] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269422.254443932] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269441.101692203] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269444.000979577] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269462.976245114] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269465.873520716] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269484.615129929] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269487.530776306] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269506.398204015] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269509.303479949] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269528.222693381] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269531.140020793] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269543.294174969] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269546.213888477] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269565.234634265] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269568.162350047] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269587.084736439] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269590.013873037] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269609.245129066] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269613.977146958] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269632.923461026] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269635.866799899] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269655.446023945] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269658.393788327] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269677.726763988] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269680.682624103] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269700.451782915] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269703.412505937] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269722.941869067] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269725.907492841] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269745.671852230] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269748.719044190] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269768.255715701] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269771.229905508] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269791.097379058] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269794.081938451] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269813.663883901] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269816.647419861] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269828.641745414] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269831.626988509] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269841.993907271] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269844.983826461] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269865.176756043] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269868.175051637] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269887.604937039] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269890.602671877] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269910.806041494] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269913.811737395] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269933.110410623] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269936.121799794] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269956.510690788] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783269959.530238885] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783269978.831912515] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783269981.854287315] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270002.209842814] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270005.318529943] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270024.736587309] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270027.776742537] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270048.015738471] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270051.056042523] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270070.548226144] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270073.593028545] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270094.030549057] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270097.086511028] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270116.463037130] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270119.519236923] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270140.043000293] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270144.981279510] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270164.268158741] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270167.336933402] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270188.201253860] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270191.273978306] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270210.786049006] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270213.861300462] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270233.070014940] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270236.160770098] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270255.581490393] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270258.670061796] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270278.257319108] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270281.349498963] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270300.800312308] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270303.895642208] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270323.780766586] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270326.884242852] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270346.514364781] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270349.623941311] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270369.595849696] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270372.714925306] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270392.421589806] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270395.540883843] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270415.509441410] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270418.718590135] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270438.431442346] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270441.563087794] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270461.519797758] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270464.655084150] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270484.651196861] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270487.793019190] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270507.740507144] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270510.896378540] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270530.754832779] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270533.905227185] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270553.843774691] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270557.005385438] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270576.968037532] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270580.138890317] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270600.151156318] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270603.324566746] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270623.283269240] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270626.459750075] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270646.362430677] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270649.625554779] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270669.789380793] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270672.971719845] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270692.770515802] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270695.963788286] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270716.198014859] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270719.392751020] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270739.376598843] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270742.582814937] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270762.810073986] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270766.014223845] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270786.098490521] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270789.313659916] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270809.443635852] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270812.661534869] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270832.903652612] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270838.099945894] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270858.126313870] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270861.351672149] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270882.012517758] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270885.322529878] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270905.438685426] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270910.666926503] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270931.332023594] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270934.581877140] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270955.056516217] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783270958.303545921] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783270979.336762956] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783270982.593689550] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783271003.261681764] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783271006.529854946] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783271027.649536491] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783271030.914630955] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783271051.482805297] [drone0.drone0_interface]: Service returned failure
+Process ForkServerProcess-2:
+Traceback (most recent call last):
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/subproc_vec_env.py", line 33, in _worker
+    cmd, data = remote.recv()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+ConnectionResetError: [Errno 104] Connection reset by peer

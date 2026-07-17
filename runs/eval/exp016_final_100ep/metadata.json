@@ -1,0 +1,9 @@
+{
+  "model": "/home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp016_curriculum_full_150k_20260705_150025/model_final.zip",
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp016.yaml",
+  "controller": "ppo:model_final",
+  "episodes": 100,
+  "base_seed": 1000,
+  "namespace": "drone0",
+  "timestamp": "20260706_072040"
+}

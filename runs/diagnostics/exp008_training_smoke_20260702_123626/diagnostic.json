@@ -1,0 +1,23 @@
+{
+  "action": [
+    0.5,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "episodes": [],
+  "episodes_requested": 1,
+  "error": "Fresh service-backed reset failed before command path readiness; refusing velocity fallback to avoid accepted-but-ignored actions. Reset diagnostics: reason=service_post_reset_command_path_failed, failure_class=post_reset_command_path_failed, target_pose=[0.0, 0.0, 1.6, 0.0], position_error=0.0, yaw_error=0.0, service_name=/drone0/platform/reset_simulator_state, message=reset state applied, linear_speed_norm=0.0, angular_speed_norm=0.0, post_reset_platform_fsm_ready=False, post_reset_takeoff_ready=False, post_reset_offboard_ready=True, post_reset_controller_ready=True, post_reset_pose_ready=False, post_reset_actionability_ready=False",
+  "min_distance_reduction": 0.1,
+  "min_position_delta": 0.1,
+  "monitor_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_123626/monitor",
+  "namespaces": [
+    "drone0"
+  ],
+  "reason": "diagnostic_error",
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_123626",
+  "steps_requested": 12,
+  "success": false,
+  "vec_env_num_envs": 1
+}

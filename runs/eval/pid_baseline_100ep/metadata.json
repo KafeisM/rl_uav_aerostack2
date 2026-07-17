@@ -1,0 +1,9 @@
+{
+  "model": null,
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp016.yaml",
+  "controller": "pid",
+  "episodes": 100,
+  "base_seed": 1000,
+  "namespace": "drone0",
+  "timestamp": "20260706_100353"
+}

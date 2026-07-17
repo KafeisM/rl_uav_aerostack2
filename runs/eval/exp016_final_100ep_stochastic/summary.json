@@ -1,0 +1,50 @@
+{
+  "episodes": 100,
+  "success_rate": 0.85,
+  "terminal_reasons": {
+    "success": 85,
+    "max_steps": 15
+  },
+  "final_distance": {
+    "mean": 0.4035,
+    "median": 0.3601,
+    "std": 0.2019
+  },
+  "steps": {
+    "mean": 67.79,
+    "median": 40.0,
+    "std": 62.6507
+  },
+  "sim_time_s_success": {
+    "mean": 8.8918,
+    "median": 7.4,
+    "std": 6.2891
+  },
+  "path_efficiency_success": {
+    "mean": 0.6275,
+    "median": 0.6006,
+    "std": 0.2143
+  },
+  "mean_action_norm": {
+    "mean": 1.6556,
+    "median": 1.6905,
+    "std": 0.1112
+  },
+  "distance_bins": {
+    "1.0-2.5": {
+      "n": 30,
+      "success_rate": 0.8,
+      "mean_final_distance": 0.4392
+    },
+    "2.5-3.5": {
+      "n": 21,
+      "success_rate": 0.8095,
+      "mean_final_distance": 0.4199
+    },
+    "3.5-5.0": {
+      "n": 49,
+      "success_rate": 0.898,
+      "mean_final_distance": 0.3746
+    }
+  }
+}

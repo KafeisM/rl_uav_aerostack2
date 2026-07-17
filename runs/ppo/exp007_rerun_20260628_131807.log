@@ -1,0 +1,93 @@
+13:18:13 [INFO] train_ppo: === PPO infrastructure ready ===
+13:18:13 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp007.yaml
+13:18:13 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260628_131812
+13:18:13 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260628_131812/tensorboard
+13:18:13 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260628_131812/monitor
+13:18:13 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260628_131812/checkpoints
+13:18:13 [INFO] train_ppo: Num envs: 1
+13:18:13 [INFO] train_ppo: Namespaces: ['drone0']
+13:18:13 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+13:18:13 [INFO] train_ppo: Checkpoint callback: every 2000 steps
+13:18:13 [INFO] train_ppo: Total timesteps: 20000
+13:18:13 [INFO] train_ppo: Starting PPO learn() ...
+13:18:13 [INFO] rl_uav.envs.as2_test_env: ROS2 initialized (process-wide)
+[INFO] [1782645493.521906569] [drone0.drone0_interface]: Starting drone0
+[INFO] [1782645494.051894542] [drone0.drone0_interface]: drone0 interface initialized
+13:18:14 [INFO] rl_uav.envs.as2_test_env: Target marker publisher created on topic 'visualization_marker' frame 'earth'
+13:18:14 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+13:18:14 [INFO] rl_uav.envs.as2_test_env: Arming drone...
+13:18:15 [INFO] rl_uav.envs.as2_test_env:   Arm: OK
+13:18:15 [INFO] rl_uav.envs.as2_test_env: Setting offboard mode...
+13:18:15 [INFO] rl_uav.envs.as2_test_env:   Offboard: OK
+13:18:15 [INFO] rl_uav.envs.as2_test_env: Taking off to 1.0m...
+13:18:18 [INFO] rl_uav.envs.as2_test_env:   Takeoff: OK
+13:18:23 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.4         0.         -0.00139402  0.        ]
+13:18:44 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+13:18:53 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.41731283 -0.00078439  0.00182353  0.02564833]
+13:19:00 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+13:19:00 [INFO] rl_uav.envs.as2_test_env: Closing environment...
+13:19:00 [INFO] rl_uav.envs.as2_test_env: Landing...
+13:19:10 [WARNING] rl_uav.envs.as2_test_env: landing exceeded 10.0s during close; continuing best-effort shutdown
+13:19:11 [INFO] rl_uav.envs.as2_test_env: DroneInterface shut down
+13:19:11 [INFO] rl_uav.envs.as2_test_env: Environment closed
+Traceback (most recent call last):
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 115, in <module>
+    raise SystemExit(main())
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 101, in main
+    model.learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py", line 311, in learn
+    return super().learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 324, in learn
+    continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer, n_rollout_steps=self.n_steps)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 218, in collect_rollouts
+    new_obs, rewards, dones, infos = env.step(clipped_actions)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/base_vec_env.py", line 222, in step
+    return self.step_wait()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/vec_monitor.py", line 75, in step_wait
+    obs, rewards, dones, infos = self.venv.step_wait()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 71, in step_wait
+    obs, self.reset_infos[env_idx] = self.envs[env_idx].reset()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 400, in reset
+    return super().reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/core.py", line 333, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 295, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 1068, in reset
+    self._recover_low_altitude_hover_before_velocity_reset(
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 699, in _recover_low_altitude_hover_before_velocity_reset
+    raise RuntimeError(
+RuntimeError: Low-altitude reset recovery found an unrecoverable ground/terminal altitude; hard AS2 reset required. Reset diagnostics: reason=hard_reset_required, failure_class=ground_or_terminal_altitude, target_pose=[-0.7887167930603027, -3.214967727661133, 1.0, 0.6227031598859457], final_pose=[-0.7887167930603027, -3.214967727661133, 0.0, 0.6227031598859457], control_available=True, state_error=z=0.000 is on/near ground or below terminal lower bound 0.100
+ERROR conda.cli.main_run:execute(142): `conda run python3 -u scripts/train_ppo.py --config configs/train_ppo_phase1_exp007.yaml` failed. (See above for error)
+Using cpu device
+Logging to runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260628_131812/tensorboard/PPO_1
+----------------------------
+| time/              |     |
+|    fps             | 5   |
+|    iterations      | 1   |
+|    time_elapsed    | 23  |
+|    total_timesteps | 128 |
+----------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -16.1        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 5            |
+|    iterations           | 2            |
+|    time_elapsed         | 45           |
+|    total_timesteps      | 256          |
+| train/                  |              |
+|    approx_kl            | 0.0021377099 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.783       |
+|    explained_variance   | -0.0213      |
+|    learning_rate        | 0.0001       |
+|    loss                 | 0.728        |
+|    n_updates            | 5            |
+|    policy_gradient_loss | 0.00366      |
+|    std                  | 1            |
+|    value_loss           | 1.48         |
+------------------------------------------

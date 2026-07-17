@@ -1,0 +1,7 @@
+#{"t_start": 1782471255.106127, "env_id": "None"}
+r,l,t,is_success,final_distance,is_out_of_bounds,terminal_reason
+-40.726448,200,54.779769,False,2.9491254357767915,False,max_steps
+-108.53151,200,98.733635,False,6.300300218070354,True,out_of_bounds
+-32.640728,200,139.003195,False,1.3126647631441608,False,max_steps
+-76.36012,200,176.939175,False,3.40495797843135,False,max_steps
+-65.910736,200,220.319171,False,2.414494707970141,False,max_steps

@@ -1,0 +1,23 @@
+{
+  "action": [
+    0.5,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "episodes": [],
+  "episodes_requested": 1,
+  "error": "Fresh service-backed reset failed before command path readiness; refusing velocity fallback to avoid accepted-but-ignored actions. Reset diagnostics: reason=service_post_reset_command_path_failed, failure_class=post_reset_command_path_failed, target_pose=[0.0, 0.0, 1.6, 0.0], position_error=0.0, yaw_error=0.0, service_name=/drone0/platform/reset_simulator_state, message=reset state applied, linear_speed_norm=0.0, angular_speed_norm=0.0, post_reset_takeoff_ready=True, post_reset_offboard_ready=True, post_reset_controller_ready=True, post_reset_pose_ready=True, post_reset_pose_observed=True, post_reset_observed_pose=[4.202565548330787e-18, 0.0, 1.6016243696212769, 0.0], post_reset_observed_position_error=0.0016, post_reset_actionability_ready=False, post_reset_actionability_recovered=False, post_reset_actionability={'accepted': True, 'stop_accepted': True, 'actionable': True, 'reason': 'probe_motion_confirmed', 'probe_twist': [0.25, 0.0, 0.0], 'twist_frame_id': 'earth', 'position_before': [4.202565660339675e-18, 0.0, 1.601624318508255], 'position_after': [0.0932778456480018, 0.0, 1.6014443377697563], 'position_after_command': [2.862204712481823e-18, 0.0, 1.6039081488191544], 'position_after_stop': [0.0932778456480018, 0.0, 1.6014443377697563], 'position_delta': [0.09327784925699234, 0.0, -0.0001800060272216797], 'forward_delta': 0.09328, 'delta_norm': 0.09328, 'min_forward_delta': 0.03, 'probe_iterations': 12, 'stop_iterations': 4, 'start_pose_restore_tolerance': 0.05, 'start_pose_error_before_restore': 0.0933, 'start_pose_restored': False, 'start_pose_restore_method': 'velocity_restore', 'start_pose_before_restore': [0.09327784925699234, 0.0, 1.6014443635940552, 0.0], 'start_pose_after_restore': [0.1528385430574417, 0.0, 1.6003727912902832, 0.0], 'start_pose_error_after_restore': 0.1528, 'start_pose_restore_diagnostics': {'reason': 'post_controller_hold', 'attempt': 1, 'elapsed': 1.207, 'reset_phase': 'hold', 'phase': 'hold', 'settle_elapsed': 0.1, 'target_pose': [0.0, 0.0, 1.6, 0.0], 'final_pose': [0.1528385430574417, 0.0, 1.6003727912902832, 0.0], 'position_error': 0.1528, 'yaw_error': 0.0, 'last_command': [0.0, 0.0, 0.0, 0.0]}}",
+  "min_distance_reduction": 0.1,
+  "min_position_delta": 0.1,
+  "monitor_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_125326/monitor",
+  "namespaces": [
+    "drone0"
+  ],
+  "reason": "diagnostic_error",
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_125326",
+  "steps_requested": 12,
+  "success": false,
+  "vec_env_num_envs": 1
+}

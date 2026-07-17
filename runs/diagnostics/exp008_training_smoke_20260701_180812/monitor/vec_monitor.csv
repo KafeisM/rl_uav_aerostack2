@@ -1,0 +1,4 @@
+#{"t_start": 1782922092.4288921, "env_id": "None"}
+r,l,t,is_success,final_distance,is_out_of_bounds,is_unsafe_low_altitude,altitude,terminal_reason,physical_displacement,path_length,max_physical_displacement,min_altitude,motion_command_steps,motion_command_accepted_steps,motion_command_acceptance_rate,reset_method,reset_path,reset_service_attempted,reset_failure_class,reset_position_error,reset_yaw_error,reset_service_status,vertical_safety_penalty,low_altitude_guard_active
+20.044708,7,17.861282,True,0.31145706428751746,False,False,1.5922369843425663,success,0.18886909336766766,0.19131558334603094,0.18886909336766766,1.5922369843425663,7,7,1.0,simulator_service,service_success,True,,0.0,0.0,service_success,0.0,False
+20.380976,11,40.461087,True,0.2887151605936322,False,False,1.6001455209196682,success,0.38255223324532056,0.3825799255281144,0.38255223324532056,1.6001455209196682,11,11,1.0,velocity,post_controller_hold,False,,0.1716,0.0,not_attempted,0.0,False

@@ -1,0 +1,36 @@
+19:05:43 [INFO] train_ppo: Resuming from runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_180806/checkpoints/ppo_phase1_exp012_50000_steps.zip at num_timesteps=50000
+19:05:43 [INFO] train_ppo: === PPO infrastructure ready ===
+19:05:43 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp012.yaml
+19:05:43 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_190542
+19:05:43 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_190542/tensorboard
+19:05:43 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_190542/monitor
+19:05:43 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_190542/checkpoints
+19:05:43 [INFO] train_ppo: Num envs: 1
+19:05:43 [INFO] train_ppo: Namespaces: ['drone0']
+19:05:43 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+19:05:43 [INFO] train_ppo: Checkpoint callback: every 5000 steps
+19:05:43 [INFO] train_ppo: Resume remainder: 0 steps to reach the configured total
+19:05:43 [INFO] train_ppo: Total timesteps: 0
+19:05:43 [INFO] train_ppo: Starting PPO learn() ...
+19:05:43 [INFO] rl_uav.envs.as2_test_env: ROS2 initialized (process-wide)
+[INFO] [1783184743.947901252] [drone0.drone0_interface]: Starting drone0
+[INFO] [1783184744.478137225] [drone0.drone0_interface]: drone0 interface initialized
+[WARN] [1783184745.487094726] [drone0.drone0_interface]: TakeoffBehavior Not Available
+[WARN] [1783184746.494615169] [drone0.drone0_interface]: GoToBehavior Not Available
+19:05:46 [INFO] rl_uav.envs.as2_test_env: Target marker publisher created on topic 'visualization_marker' frame 'earth'
+19:05:46 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+19:05:46 [INFO] rl_uav.envs.as2_test_env: Arming drone...
+19:05:47 [INFO] rl_uav.envs.as2_test_env:   Arm: OK
+19:05:47 [INFO] rl_uav.envs.as2_test_env: Setting offboard mode...
+19:05:47 [INFO] rl_uav.envs.as2_test_env:   Offboard: OK
+19:05:47 [INFO] rl_uav.envs.as2_test_env: Taking off to 1.0m...
+19:05:49 [INFO] rl_uav.envs.as2_test_env:   Takeoff: OK
+[ERROR] [1783184749.699513564] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783184749.731904266] [drone0.drone0_interface]: Service returned failure
+19:05:54 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.18403208 -0.10932441 -0.16796897  0.24759158]
+Logging to runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_190542/tensorboard/PPO_0
+19:05:54 [INFO] train_ppo: Training completed. Final model saved at: runs/ppo/ppo_phase1_exp012_bounds_guard_50k_20260704_190542/model_final.zip
+19:05:54 [INFO] rl_uav.envs.as2_test_env: Closing environment...
+19:05:54 [INFO] rl_uav.envs.as2_test_env: Landing...
+19:05:57 [INFO] rl_uav.envs.as2_test_env: DroneInterface shut down
+19:05:57 [INFO] rl_uav.envs.as2_test_env: Environment closed

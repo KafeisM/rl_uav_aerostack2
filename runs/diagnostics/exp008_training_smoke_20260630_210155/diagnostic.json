@@ -1,0 +1,1095 @@
+{
+  "action": [
+    0.8,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "episode_summaries": [
+    {
+      "accepted_command_steps": 6,
+      "distance_reduction": 0.19603985596749757,
+      "episode": 0,
+      "final_distance": 0.30396204460771864,
+      "initial_distance": 0.5000019005752162,
+      "max_step_position_delta_norm": 0.19654422548087935,
+      "reason": "distance_reduced_after_positive_x_actions",
+      "steps": 6,
+      "success": true,
+      "terminal_reason": "success",
+      "terminated_or_truncated": true,
+      "total_position_delta_norm": 0.20000551993859791
+    },
+    {
+      "accepted_command_steps": 5,
+      "distance_reduction": 0.09321616562880874,
+      "episode": 1,
+      "final_distance": 0.3738122607668089,
+      "initial_distance": 0.46702842639561765,
+      "max_step_position_delta_norm": 0.09330379239182568,
+      "reason": "distance_reduced_after_positive_x_actions",
+      "steps": 5,
+      "success": true,
+      "terminal_reason": "success",
+      "terminated_or_truncated": true,
+      "total_position_delta_norm": 0.09330379239182568
+    },
+    {
+      "accepted_command_steps": 9,
+      "distance_reduction": 0.2809181560596068,
+      "episode": 2,
+      "final_distance": 0.13054444992907033,
+      "initial_distance": 0.4114626059886771,
+      "max_step_position_delta_norm": 0.28104567002933184,
+      "reason": "distance_reduced_after_positive_x_actions",
+      "steps": 9,
+      "success": true,
+      "terminal_reason": "success",
+      "terminated_or_truncated": true,
+      "total_position_delta_norm": 0.28104567002933184
+    }
+  ],
+  "episodes": [
+    {
+      "episode": 0,
+      "reset_info_after_reset": {
+        "altitude": 1.5986213851776365,
+        "distance": 0.5000019005752162,
+        "distance_norm": 0.05773524637848512,
+        "drone_namespace": "drone0",
+        "final_distance": 0.5000019005752162,
+        "is_flying": true,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "max_physical_displacement": 0.0,
+        "min_altitude": 1.5986213851776365,
+        "motion_command_acceptance_rate": 0.0,
+        "motion_command_accepted_steps": 0,
+        "motion_command_steps": 0,
+        "orientation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "path_length": 0.0,
+        "physical_displacement": 0.0,
+        "position": [
+          0.0,
+          0.0,
+          1.5986213851776365
+        ],
+        "reset_failure_class": "",
+        "reset_method": "simulator_service",
+        "reset_path": "service_success",
+        "reset_position_error": 0.0,
+        "reset_service_attempted": true,
+        "reset_service_status": "service_success",
+        "reset_yaw_error": 0.0,
+        "speed": [
+          0.0,
+          0.0,
+          0.006851487301294868
+        ],
+        "step_count": 0,
+        "target_pose": [
+          0.5,
+          0.0,
+          1.6,
+          0.0
+        ]
+      },
+      "reset_summary": {
+        "diagnostics": {
+          "angular_speed_norm": 0.0,
+          "failure_class": "",
+          "linear_speed_norm": 0.0,
+          "message": "reset state applied",
+          "position_error": 0.0,
+          "reason": "service_success",
+          "service_name": "/drone0/platform/reset_simulator_state",
+          "target_pose": [
+            0.0,
+            0.0,
+            1.6,
+            0.0
+          ],
+          "yaw_error": 0.0
+        },
+        "reset_service_success": true,
+        "service_attempted": true,
+        "service_path": "service_success",
+        "use_simulator_reset_service": true
+      },
+      "samples": [
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.5000043122840794,
+          "distance_before": 0.5000019005752162,
+          "done": false,
+          "episode": 0,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_before": [
+            0.0,
+            0.0,
+            1.5986213851776365
+          ],
+          "position_delta": [
+            2.5251788628656632e-08,
+            0.0,
+            0.0034612944576264404
+          ],
+          "reset_success": true,
+          "reward": -0.08531264215707779,
+          "step": 0,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.5000043122840794,
+          "distance_before": 0.5000043122840794,
+          "done": false,
+          "episode": 0,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_before": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05773552507162094,
+          "step": 1,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.5000043122840794,
+          "distance_before": 0.5000043122840794,
+          "done": false,
+          "episode": 0,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_before": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05773552507162094,
+          "step": 2,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.5000043122840794,
+          "distance_before": 0.5000043122840794,
+          "done": false,
+          "episode": 0,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_before": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05773552507162094,
+          "step": 3,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.5000043122840794,
+          "distance_before": 0.5000043122840794,
+          "done": false,
+          "episode": 0,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_before": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05773552507162094,
+          "step": 4,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.30396204460771864,
+          "distance_before": 0.5000043122840794,
+          "done": true,
+          "episode": 0,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.1961920677594991,
+            0.0,
+            1.590321938734645
+          ],
+          "position_before": [
+            2.5251788628656632e-08,
+            0.0,
+            1.602082679635263
+          ],
+          "position_delta": [
+            0.19619204250771047,
+            0.0,
+            -0.01176074090061796
+          ],
+          "reset_success": true,
+          "reward": 20.356985092163086,
+          "step": 5,
+          "terminal_reason": "success"
+        }
+      ],
+      "summary": {
+        "accepted_command_steps": 6,
+        "distance_reduction": 0.19603985596749757,
+        "episode": 0,
+        "final_distance": 0.30396204460771864,
+        "initial_distance": 0.5000019005752162,
+        "max_step_position_delta_norm": 0.19654422548087935,
+        "reason": "distance_reduced_after_positive_x_actions",
+        "steps": 6,
+        "success": true,
+        "terminal_reason": "success",
+        "terminated_or_truncated": true,
+        "total_position_delta_norm": 0.20000551993859791
+      }
+    },
+    {
+      "episode": 1,
+      "reset_info_after_reset": {
+        "altitude": 1.625224540106875,
+        "distance": 0.46702842639561765,
+        "distance_norm": 0.05392779753974344,
+        "drone_namespace": "drone0",
+        "final_distance": 0.46702842639561765,
+        "is_flying": true,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "max_physical_displacement": 0.0,
+        "min_altitude": 1.625224540106875,
+        "motion_command_acceptance_rate": 0.0,
+        "motion_command_accepted_steps": 0,
+        "motion_command_steps": 0,
+        "orientation": [
+          0.0,
+          -6.572058049714646e-06,
+          0.0
+        ],
+        "path_length": 0.0,
+        "physical_displacement": 0.0,
+        "position": [
+          0.033653268867505096,
+          0.0,
+          1.625224540106875
+        ],
+        "reset_failure_class": "",
+        "reset_method": "velocity",
+        "reset_path": "post_controller_hold",
+        "reset_position_error": 0.0421,
+        "reset_service_attempted": false,
+        "reset_service_status": "not_attempted",
+        "reset_yaw_error": 0.0,
+        "speed": [
+          0.0005218200664387362,
+          0.0,
+          0.0013506312091169685
+        ],
+        "step_count": 0,
+        "target_pose": [
+          0.5,
+          0.0,
+          1.6,
+          0.0
+        ]
+      },
+      "reset_summary": {
+        "diagnostics": {
+          "attempt": 1,
+          "elapsed": 1.106,
+          "final_pose": [
+            0.033653270453214645,
+            0.0,
+            1.6252245903015137,
+            0.0
+          ],
+          "last_command": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_error": 0.0421,
+          "reason": "post_controller_hold",
+          "target_pose": [
+            0.0,
+            0.0,
+            1.6,
+            0.0
+          ],
+          "yaw_error": 0.0
+        },
+        "reset_service_success": true,
+        "service_attempted": false,
+        "service_path": "post_controller_hold",
+        "use_simulator_reset_service": true
+      },
+      "samples": [
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.46702842639561765,
+          "distance_before": 0.46702842639561765,
+          "done": false,
+          "episode": 1,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_before": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05392779782414436,
+          "step": 0,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.46702842639561765,
+          "distance_before": 0.46702842639561765,
+          "done": false,
+          "episode": 1,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_before": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05392779782414436,
+          "step": 1,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.46702842639561765,
+          "distance_before": 0.46702842639561765,
+          "done": false,
+          "episode": 1,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_before": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05392779782414436,
+          "step": 2,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.46702842639561765,
+          "distance_before": 0.46702842639561765,
+          "done": false,
+          "episode": 1,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_before": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05392779782414436,
+          "step": 3,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.3738122607668089,
+          "distance_before": 0.46702842639561765,
+          "done": true,
+          "episode": 1,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.12655549562974402,
+            0.0,
+            1.6165773476541512
+          ],
+          "position_before": [
+            0.033653268867505096,
+            0.0,
+            1.625224540106875
+          ],
+          "position_delta": [
+            0.09290222676223893,
+            0.0,
+            -0.008647192452723829
+          ],
+          "reset_success": true,
+          "reward": 20.193267822265625,
+          "step": 4,
+          "terminal_reason": "success"
+        }
+      ],
+      "summary": {
+        "accepted_command_steps": 5,
+        "distance_reduction": 0.09321616562880874,
+        "episode": 1,
+        "final_distance": 0.3738122607668089,
+        "initial_distance": 0.46702842639561765,
+        "max_step_position_delta_norm": 0.09330379239182568,
+        "reason": "distance_reduced_after_positive_x_actions",
+        "steps": 5,
+        "success": true,
+        "terminal_reason": "success",
+        "terminated_or_truncated": true,
+        "total_position_delta_norm": 0.09330379239182568
+      }
+    },
+    {
+      "episode": 2,
+      "reset_info_after_reset": {
+        "altitude": 1.6152302011209054,
+        "distance": 0.4114626059886771,
+        "distance_norm": 0.047511609265805534,
+        "drone_namespace": "drone0",
+        "final_distance": 0.4114626059886771,
+        "is_flying": true,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "max_physical_displacement": 0.0,
+        "min_altitude": 1.6152302011209054,
+        "motion_command_acceptance_rate": 0.0,
+        "motion_command_accepted_steps": 0,
+        "motion_command_steps": 0,
+        "orientation": [
+          0.0,
+          -8.81009914075901e-06,
+          0.0
+        ],
+        "path_length": 0.0,
+        "physical_displacement": 0.0,
+        "position": [
+          0.08881936195777636,
+          0.0,
+          1.6152302011209054
+        ],
+        "reset_failure_class": "",
+        "reset_method": "velocity",
+        "reset_path": "post_controller_hold",
+        "reset_position_error": 0.0901,
+        "reset_service_attempted": false,
+        "reset_service_status": "not_attempted",
+        "reset_yaw_error": 0.0,
+        "speed": [
+          0.0005170735691780109,
+          0.0,
+          0.000533387229691065
+        ],
+        "step_count": 0,
+        "target_pose": [
+          0.5,
+          0.0,
+          1.6,
+          0.0
+        ]
+      },
+      "reset_summary": {
+        "diagnostics": {
+          "attempt": 1,
+          "elapsed": 1.106,
+          "final_pose": [
+            0.08881936222314835,
+            0.0,
+            1.6152302026748657,
+            0.0
+          ],
+          "last_command": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_error": 0.0901,
+          "reason": "post_controller_hold",
+          "target_pose": [
+            0.0,
+            0.0,
+            1.6,
+            0.0
+          ],
+          "yaw_error": 0.0
+        },
+        "reset_service_success": true,
+        "service_attempted": false,
+        "service_path": "post_controller_hold",
+        "use_simulator_reset_service": true
+      },
+      "samples": [
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 0,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 1,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 2,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 3,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 4,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 5,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 6,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.4114626059886771,
+          "distance_before": 0.4114626059886771,
+          "done": false,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.04751160740852356,
+          "step": 7,
+          "terminal_reason": null
+        },
+        {
+          "action": [
+            0.800000011920929,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "distance_after": 0.13054444992907033,
+          "distance_before": 0.4114626059886771,
+          "done": true,
+          "episode": 2,
+          "motion_command_accepted": true,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.36945556615132424,
+            0.0,
+            1.6000647951562321
+          ],
+          "position_before": [
+            0.08881936195777636,
+            0.0,
+            1.6152302011209054
+          ],
+          "position_delta": [
+            0.2806362041935479,
+            0.0,
+            -0.015165405964673306
+          ],
+          "reset_success": true,
+          "reward": 20.59676170349121,
+          "step": 8,
+          "terminal_reason": "success"
+        }
+      ],
+      "summary": {
+        "accepted_command_steps": 9,
+        "distance_reduction": 0.2809181560596068,
+        "episode": 2,
+        "final_distance": 0.13054444992907033,
+        "initial_distance": 0.4114626059886771,
+        "max_step_position_delta_norm": 0.28104567002933184,
+        "reason": "distance_reduced_after_positive_x_actions",
+        "steps": 9,
+        "success": true,
+        "terminal_reason": "success",
+        "terminated_or_truncated": true,
+        "total_position_delta_norm": 0.28104567002933184
+      }
+    }
+  ],
+  "episodes_requested": 3,
+  "min_distance_reduction": 0.05,
+  "min_position_delta": 0.05,
+  "monitor_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260630_210155/monitor",
+  "namespaces": [
+    "drone0"
+  ],
+  "reason": "physical_motion_confirmed_across_training_resets",
+  "reset_summaries": [
+    {
+      "diagnostics": {
+        "angular_speed_norm": 0.0,
+        "failure_class": "",
+        "linear_speed_norm": 0.0,
+        "message": "reset state applied",
+        "position_error": 0.0,
+        "reason": "service_success",
+        "service_name": "/drone0/platform/reset_simulator_state",
+        "target_pose": [
+          0.0,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "yaw_error": 0.0
+      },
+      "reset_service_success": true,
+      "service_attempted": true,
+      "service_path": "service_success",
+      "use_simulator_reset_service": true
+    },
+    {
+      "diagnostics": {
+        "attempt": 1,
+        "elapsed": 1.106,
+        "final_pose": [
+          0.033653270453214645,
+          0.0,
+          1.6252245903015137,
+          0.0
+        ],
+        "last_command": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "position_error": 0.0421,
+        "reason": "post_controller_hold",
+        "target_pose": [
+          0.0,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "yaw_error": 0.0
+      },
+      "reset_service_success": true,
+      "service_attempted": false,
+      "service_path": "post_controller_hold",
+      "use_simulator_reset_service": true
+    },
+    {
+      "diagnostics": {
+        "attempt": 1,
+        "elapsed": 1.106,
+        "final_pose": [
+          0.08881936222314835,
+          0.0,
+          1.6152302026748657,
+          0.0
+        ],
+        "last_command": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "position_error": 0.0901,
+        "reason": "post_controller_hold",
+        "target_pose": [
+          0.0,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "yaw_error": 0.0
+      },
+      "reset_service_success": true,
+      "service_attempted": false,
+      "service_path": "post_controller_hold",
+      "use_simulator_reset_service": true
+    }
+  ],
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260630_210155",
+  "steps_requested": 12,
+  "success": true,
+  "vec_env_num_envs": 1
+}

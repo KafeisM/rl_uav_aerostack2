@@ -1,0 +1,539 @@
+10:03:53 [INFO] evaluate_policy: Controller: pid
+10:03:53 [INFO] evaluate_policy: Episodes: 100 (base seed 1000)
+10:03:53 [INFO] evaluate_policy: Output: runs/eval/pid_baseline_100ep
+10:03:53 [INFO] rl_uav.envs.as2_test_env: ROS2 initialized (process-wide)
+[INFO] [1783325033.983106347] [drone0.drone0_interface]: Starting drone0
+[INFO] [1783325034.522358483] [drone0.drone0_interface]: drone0 interface initialized
+10:03:54 [INFO] rl_uav.envs.as2_test_env: Target marker publisher created on topic 'visualization_marker' frame 'earth'
+10:03:54 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+10:03:54 [INFO] rl_uav.envs.as2_test_env: Arming drone...
+10:03:54 [INFO] rl_uav.envs.as2_test_env:   Arm: OK
+10:03:54 [INFO] rl_uav.envs.as2_test_env: Setting offboard mode...
+10:03:54 [INFO] rl_uav.envs.as2_test_env:   Offboard: OK
+10:03:54 [INFO] rl_uav.envs.as2_test_env: Taking off to 1.0m...
+10:03:57 [INFO] rl_uav.envs.as2_test_env:   Takeoff: OK
+[ERROR] [1783325038.135866571] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325038.164294284] [drone0.drone0_interface]: Service returned failure
+10:04:01 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.3888767  -0.09113849 -0.05266935 -0.50848657]
+10:04:05 [INFO] evaluate_policy: episode 1/100: success steps=17 final_dist=0.33 (start-target 2.05 m)
+10:04:05 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325045.559624635] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325045.590847673] [drone0.drone0_interface]: Service returned failure
+10:04:14 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.00122     0.30213502  0.01808206 -0.8815818 ]
+10:04:17 [INFO] evaluate_policy: episode 2/100: success steps=13 final_dist=0.33 (start-target 1.60 m)
+10:04:17 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:04:17 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.110; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325059.305267561] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325059.365797324] [drone0.drone0_interface]: Service returned failure
+10:04:31 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [0.24665798 0.30307567 0.04684682 0.97826236]
+10:04:33 [INFO] evaluate_policy: episode 3/100: success steps=13 final_dist=0.36 (start-target 1.97 m)
+10:04:33 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:04:33 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.153; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325075.767383262] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325075.816640135] [drone0.drone0_interface]: Service returned failure
+10:04:43 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.30804247  0.43159515  0.01574054  0.3099321 ]
+10:04:47 [INFO] evaluate_policy: episode 4/100: success steps=19 final_dist=0.36 (start-target 2.76 m)
+10:04:47 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325087.896025582] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325087.984200599] [drone0.drone0_interface]: Service returned failure
+10:04:54 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.23280312 -0.13990593 -0.17012836  0.7914378 ]
+10:04:56 [INFO] evaluate_policy: episode 5/100: success steps=10 final_dist=0.34 (start-target 1.60 m)
+10:04:56 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325096.786417356] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325096.842192756] [drone0.drone0_interface]: Service returned failure
+10:05:05 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.6136844  -0.3789009  -0.03250345 -0.9759043 ]
+10:05:10 [INFO] evaluate_policy: episode 6/100: success steps=28 final_dist=0.32 (start-target 3.70 m)
+10:05:10 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325110.929549744] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325111.038919508] [drone0.drone0_interface]: Service returned failure
+10:05:17 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.0346723  -0.21447892  0.10361659 -0.80768186]
+10:05:19 [INFO] evaluate_policy: episode 7/100: success steps=8 final_dist=0.39 (start-target 1.28 m)
+10:05:19 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325119.609835364] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325119.734758123] [drone0.drone0_interface]: Service returned failure
+10:05:27 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.36636943 -0.34389982  0.06409358 -0.760915  ]
+10:05:30 [INFO] evaluate_policy: episode 8/100: success steps=17 final_dist=0.34 (start-target 2.54 m)
+10:05:30 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325131.029955118] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325131.164956011] [drone0.drone0_interface]: Service returned failure
+10:05:42 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.90019184 -0.32376522 -0.09867598  0.6407617 ]
+10:05:51 [INFO] evaluate_policy: episode 9/100: success steps=42 final_dist=0.33 (start-target 4.95 m)
+10:05:51 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325151.542101013] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325151.691255096] [drone0.drone0_interface]: Service returned failure
+10:06:01 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.75458485 -0.37181497  0.07083485 -0.0613747 ]
+10:06:08 [INFO] evaluate_policy: episode 10/100: success steps=34 final_dist=0.38 (start-target 4.39 m)
+10:06:08 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325168.858674312] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325169.007690599] [drone0.drone0_interface]: Service returned failure
+10:06:19 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.22485325  0.77770525  0.04262844 -0.7099915 ]
+10:06:26 [INFO] evaluate_policy: episode 11/100: success steps=36 final_dist=0.33 (start-target 4.19 m)
+10:06:26 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325186.770615102] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325186.923599698] [drone0.drone0_interface]: Service returned failure
+10:06:37 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.24004447 -0.443279   -0.16359282  0.12913007]
+10:06:41 [INFO] evaluate_policy: episode 12/100: success steps=20 final_dist=0.34 (start-target 2.83 m)
+10:06:41 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325201.978884551] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325202.139158283] [drone0.drone0_interface]: Service returned failure
+10:06:51 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.5868193   0.37495115  0.09534313 -0.62392926]
+10:06:56 [INFO] evaluate_policy: episode 13/100: success steps=26 final_dist=0.39 (start-target 3.60 m)
+10:06:56 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:06:56 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.144; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325218.690998520] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325218.886468910] [drone0.drone0_interface]: Service returned failure
+10:07:04 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.5986221  -0.09943134  0.00579593 -0.5468768 ]
+10:07:10 [INFO] evaluate_policy: episode 14/100: success steps=27 final_dist=0.34 (start-target 3.08 m)
+10:07:10 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325230.801409614] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325231.008522540] [drone0.drone0_interface]: Service returned failure
+10:07:22 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.9049733   0.19409549 -0.03279936 -0.9105075 ]
+10:07:31 [INFO] evaluate_policy: episode 15/100: success steps=42 final_dist=0.37 (start-target 4.77 m)
+10:07:31 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325251.415946991] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325251.632737211] [drone0.drone0_interface]: Service returned failure
+10:07:44 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.6681854  -0.33768365 -0.12009137 -0.39955378]
+10:07:50 [INFO] evaluate_policy: episode 16/100: success steps=31 final_dist=0.32 (start-target 3.96 m)
+10:07:50 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325270.719552130] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325270.946482027] [drone0.drone0_interface]: Service returned failure
+10:07:58 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.2009067  -0.5154664  -0.01822786  0.3402006 ]
+10:08:02 [INFO] evaluate_policy: episode 17/100: success steps=23 final_dist=0.36 (start-target 2.67 m)
+10:08:02 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325283.330367938] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325283.567952510] [drone0.drone0_interface]: Service returned failure
+10:08:14 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.75949574 -0.00255592 -0.05884198 -0.8888574 ]
+10:08:21 [INFO] evaluate_policy: episode 18/100: success steps=35 final_dist=0.34 (start-target 3.91 m)
+10:08:21 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325301.458026776] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325301.706139059] [drone0.drone0_interface]: Service returned failure
+10:08:30 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.24550912  0.72801775 -0.02775455  0.4927837 ]
+10:08:37 [INFO] evaluate_policy: episode 19/100: success steps=34 final_dist=0.31 (start-target 3.92 m)
+10:08:37 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325317.372076049] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325317.633577002] [drone0.drone0_interface]: Service returned failure
+10:08:47 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-3.0812874e-01  7.6475316e-01  3.5051372e-02 -2.7284829e-04]
+10:08:54 [INFO] evaluate_policy: episode 20/100: success steps=36 final_dist=0.27 (start-target 4.26 m)
+10:08:54 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:08:54 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.109; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325337.073468050] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325337.348165074] [drone0.drone0_interface]: Service returned failure
+10:09:08 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.48928425  0.27351984 -0.06412331  0.18188325]
+10:09:13 [INFO] evaluate_policy: episode 21/100: success steps=22 final_dist=0.33 (start-target 2.97 m)
+10:09:13 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325353.479801857] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325353.765338350] [drone0.drone0_interface]: Service returned failure
+10:09:25 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.02478036 -0.8278674  -0.05936216  0.5751295 ]
+10:09:33 [INFO] evaluate_policy: episode 22/100: success steps=39 final_dist=0.27 (start-target 4.16 m)
+10:09:33 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325373.491572619] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325373.786654636] [drone0.drone0_interface]: Service returned failure
+10:09:40 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.22615072 -0.16636465  0.037265    0.35966682]
+10:09:42 [INFO] evaluate_policy: episode 23/100: success steps=9 final_dist=0.37 (start-target 1.47 m)
+10:09:42 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325382.603957072] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325382.909691485] [drone0.drone0_interface]: Service returned failure
+10:09:53 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.11992421 -0.8085452  -0.08360726  0.65578175]
+10:10:01 [INFO] evaluate_policy: episode 24/100: success steps=38 final_dist=0.32 (start-target 4.17 m)
+10:10:01 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325402.011898886] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325402.331934235] [drone0.drone0_interface]: Service returned failure
+10:10:08 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.45867276 -0.01736503 -0.01057845 -0.9941749 ]
+10:10:12 [INFO] evaluate_policy: episode 25/100: success steps=21 final_dist=0.34 (start-target 2.31 m)
+10:10:12 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325413.024899542] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325413.351489374] [drone0.drone0_interface]: Service returned failure
+10:10:23 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.6832594  -0.5236072   0.07122492 -0.64751965]
+10:10:29 [INFO] evaluate_policy: episode 26/100: success steps=31 final_dist=0.40 (start-target 4.36 m)
+10:10:29 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:10:29 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.017; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325432.535699664] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325432.876647303] [drone0.drone0_interface]: Service returned failure
+10:10:45 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.40865278 -0.5499074   0.06660546  0.05532328]
+10:10:50 [INFO] evaluate_policy: episode 27/100: success steps=25 final_dist=0.35 (start-target 3.50 m)
+10:10:50 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325451.047954601] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325451.400340200] [drone0.drone0_interface]: Service returned failure
+10:11:00 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.6146637  -0.4670185   0.14147092 -0.071785  ]
+10:11:06 [INFO] evaluate_policy: episode 28/100: success steps=28 final_dist=0.34 (start-target 3.93 m)
+10:11:06 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:11:06 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.118; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325468.362650229] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325468.725036860] [drone0.drone0_interface]: Service returned failure
+10:11:20 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.5665558  -0.70251536  0.01439777  0.8072242 ]
+10:11:26 [INFO] evaluate_policy: episode 29/100: success steps=32 final_dist=0.38 (start-target 4.63 m)
+10:11:26 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325487.269688302] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325487.643603113] [drone0.drone0_interface]: Service returned failure
+10:11:40 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.6027375  -0.47191778  0.03803989  0.62486464]
+10:11:45 [INFO] evaluate_policy: episode 30/100: success steps=27 final_dist=0.38 (start-target 3.96 m)
+10:11:45 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325506.380377189] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325506.765007166] [drone0.drone0_interface]: Service returned failure
+10:11:55 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.15506956  0.37591803  0.17300232 -0.50304276]
+10:11:58 [INFO] evaluate_policy: episode 31/100: success steps=17 final_dist=0.35 (start-target 2.33 m)
+10:11:58 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:11:58 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.089; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325521.388491351] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325521.776436779] [drone0.drone0_interface]: Service returned failure
+10:12:08 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.04771372  0.8640521   0.00586826  0.13422132]
+10:12:17 [INFO] evaluate_policy: episode 32/100: success steps=41 final_dist=0.35 (start-target 4.38 m)
+10:12:17 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325537.705449312] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325538.113820462] [drone0.drone0_interface]: Service returned failure
+10:12:27 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.05000415 -0.6707071  -0.07710692  0.32922718]
+10:12:33 [INFO] evaluate_policy: episode 33/100: success steps=31 final_dist=0.32 (start-target 3.42 m)
+10:12:33 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325554.116325655] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325554.536588946] [drone0.drone0_interface]: Service returned failure
+10:12:42 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.22169043  0.7499535  -0.05008177 -0.9652494 ]
+10:12:49 [INFO] evaluate_policy: episode 34/100: success steps=35 final_dist=0.31 (start-target 3.93 m)
+10:12:49 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325570.126179752] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325570.557124572] [drone0.drone0_interface]: Service returned failure
+10:12:56 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.36505935 -0.6111649   0.02615334 -0.06298725]
+10:13:02 [INFO] evaluate_policy: episode 35/100: success steps=28 final_dist=0.36 (start-target 3.65 m)
+10:13:02 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325583.236601717] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325583.676838882] [drone0.drone0_interface]: Service returned failure
+10:13:12 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.3167276   0.39421126 -0.09899507  0.0771459 ]
+10:13:16 [INFO] evaluate_policy: episode 36/100: success steps=18 final_dist=0.35 (start-target 2.55 m)
+10:13:16 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325597.148141132] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325597.600624567] [drone0.drone0_interface]: Service returned failure
+10:13:23 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.18329097 -0.06599337 -0.09059133  0.8965548 ]
+10:13:25 [INFO] evaluate_policy: episode 37/100: success steps=7 final_dist=0.35 (start-target 1.14 m)
+10:13:25 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325606.163600610] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325606.629583446] [drone0.drone0_interface]: Service returned failure
+10:13:35 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.23144014 -0.6134267  -0.03715609 -0.6240182 ]
+10:13:41 [INFO] evaluate_policy: episode 38/100: success steps=29 final_dist=0.31 (start-target 3.29 m)
+10:13:41 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325621.775262631] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325622.250135523] [drone0.drone0_interface]: Service returned failure
+10:13:53 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.28902933 -0.52185905 -0.07106906  0.17176072]
+10:13:58 [INFO] evaluate_policy: episode 39/100: success steps=24 final_dist=0.30 (start-target 3.06 m)
+10:13:58 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325639.287236049] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325639.776233917] [drone0.drone0_interface]: Service returned failure
+10:14:06 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.45743114  0.11827879  0.03156654 -0.76489943]
+10:14:10 [INFO] evaluate_policy: episode 40/100: success steps=21 final_dist=0.34 (start-target 2.41 m)
+10:14:10 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325651.095835612] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325651.593386844] [drone0.drone0_interface]: Service returned failure
+10:14:17 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.16479236 -0.22721757 -0.0308208  -0.5941292 ]
+10:14:19 [INFO] evaluate_policy: episode 41/100: success steps=10 final_dist=0.35 (start-target 1.34 m)
+10:14:19 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325660.601164462] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325661.109698351] [drone0.drone0_interface]: Service returned failure
+10:14:29 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.53132606 -0.57837033 -0.02667433  0.8388627 ]
+10:14:35 [INFO] evaluate_policy: episode 42/100: success steps=27 final_dist=0.28 (start-target 3.99 m)
+10:14:35 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325675.916537087] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325676.437984111] [drone0.drone0_interface]: Service returned failure
+10:14:43 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.02189395  0.31582475 -0.07344617  0.07437193]
+10:14:46 [INFO] evaluate_policy: episode 43/100: success steps=14 final_dist=0.31 (start-target 1.55 m)
+10:14:46 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325687.325156066] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325687.855994221] [drone0.drone0_interface]: Service returned failure
+10:14:56 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.26054934  0.77544427 -0.12385394  0.57911223]
+10:15:04 [INFO] evaluate_policy: episode 44/100: success steps=36 final_dist=0.32 (start-target 4.22 m)
+10:15:04 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325704.840571693] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325705.737568330] [drone0.drone0_interface]: Service returned failure
+10:15:13 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.24743237 -0.21428335 -0.03446156 -0.53313565]
+10:15:15 [INFO] evaluate_policy: episode 45/100: success steps=11 final_dist=0.37 (start-target 1.73 m)
+10:15:15 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325716.148991569] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325716.703542990] [drone0.drone0_interface]: Service returned failure
+10:15:23 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [0.21093991 0.3040304  0.13947631 0.06401987]
+10:15:25 [INFO] evaluate_policy: episode 46/100: success steps=14 final_dist=0.30 (start-target 2.00 m)
+10:15:25 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325726.664610189] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325727.230491426] [drone0.drone0_interface]: Service returned failure
+10:15:34 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.3020478   0.49133414 -0.11713818  0.88528705]
+10:15:39 [INFO] evaluate_policy: episode 47/100: success steps=22 final_dist=0.34 (start-target 3.05 m)
+10:15:39 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325739.867954871] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325740.444811064] [drone0.drone0_interface]: Service returned failure
+10:15:49 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [0.085778   0.7125294  0.03406791 0.84509873]
+10:15:56 [INFO] evaluate_policy: episode 48/100: success steps=33 final_dist=0.33 (start-target 3.69 m)
+10:15:56 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325756.982255015] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325757.570046933] [drone0.drone0_interface]: Service returned failure
+10:16:09 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.9714772  -0.14520136  0.01068938  0.09612639]
+10:16:18 [INFO] evaluate_policy: episode 49/100: success steps=45 final_dist=0.37 (start-target 4.97 m)
+10:16:18 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325779.594353966] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325780.189532111] [drone0.drone0_interface]: Service returned failure
+10:16:26 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.3259932   0.3754818  -0.07101149 -0.3750901 ]
+10:16:30 [INFO] evaluate_policy: episode 50/100: success steps=18 final_dist=0.22 (start-target 2.64 m)
+10:16:30 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325791.108906307] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325791.719216136] [drone0.drone0_interface]: Service returned failure
+10:16:43 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.6485169   0.01726659  0.01248959  0.34018573]
+10:16:49 [INFO] evaluate_policy: episode 51/100: success steps=30 final_dist=0.32 (start-target 3.45 m)
+10:16:49 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325810.314334215] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325810.936840922] [drone0.drone0_interface]: Service returned failure
+10:17:05 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.44440427 -0.5633827  -0.04656376 -0.11038184]
+10:17:10 [INFO] evaluate_policy: episode 52/100: success steps=26 final_dist=0.34 (start-target 3.58 m)
+10:17:10 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325831.529947654] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325832.161539016] [drone0.drone0_interface]: Service returned failure
+10:17:20 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.36789203  0.5605864   0.17286107 -0.5664365 ]
+10:17:25 [INFO] evaluate_policy: episode 53/100: success steps=26 final_dist=0.29 (start-target 3.59 m)
+10:17:25 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:17:25 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.015; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325848.437157350] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325849.080447152] [drone0.drone0_interface]: Service returned failure
+10:17:42 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.68858624 -0.6515095   0.0111658   0.10473239]
+10:17:49 [INFO] evaluate_policy: episode 54/100: success steps=32 final_dist=0.38 (start-target 4.81 m)
+10:17:49 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325870.149495170] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325870.804791430] [drone0.drone0_interface]: Service returned failure
+10:17:58 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.44547448 -0.1777363  -0.11745521  0.83614904]
+10:18:03 [INFO] evaluate_policy: episode 55/100: success steps=21 final_dist=0.30 (start-target 2.46 m)
+10:18:03 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325884.064871156] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325884.727928135] [drone0.drone0_interface]: Service returned failure
+10:18:16 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.25395536  0.20812492 -0.09261693 -0.41112477]
+10:18:19 [INFO] evaluate_policy: episode 56/100: success steps=11 final_dist=0.38 (start-target 1.86 m)
+10:18:19 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325899.971037310] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325900.648985991] [drone0.drone0_interface]: Service returned failure
+10:18:30 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.45315787  0.44746676  0.07937117 -0.09419491]
+10:18:34 [INFO] evaluate_policy: episode 57/100: success steps=22 final_dist=0.27 (start-target 3.15 m)
+10:18:34 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325915.590167974] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325916.281023478] [drone0.drone0_interface]: Service returned failure
+10:18:45 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.02991996  0.48680398 -0.01813251 -0.07881326]
+10:18:50 [INFO] evaluate_policy: episode 58/100: success steps=23 final_dist=0.28 (start-target 2.55 m)
+10:18:50 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325931.197867784] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325931.894892708] [drone0.drone0_interface]: Service returned failure
+10:19:03 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.5546563   0.61303747  0.00989945  0.3508072 ]
+10:19:09 [INFO] evaluate_policy: episode 59/100: success steps=29 final_dist=0.28 (start-target 4.24 m)
+10:19:09 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325950.104829230] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325950.813505113] [drone0.drone0_interface]: Service returned failure
+10:19:20 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.73101526 -0.60561657  0.08096532 -0.2903604 ]
+10:19:27 [INFO] evaluate_policy: episode 60/100: success steps=34 final_dist=0.33 (start-target 4.69 m)
+10:19:27 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:19:27 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.079; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783325971.109788912] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325971.827278792] [drone0.drone0_interface]: Service returned failure
+10:19:41 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.42261758 -0.79396147 -0.066279    0.74821293]
+10:19:49 [INFO] evaluate_policy: episode 61/100: success steps=39 final_dist=0.22 (start-target 4.46 m)
+10:19:49 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783325990.728693239] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783325991.459557684] [drone0.drone0_interface]: Service returned failure
+10:20:05 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.3649571  -0.20882541 -0.00488007 -0.90012026]
+10:20:08 [INFO] evaluate_policy: episode 62/100: success steps=16 final_dist=0.33 (start-target 2.03 m)
+10:20:08 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326010.038317917] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326010.780336398] [drone0.drone0_interface]: Service returned failure
+10:20:20 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.10605225 -0.918003   -0.09117685  0.5656976 ]
+10:20:29 [INFO] evaluate_policy: episode 63/100: success steps=44 final_dist=0.27 (start-target 4.72 m)
+10:20:29 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326030.453841416] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326031.212795629] [drone0.drone0_interface]: Service returned failure
+10:20:39 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.44933507  0.12808077  0.11432986 -0.85694134]
+10:20:44 [INFO] evaluate_policy: episode 64/100: success steps=22 final_dist=0.23 (start-target 2.26 m)
+10:20:44 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:20:44 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.104; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783326047.464678312] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326048.233536789] [drone0.drone0_interface]: Service returned failure
+10:21:02 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.19869138 -0.2601351  -0.0528823   0.4770634 ]
+10:21:05 [INFO] evaluate_policy: episode 65/100: success steps=12 final_dist=0.28 (start-target 1.72 m)
+10:21:05 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326066.478660847] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326067.250467885] [drone0.drone0_interface]: Service returned failure
+10:21:16 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.7031887   0.05939773  0.03157466  0.9227796 ]
+10:21:22 [INFO] evaluate_policy: episode 66/100: success steps=34 final_dist=0.21 (start-target 3.60 m)
+10:21:22 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326084.086303446] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326084.878220775] [drone0.drone0_interface]: Service returned failure
+10:21:36 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.9500558  -0.17811503 -0.0181494   0.71174115]
+10:21:45 [INFO] evaluate_policy: episode 67/100: success steps=44 final_dist=0.35 (start-target 4.87 m)
+10:21:45 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326106.697466530] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326107.501424011] [drone0.drone0_interface]: Service returned failure
+10:21:59 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.4833687  -0.12440409 -0.01232789 -0.42322743]
+10:22:03 [INFO] evaluate_policy: episode 68/100: success steps=22 final_dist=0.30 (start-target 2.64 m)
+10:22:03 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326125.008217914] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326125.821118406] [drone0.drone0_interface]: Service returned failure
+10:22:14 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.04774367 -0.3967817  -0.09822656  0.4441572 ]
+10:22:18 [INFO] evaluate_policy: episode 69/100: success steps=17 final_dist=0.40 (start-target 1.98 m)
+10:22:18 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326139.420692317] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326140.244660970] [drone0.drone0_interface]: Service returned failure
+10:22:29 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.6178536  -0.7422557   0.15743837 -0.27866673]
+10:22:36 [INFO] evaluate_policy: episode 70/100: success steps=34 final_dist=0.36 (start-target 4.74 m)
+10:22:36 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:22:36 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.008; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783326159.836771893] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326160.672505235] [drone0.drone0_interface]: Service returned failure
+10:22:51 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.4526722   0.693155   -0.0267673  -0.16362719]
+10:22:58 [INFO] evaluate_policy: episode 71/100: success steps=32 final_dist=0.36 (start-target 4.30 m)
+10:22:58 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326179.243330263] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326180.088487804] [drone0.drone0_interface]: Service returned failure
+10:23:12 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.33878195  0.287754   -0.11698665 -0.8845622 ]
+10:23:15 [INFO] evaluate_policy: episode 72/100: success steps=15 final_dist=0.35 (start-target 2.48 m)
+10:23:15 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326196.253449991] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326197.110950657] [drone0.drone0_interface]: Service returned failure
+10:23:28 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.53457135  0.31322548  0.00914264 -0.5593952 ]
+10:23:33 [INFO] evaluate_policy: episode 73/100: success steps=25 final_dist=0.29 (start-target 3.11 m)
+10:23:33 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326214.754154498] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326215.624899929] [drone0.drone0_interface]: Service returned failure
+10:23:45 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.20635544 -0.20440733  0.03868021 -0.5671113 ]
+10:23:47 [INFO] evaluate_policy: episode 74/100: success steps=9 final_dist=0.40 (start-target 1.41 m)
+10:23:47 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326228.576925342] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326229.452892672] [drone0.drone0_interface]: Service returned failure
+10:23:58 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.23547682 -0.06584994  0.02655948  0.7482095 ]
+10:24:00 [INFO] evaluate_policy: episode 75/100: success steps=12 final_dist=0.17 (start-target 1.22 m)
+10:24:00 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326242.172801501] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326243.587371726] [drone0.drone0_interface]: Service returned failure
+10:24:15 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.29990008 -0.6486664  -0.09500515 -0.64604926]
+10:24:21 [INFO] evaluate_policy: episode 76/100: success steps=30 final_dist=0.36 (start-target 3.58 m)
+10:24:21 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326262.892777057] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326263.796509239] [drone0.drone0_interface]: Service returned failure
+10:24:34 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.19055817  0.18036397  0.03267792 -0.61239135]
+10:24:36 [INFO] evaluate_policy: episode 77/100: success steps=10 final_dist=0.22 (start-target 1.29 m)
+10:24:36 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326277.909335068] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326278.824885586] [drone0.drone0_interface]: Service returned failure
+10:24:51 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.7223992  -0.27291837  0.11284386  0.6390786 ]
+10:24:58 [INFO] evaluate_policy: episode 78/100: success steps=33 final_dist=0.37 (start-target 3.91 m)
+10:24:58 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326300.121586840] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326301.046666311] [drone0.drone0_interface]: Service returned failure
+10:25:15 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.2255053  -0.07398807  0.0892726  -0.07310512]
+10:25:17 [INFO] evaluate_policy: episode 79/100: success steps=12 final_dist=0.28 (start-target 1.11 m)
+10:25:17 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326319.333860199] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326320.268759624] [drone0.drone0_interface]: Service returned failure
+10:25:34 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.5627806  -0.21645714 -0.00238893  0.57996196]
+10:25:39 [INFO] evaluate_policy: episode 80/100: success steps=27 final_dist=0.21 (start-target 3.06 m)
+10:25:39 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326341.044263335] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326341.993501878] [drone0.drone0_interface]: Service returned failure
+10:25:48 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.29180834 -0.7229161   0.12775886  0.13631865]
+10:25:55 [INFO] evaluate_policy: episode 81/100: success steps=33 final_dist=0.35 (start-target 3.83 m)
+10:25:55 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326356.852221423] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326357.811422262] [drone0.drone0_interface]: Service returned failure
+10:26:10 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.18782313 -0.62882704  0.15164672  0.0054943 ]
+10:26:16 [INFO] evaluate_policy: episode 82/100: success steps=30 final_dist=0.20 (start-target 3.29 m)
+10:26:16 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326378.164785785] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326379.139604518] [drone0.drone0_interface]: Service returned failure
+10:26:33 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.9323413   0.19514343 -0.02330208  0.12390156]
+10:26:41 [INFO] evaluate_policy: episode 83/100: success steps=43 final_dist=0.37 (start-target 4.76 m)
+10:26:41 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326403.278265664] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326404.880565326] [drone0.drone0_interface]: Service returned failure
+10:26:53 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.13967547  0.32536304 -0.00199597 -0.6717994 ]
+10:26:56 [INFO] evaluate_policy: episode 84/100: success steps=16 final_dist=0.22 (start-target 1.84 m)
+10:26:56 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326418.087783699] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326419.074183882] [drone0.drone0_interface]: Service returned failure
+10:27:08 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [0.8575143  0.0261536  0.08600662 0.44659972]
+10:27:17 [INFO] evaluate_policy: episode 85/100: success steps=40 final_dist=0.39 (start-target 4.20 m)
+10:27:17 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:27:17 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.156; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783326440.196575034] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326441.204884696] [drone0.drone0_interface]: Service returned failure
+10:27:36 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.8021927   0.15510778 -0.03650861 -0.67298526]
+10:27:44 [INFO] evaluate_policy: episode 86/100: success steps=39 final_dist=0.19 (start-target 4.03 m)
+10:27:44 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326466.014982163] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326467.026031913] [drone0.drone0_interface]: Service returned failure
+10:28:01 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.19030869  0.30892193 -0.03092196  0.68478644]
+10:28:04 [INFO] evaluate_policy: episode 87/100: success steps=15 final_dist=0.25 (start-target 1.74 m)
+10:28:04 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326486.027387311] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326487.050149594] [drone0.drone0_interface]: Service returned failure
+10:28:15 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.5319506  -0.5528678   0.0247506  -0.00326064]
+10:28:21 [INFO] evaluate_policy: episode 88/100: success steps=29 final_dist=0.09 (start-target 3.74 m)
+10:28:21 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326503.331859687] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326504.371118238] [drone0.drone0_interface]: Service returned failure
+10:28:33 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.9785355   0.08962162 -0.00539925 -0.03297641]
+10:28:43 [INFO] evaluate_policy: episode 89/100: success steps=46 final_dist=0.34 (start-target 4.99 m)
+10:28:43 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326524.846134666] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326525.891807049] [drone0.drone0_interface]: Service returned failure
+10:28:55 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.47074124 -0.5718559   0.10067263  0.50817126]
+10:29:00 [INFO] evaluate_policy: episode 90/100: success steps=26 final_dist=0.38 (start-target 3.67 m)
+10:29:00 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326542.248174294] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326543.309134854] [drone0.drone0_interface]: Service returned failure
+10:29:12 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.8867907   0.05901632 -0.06254956 -0.79047364]
+10:29:21 [INFO] evaluate_policy: episode 91/100: success steps=43 final_dist=0.21 (start-target 4.60 m)
+10:29:21 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326563.364022564] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326564.434296182] [drone0.drone0_interface]: Service returned failure
+10:29:34 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.43286583  0.7425198   0.01762266 -0.06581847]
+10:29:41 [INFO] evaluate_policy: episode 92/100: success steps=36 final_dist=0.20 (start-target 4.40 m)
+10:29:41 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326582.976803749] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326584.056579575] [drone0.drone0_interface]: Service returned failure
+10:29:57 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.3914266   0.0254072  -0.0716585  -0.44279176]
+10:30:01 [INFO] evaluate_policy: episode 93/100: success steps=19 final_dist=0.19 (start-target 1.97 m)
+10:30:01 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326603.390679641] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326604.481797427] [drone0.drone0_interface]: Service returned failure
+10:30:21 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.1404795   0.14988075 -0.02847472 -0.30378425]
+10:30:22 [INFO] evaluate_policy: episode 94/100: success steps=9 final_dist=0.09 (start-target 1.09 m)
+10:30:22 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326624.600393339] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326625.703298993] [drone0.drone0_interface]: Service returned failure
+10:30:40 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.7746831  -0.5764852  -0.09357905 -0.03169247]
+10:30:47 [INFO] evaluate_policy: episode 95/100: success steps=36 final_dist=0.30 (start-target 4.86 m)
+10:30:47 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326649.414481992] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326650.531192970] [drone0.drone0_interface]: Service returned failure
+10:31:03 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.10526761 -0.8322819  -0.04314616  0.6577315 ]
+10:31:11 [INFO] evaluate_policy: episode 96/100: success steps=40 final_dist=0.24 (start-target 4.36 m)
+10:31:11 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326673.526832661] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326674.652129841] [drone0.drone0_interface]: Service returned failure
+10:31:26 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.13124192  0.8960518   0.07591631  0.90704924]
+10:31:35 [INFO] evaluate_policy: episode 97/100: success steps=43 final_dist=0.22 (start-target 4.49 m)
+10:31:35 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326697.039084962] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326698.179694387] [drone0.drone0_interface]: Service returned failure
+10:31:48 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.55244845 -0.5251638   0.04014118  0.9210266 ]
+10:31:54 [INFO] evaluate_policy: episode 98/100: success steps=27 final_dist=0.27 (start-target 3.69 m)
+10:31:54 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+[ERROR] [1783326716.030125566] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326717.186276521] [drone0.drone0_interface]: Service returned failure
+10:32:06 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.0241556  -0.40298995  0.10330684  0.29998717]
+10:32:10 [INFO] evaluate_policy: episode 99/100: success steps=21 final_dist=0.13 (start-target 2.19 m)
+10:32:10 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for velocity reset...
+10:32:10 [WARNING] rl_uav.envs.as2_test_env: Reset started at valid low altitude z=1.150; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783326734.656890925] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783326735.815567209] [drone0.drone0_interface]: Service returned failure
+10:32:29 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [ 0.4966175  -0.32854584 -0.03100354 -0.4105231 ]
+10:32:35 [INFO] evaluate_policy: episode 100/100: success steps=26 final_dist=0.10 (start-target 2.98 m)
+10:32:35 [INFO] rl_uav.envs.as2_test_env: Closing environment...
+10:32:35 [INFO] rl_uav.envs.as2_test_env: Landing...
+10:32:43 [INFO] rl_uav.envs.as2_test_env: DroneInterface shut down
+10:32:43 [INFO] rl_uav.envs.as2_test_env: Environment closed
+10:32:43 [INFO] evaluate_policy: === Evaluation summary ===
+10:32:43 [INFO] evaluate_policy: success_rate: 1.0
+10:32:43 [INFO] evaluate_policy: terminal_reasons: {'success': 100}
+10:32:43 [INFO] evaluate_policy: final_distance: {'mean': 0.3071, 'median': 0.3286, 'std': 0.0701}
+10:32:43 [INFO] evaluate_policy: path_efficiency (successes): {'mean': 1.09, 'median': 1.0645, 'std': 0.1085}
+10:32:43 [INFO] evaluate_policy: bin 1.0-2.5 m: {'n': 30, 'success_rate': 1.0, 'mean_final_distance': 0.3014}
+10:32:43 [INFO] evaluate_policy: bin 2.5-3.5 m: {'n': 21, 'success_rate': 1.0, 'mean_final_distance': 0.2968}
+10:32:43 [INFO] evaluate_policy: bin 3.5-5.0 m: {'n': 49, 'success_rate': 1.0, 'mean_final_distance': 0.315}
+10:32:43 [INFO] evaluate_policy: Full results in runs/eval/pid_baseline_100ep

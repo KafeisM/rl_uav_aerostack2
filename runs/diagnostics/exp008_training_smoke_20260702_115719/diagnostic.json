@@ -1,0 +1,23 @@
+{
+  "action": [
+    0.5,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "episodes": [],
+  "episodes_requested": 1,
+  "error": "Fresh service-backed reset failed before command path readiness; refusing velocity fallback to avoid accepted-but-ignored actions. Reset diagnostics: reason=service_post_reset_command_path_failed, failure_class=post_reset_command_path_failed, target_pose=[0.0, 0.0, 1.6, 0.0], position_error=0.0, yaw_error=0.0, service_name=/drone0/platform/reset_simulator_state, message=reset state applied, linear_speed_norm=0.0, angular_speed_norm=0.0, post_reset_platform_reassertion_attempted=True, post_reset_platform_fsm_ready=False, post_reset_offboard_ready=True, post_reset_controller_ready=True, post_reset_actionability_ready=False, post_reset_actionability_recovered=False, post_reset_actionability={'first_probe': {'accepted': True, 'stop_accepted': True, 'actionable': False, 'reason': 'probe_motion_not_confirmed', 'probe_twist': [0.25, 0.0, 0.0], 'position_before': [0.30829724903662625, 0.0, 1.083045481011684], 'position_after': [0.308306402990633, 0.0, 1.0861958190095073], 'position_delta': [9.149312973022461e-06, 0.0, 0.003150343894958496], 'forward_delta': 1e-05, 'delta_norm': 0.00315, 'min_forward_delta': 0.03, 'probe_iterations': 12, 'stop_iterations': 4}, 'recovery_attempted': True, 'recovery_ready': True, 'second_probe': {'accepted': True, 'stop_accepted': True, 'actionable': False, 'reason': 'probe_motion_not_confirmed', 'probe_twist': [0.25, 0.0, 0.0], 'position_before': [0.4626644940910426, 0.0, 1.085319549214056], 'position_after': [0.4615958857803219, 0.0, 1.0884477880881216], 'position_delta': [-0.0010685920715332031, 0.0, 0.0031282901763916016], 'forward_delta': -0.00107, 'delta_norm': 0.00331, 'min_forward_delta': 0.03, 'probe_iterations': 12, 'stop_iterations': 4}}",
+  "min_distance_reduction": 0.1,
+  "min_position_delta": 0.1,
+  "monitor_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_115719/monitor",
+  "namespaces": [
+    "drone0"
+  ],
+  "reason": "diagnostic_error",
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260702_115719",
+  "steps_requested": 12,
+  "success": false,
+  "vec_env_num_envs": 1
+}

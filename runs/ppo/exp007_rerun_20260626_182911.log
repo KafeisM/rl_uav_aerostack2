@@ -1,0 +1,100 @@
+18:29:14 [INFO] train_ppo: === PPO infrastructure ready ===
+18:29:14 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp007.yaml
+18:29:14 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_182913
+18:29:14 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_182913/tensorboard
+18:29:14 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_182913/monitor
+18:29:14 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_182913/checkpoints
+18:29:14 [INFO] train_ppo: Num envs: 1
+18:29:14 [INFO] train_ppo: Namespaces: ['drone0']
+18:29:14 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+18:29:14 [INFO] train_ppo: Checkpoint callback: every 2000 steps
+18:29:14 [INFO] train_ppo: Total timesteps: 20000
+18:29:14 [INFO] train_ppo: Starting PPO learn() ...
+18:29:14 [INFO] rl_uav.envs.as2_test_env: ROS2 initialized (process-wide)
+[INFO] [1782491354.563528801] [drone0.drone0_interface]: Starting drone0
+[INFO] [1782491355.094359525] [drone0.drone0_interface]: drone0 interface initialized
+18:29:15 [INFO] rl_uav.envs.as2_test_env: Target marker publisher created on topic 'visualization_marker' frame 'earth'
+18:29:15 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+18:29:15 [INFO] rl_uav.envs.as2_test_env: Arming drone...
+18:29:16 [INFO] rl_uav.envs.as2_test_env:   Arm: OK
+18:29:16 [INFO] rl_uav.envs.as2_test_env: Setting offboard mode...
+18:29:17 [INFO] rl_uav.envs.as2_test_env:   Offboard: OK
+18:29:17 [INFO] rl_uav.envs.as2_test_env: Taking off to 1.0m...
+18:29:19 [INFO] rl_uav.envs.as2_test_env:   Takeoff: OK
+18:29:25 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.4        0.        -0.0013919  0.       ]
+18:29:46 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+18:29:55 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.41168857 -0.00121218  0.00243276  0.01642392]
+18:30:02 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+18:30:02 [WARNING] rl_uav.envs.as2_test_env: Reset started at low altitude z=0.000; recovering to hover 1.000m before velocity reset
+18:30:12 [WARNING] rl_uav.envs.as2_test_env: low-altitude recovery landing exceeded 10.0s during close; continuing best-effort shutdown
+18:30:12 [WARNING] rl_uav.envs.as2_test_env: Low-altitude landing handoff did not complete; recreating DroneInterface before takeoff recovery
+[WARN] [1782491412.352019596] [rcl.logging_rosout]: Publisher already registered for provided node name. If this is due to multiple nodes with the same name then all logs for that logger name will go out over the existing publisher. As soon as any node with that name is destructed it will unregister the publisher, preventing any further logs for that name from being published on the rosout topic.
+[INFO] [1782491412.356411554] [drone0.drone0_interface]: Starting drone0
+[INFO] [1782491412.859095796] [drone0.drone0_interface]: drone0 interface initialized
+18:30:12 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+[ERROR] [1782491414.837686359] [drone0.drone0_interface]: Service returned failure
+[WARN] [1782491415.645466409] [drone0.drone0_interface]: Goal Rejected
+18:30:15 [INFO] rl_uav.envs.as2_test_env: Closing environment...
+18:30:16 [INFO] rl_uav.envs.as2_test_env: DroneInterface shut down
+18:30:16 [INFO] rl_uav.envs.as2_test_env: Environment closed
+Traceback (most recent call last):
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 115, in <module>
+    raise SystemExit(main())
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 101, in main
+    model.learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py", line 311, in learn
+    return super().learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 324, in learn
+    continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer, n_rollout_steps=self.n_steps)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 218, in collect_rollouts
+    new_obs, rewards, dones, infos = env.step(clipped_actions)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/base_vec_env.py", line 222, in step
+    return self.step_wait()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/vec_monitor.py", line 75, in step_wait
+    obs, rewards, dones, infos = self.venv.step_wait()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 71, in step_wait
+    obs, self.reset_infos[env_idx] = self.envs[env_idx].reset()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 400, in reset
+    return super().reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/core.py", line 333, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 295, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 1048, in reset
+    self._recover_low_altitude_hover_before_velocity_reset(
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 781, in _recover_low_altitude_hover_before_velocity_reset
+    raise RuntimeError(
+RuntimeError: Low-altitude hover recovery did not reach a stable flying state before velocity reset. Reset diagnostics: reason=low_altitude_recovery_failed, target_pose=[-0.7531065344810486, -3.105264186859131, 1.0, 0.5700753356285705], final_pose=[-0.7531065344810486, -3.105264186859131, 0.0, 0.5700753356285705], state_error={'arm_success': False, 'offboard_success': True, 'takeoff_success': False, 'hover_settled': False}
+ERROR conda.cli.main_run:execute(142): `conda run python scripts/train_ppo.py --config configs/train_ppo_phase1_exp007.yaml` failed. (See above for error)
+Using cpu device
+Logging to runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_182913/tensorboard/PPO_1
+----------------------------
+| time/              |     |
+|    fps             | 5   |
+|    iterations      | 1   |
+|    time_elapsed    | 24  |
+|    total_timesteps | 128 |
+----------------------------
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 200         |
+|    ep_rew_mean          | -17.8       |
+|    success_rate         | 0           |
+| time/                   |             |
+|    fps                  | 5           |
+|    iterations           | 2           |
+|    time_elapsed         | 46          |
+|    total_timesteps      | 256         |
+| train/                  |             |
+|    approx_kl            | 0.002004683 |
+|    clip_fraction        | 0           |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -0.78       |
+|    explained_variance   | -0.0201     |
+|    learning_rate        | 0.0001      |
+|    loss                 | 0.903       |
+|    n_updates            | 5           |
+|    policy_gradient_loss | 0.00398     |
+|    std                  | 1           |
+|    value_loss           | 1.84        |
+-----------------------------------------

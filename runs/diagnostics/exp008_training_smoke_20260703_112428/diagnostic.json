@@ -1,0 +1,1578 @@
+{
+  "action": [
+    0.5,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "config": "/home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp008a.yaml",
+  "episode_summaries": [
+    {
+      "accepted_command_steps": 3,
+      "accepted_without_motion_steps": 1,
+      "distance_reduction": 0.062115488618247394,
+      "episode": 0,
+      "final_distance": 0.3830448187584094,
+      "initial_distance": 0.4451603073766568,
+      "max_step_position_delta_norm": 0.24117683910926088,
+      "min_altitude": 1.6828605864549602,
+      "physical_actionability_confirmed": true,
+      "reason": "physical_actionability_confirmed",
+      "require_target_progress": false,
+      "steps": 3,
+      "success": true,
+      "target_progress_confirmed": false,
+      "terminal_reason": "success",
+      "terminal_safety_reason": null,
+      "terminated_or_truncated": true,
+      "total_position_delta_norm": 0.24200145684246682
+    },
+    {
+      "accepted_command_steps": 8,
+      "accepted_without_motion_steps": 6,
+      "distance_reduction": 0.012505886973937563,
+      "episode": 1,
+      "final_distance": 0.4925939338154404,
+      "initial_distance": 0.505099820789378,
+      "max_step_position_delta_norm": 0.5253961439698053,
+      "min_altitude": 1.6070042641981932,
+      "physical_actionability_confirmed": true,
+      "reason": "physical_actionability_confirmed",
+      "require_target_progress": false,
+      "steps": 8,
+      "success": true,
+      "target_progress_confirmed": false,
+      "terminal_reason": null,
+      "terminal_safety_reason": null,
+      "terminated_or_truncated": false,
+      "total_position_delta_norm": 0.6593331700664311
+    }
+  ],
+  "episodes": [
+    {
+      "episode": 0,
+      "reset_info_after_reset": {
+        "altitude": 1.6828605864549602,
+        "distance": 0.4451603073766568,
+        "distance_norm": 0.05140268465928988,
+        "drone_namespace": "drone0",
+        "final_distance": 0.4451603073766568,
+        "height_bounds": [
+          0.8,
+          2.5
+        ],
+        "is_flying": true,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "last_action_vx": 0.0,
+        "last_action_vy": 0.0,
+        "last_action_vyaw": 0.0,
+        "last_action_vz": 0.0,
+        "low_altitude_guard_height": 1.9,
+        "max_action_norm": 0.0,
+        "max_physical_displacement": 0.0,
+        "max_xy_action_norm": 0.0,
+        "mean_action_norm": 0.0,
+        "mean_xy_action_norm": 0.0,
+        "min_altitude": 1.6828605864549602,
+        "motion_command_acceptance_rate": 0.0,
+        "motion_command_accepted_steps": 0,
+        "motion_command_steps": 0,
+        "orientation": [
+          0.0,
+          -0.008090496928151874,
+          0.0
+        ],
+        "path_length": 0.0,
+        "physical_displacement": 0.0,
+        "position": [
+          0.06261936202431222,
+          0.0,
+          1.6828605864549602
+        ],
+        "reset_failure_class": "",
+        "reset_method": "simulator_service",
+        "reset_path": "service_success",
+        "reset_position_error": 0.0804,
+        "reset_service_attempted": true,
+        "reset_service_status": "service_success",
+        "reset_yaw_error": 0.0,
+        "speed": [
+          -0.0031367254621039943,
+          0.0,
+          0.0012491607770088536
+        ],
+        "step_count": 0,
+        "target_pose": [
+          0.5,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "unsafe_low_altitude_threshold": 1.3
+      },
+      "reset_summary": {
+        "diagnostics": {
+          "attempt": 1,
+          "elapsed": 2.816,
+          "failure_class": "",
+          "final_pose": [
+            0.0,
+            0.0,
+            1.6803792715072632,
+            0.0
+          ],
+          "last_command": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "phase": "hold",
+          "position_error": 0.0804,
+          "post_reset_actionability": {
+            "accepted": true,
+            "actionable": true,
+            "delta_norm": 0.02328,
+            "forward_delta": 0.02327,
+            "min_forward_delta": 0.012,
+            "observation_samples": 1,
+            "observation_timeout": 1.25,
+            "position_after": [
+              0.023273502910607854,
+              0.0,
+              1.6815346215153795
+            ],
+            "position_after_command": [
+              0.023273502910607854,
+              0.0,
+              1.6815346215153795
+            ],
+            "position_after_stop": [
+              0.023273502910607854,
+              0.0,
+              1.6815346215153795
+            ],
+            "position_before": [
+              0.0,
+              0.0,
+              1.681249366812737
+            ],
+            "position_delta": [
+              0.02327350340783596,
+              0.0,
+              0.00028526782989501953
+            ],
+            "probe_iterations": 12,
+            "probe_twist": [
+              0.10000000149011612,
+              0.0,
+              0.0
+            ],
+            "reason": "probe_motion_confirmed",
+            "start_pose_after_restore": [
+              0.06261935830116272,
+              0.0,
+              1.6828606128692627,
+              0.0
+            ],
+            "start_pose_before_restore": [
+              0.02327350340783596,
+              0.0,
+              1.6815346479415894,
+              0.0
+            ],
+            "start_pose_error_after_restore": 0.1039,
+            "start_pose_error_before_restore": 0.0848,
+            "start_pose_restore_diagnostics": {
+              "attempt": 1,
+              "elapsed": 1.206,
+              "final_pose": [
+                0.06261935830116272,
+                0.0,
+                1.6828606128692627,
+                0.0
+              ],
+              "last_command": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "phase": "hold",
+              "position_error": 0.1039,
+              "reason": "post_controller_hold",
+              "reset_phase": "hold",
+              "settle_elapsed": 0.201,
+              "target_pose": [
+                0.0,
+                0.0,
+                1.6,
+                0.0
+              ],
+              "yaw_error": 0.0
+            },
+            "start_pose_restore_method": "velocity_restore",
+            "start_pose_restore_tolerance": 0.22,
+            "start_pose_restored": true,
+            "start_pose_speed_after_restore": [
+              -0.0031367254621039943,
+              0.0,
+              0.0012491607770088536
+            ],
+            "start_pose_speed_before_restore": [
+              0.10238432411457608,
+              0.0,
+              -0.003920875410606948
+            ],
+            "start_pose_speed_norm_after_restore": 0.0034,
+            "start_pose_speed_norm_before_restore": 0.1025,
+            "stop_accepted": true,
+            "stop_iterations": 4,
+            "twist_frame_id": "earth"
+          },
+          "post_reset_actionability_ready": true,
+          "post_reset_actionability_recovered": false,
+          "post_reset_controller_hold_ready": true,
+          "post_reset_controller_ready": true,
+          "post_reset_mode_refresh_ready": true,
+          "post_reset_observed_pose": [
+            0.0,
+            0.0,
+            1.6812493801116943,
+            0.0
+          ],
+          "post_reset_observed_position_error": 0.0812,
+          "post_reset_observed_speed": [
+            0.0,
+            0.0,
+            0.0015985395607179727
+          ],
+          "post_reset_observed_speed_norm": 0.0016,
+          "post_reset_observed_yaw_error": 0.0,
+          "post_reset_offboard_ready": true,
+          "post_reset_pose_observe_elapsed": 0.101,
+          "post_reset_pose_observed": true,
+          "post_reset_pose_ready": true,
+          "post_reset_pose_stable_elapsed": 0.2,
+          "post_reset_takeoff_ready": true,
+          "reason": "service_success",
+          "reset_phase": "hold",
+          "settle_elapsed": 0.201,
+          "target_pose": [
+            0.0,
+            0.0,
+            1.6,
+            0.0
+          ],
+          "yaw_error": 0.0
+        },
+        "reset_service_success": true,
+        "service_attempted": true,
+        "service_path": "service_success",
+        "use_simulator_reset_service": true
+      },
+      "samples": [
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.683540189368026,
+          "altitude_before": 1.6828605864549602,
+          "consecutive_accepted_without_motion": 0,
+          "distance_after": 0.445746070961715,
+          "distance_before": 0.4451603073766568,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 0,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.6828605864549602,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.06215231354024422,
+            0.0,
+            1.683540189368026
+          ],
+          "position_before": [
+            0.06261936202431222,
+            0.0,
+            1.6828605864549602
+          ],
+          "position_delta": [
+            -0.00046704848406799865,
+            0.0,
+            0.000679602913065791
+          ],
+          "position_delta_norm": 0.0008246177332059532,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.0526418499648571,
+          "speed_after": [
+            -0.002670042241223678,
+            0.0,
+            0.001121628653883219
+          ],
+          "speed_before": [
+            -0.0031367254621039943,
+            0.0,
+            0.0012491607770088536
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.001121628653883219,
+          "speed_z_before": 0.0012491607770088536,
+          "step": 0,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.683540189368026,
+          "altitude_before": 1.683540189368026,
+          "consecutive_accepted_without_motion": 1,
+          "distance_after": 0.445746070961715,
+          "distance_before": 0.445746070961715,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 0,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.683540189368026,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.06215231354024422,
+            0.0,
+            1.683540189368026
+          ],
+          "position_before": [
+            0.06215231354024422,
+            0.0,
+            1.683540189368026
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.0514703243970871,
+          "speed_after": [
+            -0.002670042241223678,
+            0.0,
+            0.001121628653883219
+          ],
+          "speed_before": [
+            -0.002670042241223678,
+            0.0,
+            0.001121628653883219
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.001121628653883219,
+          "speed_z_before": 0.001121628653883219,
+          "step": 1,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.8638517164996065,
+          "altitude_before": 1.683540189368026,
+          "consecutive_accepted_without_motion": 0,
+          "distance_after": 0.3830448187584094,
+          "distance_before": 0.445746070961715,
+          "done": true,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 0,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.683540189368026,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.2223210399078208,
+            0.0,
+            1.8638517164996065
+          ],
+          "position_before": [
+            0.06215231354024422,
+            0.0,
+            1.683540189368026
+          ],
+          "position_delta": [
+            0.16016872636757656,
+            0.0,
+            0.1803115271315805
+          ],
+          "position_delta_norm": 0.24117683910926088,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": 20.081172943115234,
+          "speed_after": [
+            -0.002670042241223678,
+            0.0,
+            0.001121628653883219
+          ],
+          "speed_before": [
+            -0.002670042241223678,
+            0.0,
+            0.001121628653883219
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.001121628653883219,
+          "speed_z_before": 0.001121628653883219,
+          "step": 2,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": "success",
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        }
+      ],
+      "summary": {
+        "accepted_command_steps": 3,
+        "accepted_without_motion_steps": 1,
+        "distance_reduction": 0.062115488618247394,
+        "episode": 0,
+        "final_distance": 0.3830448187584094,
+        "initial_distance": 0.4451603073766568,
+        "max_step_position_delta_norm": 0.24117683910926088,
+        "min_altitude": 1.6828605864549602,
+        "physical_actionability_confirmed": true,
+        "reason": "physical_actionability_confirmed",
+        "require_target_progress": false,
+        "steps": 3,
+        "success": true,
+        "target_progress_confirmed": false,
+        "terminal_reason": "success",
+        "terminal_safety_reason": null,
+        "terminated_or_truncated": true,
+        "total_position_delta_norm": 0.24200145684246682
+      }
+    },
+    {
+      "episode": 1,
+      "reset_info_after_reset": {
+        "altitude": 1.6070042641981932,
+        "distance": 0.505099820789378,
+        "distance_norm": 0.05832390350007583,
+        "drone_namespace": "drone0",
+        "final_distance": 0.505099820789378,
+        "height_bounds": [
+          0.8,
+          2.5
+        ],
+        "is_flying": true,
+        "is_out_of_bounds": false,
+        "is_success": false,
+        "is_unsafe_low_altitude": false,
+        "last_action_vx": 0.0,
+        "last_action_vy": 0.0,
+        "last_action_vyaw": 0.0,
+        "last_action_vz": 0.0,
+        "low_altitude_guard_height": 1.9,
+        "max_action_norm": 0.0,
+        "max_physical_displacement": 0.0,
+        "max_xy_action_norm": 0.0,
+        "mean_action_norm": 0.0,
+        "mean_xy_action_norm": 0.0,
+        "min_altitude": 1.6070042641981932,
+        "motion_command_acceptance_rate": 0.0,
+        "motion_command_accepted_steps": 0,
+        "motion_command_steps": 0,
+        "orientation": [
+          0.0,
+          -4.5304119768859085e-06,
+          0.0
+        ],
+        "path_length": 0.0,
+        "physical_displacement": 0.0,
+        "position": [
+          -0.005051254076755747,
+          0.0,
+          1.6070042641981932
+        ],
+        "reset_failure_class": "",
+        "reset_method": "velocity",
+        "reset_path": "post_controller_hold",
+        "reset_position_error": 0.0086,
+        "reset_service_attempted": false,
+        "reset_service_status": "not_attempted",
+        "reset_yaw_error": 0.0,
+        "speed": [
+          0.00035952564624229825,
+          0.0,
+          0.0007584800394615791
+        ],
+        "step_count": 0,
+        "target_pose": [
+          0.5,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "unsafe_low_altitude_threshold": 1.3
+      },
+      "reset_summary": {
+        "diagnostics": {
+          "attempt": 1,
+          "elapsed": 1.206,
+          "final_pose": [
+            -0.005051254294812679,
+            0.0,
+            1.6070042848587036,
+            0.0
+          ],
+          "last_command": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "phase": "hold",
+          "position_error": 0.0086,
+          "reason": "post_controller_hold",
+          "reset_phase": "hold",
+          "settle_elapsed": 0.201,
+          "target_pose": [
+            0.0,
+            0.0,
+            1.6,
+            0.0
+          ],
+          "yaw_error": 0.0
+        },
+        "reset_service_success": true,
+        "service_attempted": false,
+        "service_path": "post_controller_hold",
+        "use_simulator_reset_service": true
+      },
+      "samples": [
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.6070042641981932,
+          "altitude_before": 1.6070042641981932,
+          "consecutive_accepted_without_motion": 1,
+          "distance_after": 0.505099820789378,
+          "distance_before": 0.505099820789378,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.6070042641981932,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            -0.005051254076755747,
+            0.0,
+            1.6070042641981932
+          ],
+          "position_before": [
+            -0.005051254076755747,
+            0.0,
+            1.6070042641981932
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05832390487194061,
+          "speed_after": [
+            0.00035952564624229825,
+            0.0,
+            0.0007584800394615791
+          ],
+          "speed_before": [
+            0.00035952564624229825,
+            0.0,
+            0.0007584800394615791
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.0007584800394615791,
+          "speed_z_before": 0.0007584800394615791,
+          "step": 0,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.6070042641981932,
+          "altitude_before": 1.6070042641981932,
+          "consecutive_accepted_without_motion": 2,
+          "distance_after": 0.505099820789378,
+          "distance_before": 0.505099820789378,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.6070042641981932,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            -0.005051254076755747,
+            0.0,
+            1.6070042641981932
+          ],
+          "position_before": [
+            -0.005051254076755747,
+            0.0,
+            1.6070042641981932
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.05832390487194061,
+          "speed_after": [
+            0.00035952564624229825,
+            0.0,
+            0.0007584800394615791
+          ],
+          "speed_before": [
+            0.00035952564624229825,
+            0.0,
+            0.0007584800394615791
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.0007584800394615791,
+          "speed_z_before": 0.0007584800394615791,
+          "step": 1,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.7139343293366172,
+          "altitude_before": 1.6070042641981932,
+          "consecutive_accepted_without_motion": 0,
+          "distance_after": 0.4394245706110162,
+          "distance_before": 0.505099820789378,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.6070042641981932,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.07560287247049934,
+            0.0,
+            1.7139343293366172
+          ],
+          "position_before": [
+            -0.005051254076755747,
+            0.0,
+            1.6070042641981932
+          ],
+          "position_delta": [
+            0.08065412654725508,
+            0.0,
+            0.10693006513842396
+          ],
+          "position_delta_norm": 0.13393702609662583,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": 0.1306101232767105,
+          "speed_after": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_before": [
+            0.00035952564624229825,
+            0.0,
+            0.0007584800394615791
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.44974555261092614,
+          "speed_z_before": 0.0007584800394615791,
+          "step": 2,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.7139343293366172,
+          "altitude_before": 1.7139343293366172,
+          "consecutive_accepted_without_motion": 1,
+          "distance_after": 0.4394245706110162,
+          "distance_before": 0.4394245706110162,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.7139343293366172,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.07560287247049934,
+            0.0,
+            1.7139343293366172
+          ],
+          "position_before": [
+            0.07560287247049934,
+            0.0,
+            1.7139343293366172
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.0007403788040392101,
+          "speed_after": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_before": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.44974555261092614,
+          "speed_z_before": 0.44974555261092614,
+          "step": 3,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 1.7139343293366172,
+          "altitude_before": 1.7139343293366172,
+          "consecutive_accepted_without_motion": 2,
+          "distance_after": 0.4394245706110162,
+          "distance_before": 0.4394245706110162,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.7139343293366172,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.07560287247049934,
+            0.0,
+            1.7139343293366172
+          ],
+          "position_before": [
+            0.07560287247049934,
+            0.0,
+            1.7139343293366172
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.0007403788040392101,
+          "speed_after": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_before": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.44974555261092614,
+          "speed_z_before": 0.44974555261092614,
+          "step": 4,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.5,
+            0.0
+          ],
+          "altitude_after": 2.0893093440241217,
+          "altitude_before": 1.7139343293366172,
+          "consecutive_accepted_without_motion": 0,
+          "distance_after": 0.4925939338154404,
+          "distance_before": 0.4394245706110162,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": true,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 1.7139343293366172,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.44320960043762464,
+            0.0,
+            2.0893093440241217
+          ],
+          "position_before": [
+            0.07560287247049934,
+            0.0,
+            1.7139343293366172
+          ],
+          "position_delta": [
+            0.3676067279671253,
+            0.0,
+            0.37537501468750456
+          ],
+          "position_delta_norm": 0.5253961439698053,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.11321857571601868,
+          "speed_after": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_before": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.44974555261092614,
+          "speed_z_before": 0.44974555261092614,
+          "step": 5,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.5
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "altitude_after": 2.0893093440241217,
+          "altitude_before": 2.0893093440241217,
+          "consecutive_accepted_without_motion": 1,
+          "distance_after": 0.4925939338154404,
+          "distance_before": 0.4925939338154404,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": false,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 2.0893093440241217,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.44320960043762464,
+            0.0,
+            2.0893093440241217
+          ],
+          "position_before": [
+            0.44320960043762464,
+            0.0,
+            2.0893093440241217
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.006879847962409258,
+          "speed_after": [
+            0.4603643662018959,
+            0.0,
+            0.5349295803103687
+          ],
+          "speed_before": [
+            0.593061601582131,
+            0.0,
+            0.44974555261092614
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.5349295803103687,
+          "speed_z_before": 0.44974555261092614,
+          "step": 6,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.0
+        },
+        {
+          "action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_requested": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "action_sent": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "altitude_after": 2.0893093440241217,
+          "altitude_before": 2.0893093440241217,
+          "consecutive_accepted_without_motion": 2,
+          "distance_after": 0.4925939338154404,
+          "distance_before": 0.4925939338154404,
+          "done": false,
+          "env_max_vel": 0.5,
+          "env_step_duration": 0.2,
+          "episode": 1,
+          "height_bounds": [
+            0.8,
+            2.5
+          ],
+          "is_out_of_bounds": false,
+          "is_unsafe_low_altitude": false,
+          "low_altitude_guard_active": false,
+          "low_altitude_guard_height": 1.9,
+          "min_altitude_step": 2.0893093440241217,
+          "motion_command_accepted": true,
+          "motion_command_accepted_publication_count": 4,
+          "motion_command_publication_count": 4,
+          "motion_command_recovered": false,
+          "position_after": [
+            0.44320960043762464,
+            0.0,
+            2.0893093440241217
+          ],
+          "position_before": [
+            0.44320960043762464,
+            0.0,
+            2.0893093440241217
+          ],
+          "position_delta": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "position_delta_norm": 0.0,
+          "raw_action": [
+            0.5,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reset_success": true,
+          "reward": -0.006879847962409258,
+          "speed_after": [
+            0.4603643662018959,
+            0.0,
+            0.5349295803103687
+          ],
+          "speed_before": [
+            0.4603643662018959,
+            0.0,
+            0.5349295803103687
+          ],
+          "speed_command_reference_frame": "earth",
+          "speed_z_after": 0.5349295803103687,
+          "speed_z_before": 0.5349295803103687,
+          "step": 7,
+          "step_safety_checked_after_publication": true,
+          "step_safety_terminal": false,
+          "terminal_reason": null,
+          "unsafe_low_altitude_threshold": 1.3,
+          "vertical_action_requested": 0.0,
+          "vertical_action_sent": 0.0
+        }
+      ],
+      "summary": {
+        "accepted_command_steps": 8,
+        "accepted_without_motion_steps": 6,
+        "distance_reduction": 0.012505886973937563,
+        "episode": 1,
+        "final_distance": 0.4925939338154404,
+        "initial_distance": 0.505099820789378,
+        "max_step_position_delta_norm": 0.5253961439698053,
+        "min_altitude": 1.6070042641981932,
+        "physical_actionability_confirmed": true,
+        "reason": "physical_actionability_confirmed",
+        "require_target_progress": false,
+        "steps": 8,
+        "success": true,
+        "target_progress_confirmed": false,
+        "terminal_reason": null,
+        "terminal_safety_reason": null,
+        "terminated_or_truncated": false,
+        "total_position_delta_norm": 0.6593331700664311
+      }
+    }
+  ],
+  "episodes_requested": 2,
+  "min_distance_reduction": 0.25,
+  "min_position_delta": 0.1,
+  "monitor_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260703_112428/monitor",
+  "namespaces": [
+    "drone0"
+  ],
+  "physical_actionability_confirmed": true,
+  "reason": "physical_actionability_confirmed_across_training_resets",
+  "require_target_progress": false,
+  "reset_summaries": [
+    {
+      "diagnostics": {
+        "attempt": 1,
+        "elapsed": 2.816,
+        "failure_class": "",
+        "final_pose": [
+          0.0,
+          0.0,
+          1.6803792715072632,
+          0.0
+        ],
+        "last_command": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "phase": "hold",
+        "position_error": 0.0804,
+        "post_reset_actionability": {
+          "accepted": true,
+          "actionable": true,
+          "delta_norm": 0.02328,
+          "forward_delta": 0.02327,
+          "min_forward_delta": 0.012,
+          "observation_samples": 1,
+          "observation_timeout": 1.25,
+          "position_after": [
+            0.023273502910607854,
+            0.0,
+            1.6815346215153795
+          ],
+          "position_after_command": [
+            0.023273502910607854,
+            0.0,
+            1.6815346215153795
+          ],
+          "position_after_stop": [
+            0.023273502910607854,
+            0.0,
+            1.6815346215153795
+          ],
+          "position_before": [
+            0.0,
+            0.0,
+            1.681249366812737
+          ],
+          "position_delta": [
+            0.02327350340783596,
+            0.0,
+            0.00028526782989501953
+          ],
+          "probe_iterations": 12,
+          "probe_twist": [
+            0.10000000149011612,
+            0.0,
+            0.0
+          ],
+          "reason": "probe_motion_confirmed",
+          "start_pose_after_restore": [
+            0.06261935830116272,
+            0.0,
+            1.6828606128692627,
+            0.0
+          ],
+          "start_pose_before_restore": [
+            0.02327350340783596,
+            0.0,
+            1.6815346479415894,
+            0.0
+          ],
+          "start_pose_error_after_restore": 0.1039,
+          "start_pose_error_before_restore": 0.0848,
+          "start_pose_restore_diagnostics": {
+            "attempt": 1,
+            "elapsed": 1.206,
+            "final_pose": [
+              0.06261935830116272,
+              0.0,
+              1.6828606128692627,
+              0.0
+            ],
+            "last_command": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "phase": "hold",
+            "position_error": 0.1039,
+            "reason": "post_controller_hold",
+            "reset_phase": "hold",
+            "settle_elapsed": 0.201,
+            "target_pose": [
+              0.0,
+              0.0,
+              1.6,
+              0.0
+            ],
+            "yaw_error": 0.0
+          },
+          "start_pose_restore_method": "velocity_restore",
+          "start_pose_restore_tolerance": 0.22,
+          "start_pose_restored": true,
+          "start_pose_speed_after_restore": [
+            -0.0031367254621039943,
+            0.0,
+            0.0012491607770088536
+          ],
+          "start_pose_speed_before_restore": [
+            0.10238432411457608,
+            0.0,
+            -0.003920875410606948
+          ],
+          "start_pose_speed_norm_after_restore": 0.0034,
+          "start_pose_speed_norm_before_restore": 0.1025,
+          "stop_accepted": true,
+          "stop_iterations": 4,
+          "twist_frame_id": "earth"
+        },
+        "post_reset_actionability_ready": true,
+        "post_reset_actionability_recovered": false,
+        "post_reset_controller_hold_ready": true,
+        "post_reset_controller_ready": true,
+        "post_reset_mode_refresh_ready": true,
+        "post_reset_observed_pose": [
+          0.0,
+          0.0,
+          1.6812493801116943,
+          0.0
+        ],
+        "post_reset_observed_position_error": 0.0812,
+        "post_reset_observed_speed": [
+          0.0,
+          0.0,
+          0.0015985395607179727
+        ],
+        "post_reset_observed_speed_norm": 0.0016,
+        "post_reset_observed_yaw_error": 0.0,
+        "post_reset_offboard_ready": true,
+        "post_reset_pose_observe_elapsed": 0.101,
+        "post_reset_pose_observed": true,
+        "post_reset_pose_ready": true,
+        "post_reset_pose_stable_elapsed": 0.2,
+        "post_reset_takeoff_ready": true,
+        "reason": "service_success",
+        "reset_phase": "hold",
+        "settle_elapsed": 0.201,
+        "target_pose": [
+          0.0,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "yaw_error": 0.0
+      },
+      "reset_service_success": true,
+      "service_attempted": true,
+      "service_path": "service_success",
+      "use_simulator_reset_service": true
+    },
+    {
+      "diagnostics": {
+        "attempt": 1,
+        "elapsed": 1.206,
+        "final_pose": [
+          -0.005051254294812679,
+          0.0,
+          1.6070042848587036,
+          0.0
+        ],
+        "last_command": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "phase": "hold",
+        "position_error": 0.0086,
+        "reason": "post_controller_hold",
+        "reset_phase": "hold",
+        "settle_elapsed": 0.201,
+        "target_pose": [
+          0.0,
+          0.0,
+          1.6,
+          0.0
+        ],
+        "yaw_error": 0.0
+      },
+      "reset_service_success": true,
+      "service_attempted": false,
+      "service_path": "post_controller_hold",
+      "use_simulator_reset_service": true
+    }
+  ],
+  "run_dir": "/home/jordi/TFM/rl_uav_aerostack2/runs/diagnostics/exp008_training_smoke_20260703_112428",
+  "steps_requested": 8,
+  "success": true,
+  "target_progress_confirmed": false,
+  "vec_env_num_envs": 1
+}

@@ -1,0 +1,1226 @@
+22:32:32 [INFO] train_ppo: Resuming from runs/ppo/ppo_phase1_exp016_curriculum_full_150k_20260705_150025/model_final.zip at num_timesteps=150296
+22:32:32 [INFO] train_ppo: === PPO infrastructure ready ===
+22:32:32 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp018.yaml
+22:32:32 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp018_vectorized_watchdog_200k_20260705_223230
+22:32:32 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp018_vectorized_watchdog_200k_20260705_223230/tensorboard
+22:32:32 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp018_vectorized_watchdog_200k_20260705_223230/monitor
+22:32:32 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp018_vectorized_watchdog_200k_20260705_223230/checkpoints
+22:32:32 [INFO] train_ppo: Num envs: 2
+22:32:32 [INFO] train_ppo: Namespaces: ['drone0', 'drone1']
+22:32:32 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+22:32:32 [INFO] train_ppo: Checkpoint callback: every 5000 steps
+22:32:32 [INFO] train_ppo: Resume remainder: 49704 steps to reach the configured total
+22:32:32 [INFO] train_ppo: Total timesteps: 49704
+22:32:32 [INFO] train_ppo: Starting PPO learn() ...
+[INFO] [1783283553.090129899] [drone1.drone1_interface]: Starting drone1
+[INFO] [1783283553.140237319] [drone0.drone0_interface]: Starting drone0
+[INFO] [1783283553.640016147] [drone1.drone1_interface]: drone1 interface initialized
+[INFO] [1783283553.675103266] [drone0.drone0_interface]: drone0 interface initialized
+[ERROR] [1783283556.803597870] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283556.837201463] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283556.865073697] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283556.896437226] [drone1.drone1_interface]: Service returned failure
+Logging to runs/ppo/ppo_phase1_exp018_vectorized_watchdog_200k_20260705_223230/tensorboard/PPO_0
+[ERROR] [1783283562.895568647] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283562.931258246] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=0.998; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783283574.958416870] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283574.990591826] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283588.548388011] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283588.587306125] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.080; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783283603.526446924] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283603.569000985] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283611.527101176] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283611.594180627] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283621.532954817] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283621.578784584] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283638.626410218] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283638.704053755] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283648.947037214] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283649.060362621] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283665.532004998] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283665.619747129] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283682.036921284] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283682.096700741] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283693.521741989] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283693.624047833] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283712.233215795] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283712.342281040] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283730.248652096] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283730.312170213] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283747.140950393] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283747.260733831] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283761.394308784] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283761.503459517] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.141; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783283781.555469420] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283781.689808876] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283797.478320666] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283797.608672181] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283808.949624583] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283809.097006158] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283818.422604295] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283818.560032842] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283832.460899628] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283832.612191016] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283853.371386455] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283853.526434817] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283865.986863089] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283866.141589721] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283877.794475658] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283878.006657325] [drone1.drone1_interface]: Service returned failure
+---------------------------------
+| rollout/           |          |
+|    ep_len_mean     | 62.6     |
+|    ep_rew_mean     | 3.44     |
+|    success_rate    | 0.99     |
+| time/              |          |
+|    fps             | 3        |
+|    iterations      | 1        |
+|    time_elapsed    | 335      |
+|    total_timesteps | 151320   |
+---------------------------------
+[ERROR] [1783283893.404145880] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283893.604562491] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283907.114344113] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283907.324958281] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283920.008197545] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283920.156473965] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=0.980; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783283936.718028322] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283936.869358067] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283952.324402225] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283952.546092312] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.153; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783283971.825509915] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283971.983758321] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783283980.437297147] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283980.669829207] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283999.745820980] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783283999.988216319] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284019.459547092] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284019.713505338] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284031.036958228] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284031.198959698] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284049.246915641] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284049.412326222] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284060.061340617] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284060.264924296] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284071.968374657] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284072.232278280] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284084.568062258] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284084.782446324] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284099.878110415] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284100.103538967] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284117.393939007] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284117.629441609] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.031; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783284130.079933853] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284130.355273673] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284143.802462136] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284144.087313580] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284158.903061238] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284159.149392471] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284182.626877452] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284182.883209033] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783284195.597928550] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284195.893421172] [drone1.drone1_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 63.9        |
+|    ep_rew_mean          | 2.76        |
+|    success_rate         | 0.98        |
+| time/                   |             |
+|    fps                  | 3           |
+|    iterations           | 2           |
+|    time_elapsed         | 651         |
+|    total_timesteps      | 152344      |
+| train/                  |             |
+|    approx_kl            | 0.002303361 |
+|    clip_fraction        | 0.00469     |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.1       |
+|    explained_variance   | 0.523       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 7.17        |
+|    n_updates            | 1465        |
+|    policy_gradient_loss | -0.00604    |
+|    std                  | 0.916       |
+|    value_loss           | 18.3        |
+-----------------------------------------
+[ERROR] [1783284207.308509368] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284207.614345276] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284225.119377983] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284225.435267160] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284252.929176857] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284253.256952887] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284275.039174229] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284275.540666423] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284286.846285043] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284287.109581424] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284307.235875139] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284307.514017575] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284320.250901443] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284320.598735581] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284331.247205319] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284331.535123168] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284345.063827251] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284345.423385865] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284359.574660438] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284359.944061830] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284372.854814853] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284373.355954209] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284384.067320458] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284384.376498411] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284406.278334760] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284406.598290280] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.137; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783284424.286656572] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284424.667374222] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284438.992399749] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284439.382667694] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284451.287087060] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284451.617878472] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284475.504291523] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284475.905640889] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284484.899026739] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284485.240424697] [drone0.drone0_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 61.2         |
+|    ep_rew_mean          | 3.58         |
+|    success_rate         | 0.98         |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 3            |
+|    time_elapsed         | 944          |
+|    total_timesteps      | 153368       |
+| train/                  |              |
+|    approx_kl            | 0.0028048665 |
+|    clip_fraction        | 0.00703      |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.1        |
+|    explained_variance   | 0.428        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 12.3         |
+|    n_updates            | 1470         |
+|    policy_gradient_loss | -0.00471     |
+|    std                  | 0.915        |
+|    value_loss           | 18.1         |
+------------------------------------------
+[ERROR] [1783284503.207960728] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284503.561290669] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284516.319000747] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284516.730964872] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284530.523883609] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284530.887842640] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284547.729800591] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284548.153851631] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284558.931273818] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284559.304513210] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284580.540379953] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284580.925558037] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284610.850270965] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284611.243945234] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284629.540854947] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284629.973944266] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284645.360541610] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284645.765089786] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284660.944574135] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284661.389357847] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284683.558896260] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284684.258991241] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284706.366973737] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284706.831458417] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284725.773491993] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284726.188962276] [drone0.drone0_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 60           |
+|    ep_rew_mean          | 3.74         |
+|    success_rate         | 0.97         |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 4            |
+|    time_elapsed         | 1191         |
+|    total_timesteps      | 154392       |
+| train/                  |              |
+|    approx_kl            | 0.0039846133 |
+|    clip_fraction        | 0.0182       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -15.7        |
+|    explained_variance   | 0.266        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 3.79         |
+|    n_updates            | 1475         |
+|    policy_gradient_loss | -0.011       |
+|    std                  | 0.914        |
+|    value_loss           | 12.5         |
+------------------------------------------
+[ERROR] [1783284751.181149480] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284751.657692482] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284761.988972113] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284762.475849514] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.062; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783284779.900705649] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284780.397044308] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284793.784141191] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284794.209686107] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.132; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783284813.112865977] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284813.621013312] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284833.293099900] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284833.729853829] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284848.621974506] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284849.149434872] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284863.203214096] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284863.652528311] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.030; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783284874.233242017] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284874.761352365] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284894.511967000] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284894.968445747] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.102; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783284908.826827211] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284909.305561628] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284927.440889594] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284927.979835192] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284935.935679483] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284936.416312734] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284951.948597497] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284952.440451309] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783284979.553424659] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284980.103664838] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284990.464879170] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783284991.362868578] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285011.972992914] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285012.544663346] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285024.256391293] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285024.756278073] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285049.566910151] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285050.077456256] [drone0.drone0_interface]: Service returned failure
+----------------------------------------
+| rollout/                |            |
+|    ep_len_mean          | 55.7       |
+|    ep_rew_mean          | 4.29       |
+|    success_rate         | 0.97       |
+| time/                   |            |
+|    fps                  | 3          |
+|    iterations           | 5          |
+|    time_elapsed         | 1512       |
+|    total_timesteps      | 155416     |
+| train/                  |            |
+|    approx_kl            | 0.00954167 |
+|    clip_fraction        | 0.0516     |
+|    clip_range           | 0.2        |
+|    entropy_loss         | -15.9      |
+|    explained_variance   | 0.445      |
+|    learning_rate        | 3e-05      |
+|    loss                 | 4          |
+|    n_updates            | 1480       |
+|    policy_gradient_loss | -0.0169    |
+|    std                  | 0.913      |
+|    value_loss           | 8.87       |
+----------------------------------------
+[ERROR] [1783285068.578248245] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285069.160233356] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.147; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285083.478740870] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285084.001247105] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285115.399484128] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285115.993462545] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285126.989227618] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285127.521625227] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285147.712882898] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285148.318893734] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285164.516087954] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285165.131193363] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285189.928187987] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285190.553832872] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.006; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285203.699027639] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285204.602586169] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285222.911060631] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285223.465850258] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285238.823485048] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285239.390283895] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.050; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285255.343372868] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285255.992213580] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285268.828518031] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285269.409763760] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.057; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285286.053320066] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285286.701537709] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.108; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285307.443372865] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285308.344695096] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285322.167979118] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285322.824649842] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285345.451937339] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285346.049249404] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285372.470739651] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285373.138927858] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.155; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285392.066137724] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285392.674225588] [drone0.drone0_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 56.3         |
+|    ep_rew_mean          | 4.65         |
+|    success_rate         | 0.97         |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 6            |
+|    time_elapsed         | 1857         |
+|    total_timesteps      | 156440       |
+| train/                  |              |
+|    approx_kl            | 0.0040290686 |
+|    clip_fraction        | 0.00937      |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.3        |
+|    explained_variance   | 0.47         |
+|    learning_rate        | 3e-05        |
+|    loss                 | 5.57         |
+|    n_updates            | 1485         |
+|    policy_gradient_loss | -0.0118      |
+|    std                  | 0.912        |
+|    value_loss           | 14.9         |
+------------------------------------------
+[ERROR] [1783285410.880790374] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285411.561015628] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285429.287017147] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285429.906936685] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285448.997505581] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285449.691162039] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285468.405282927] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285469.114298884] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285484.514306562] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285485.227791837] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285495.882890419] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285496.513255428] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=0.958; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285515.304176111] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285515.946524832] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285527.724765776] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285528.446860447] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285542.810776656] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285543.468220174] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.119; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285565.631465141] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285566.371615322] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285584.718006681] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285585.377926847] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285600.625314303] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285601.297592873] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285623.938203914] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285624.620090611] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285636.042671089] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285636.785487084] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285651.755369990] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285652.507754593] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285675.650184732] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285676.069069863] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285676.343427921] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285676.834938744] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285700.588614252] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285701.371484429] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.003; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285718.660599498] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285719.365547222] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.143; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783285741.376644462] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285742.111440409] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285750.797586944] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285751.596836749] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285764.887777064] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285765.616149705] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285783.096263576] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285783.892072975] [drone1.drone1_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 55.4         |
+|    ep_rew_mean          | 4.86         |
+|    success_rate         | 0.97         |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 7            |
+|    time_elapsed         | 2252         |
+|    total_timesteps      | 157464       |
+| train/                  |              |
+|    approx_kl            | 0.0012044627 |
+|    clip_fraction        | 0.000586     |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.2        |
+|    explained_variance   | 0.519        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 5.52         |
+|    n_updates            | 1490         |
+|    policy_gradient_loss | -0.0031      |
+|    std                  | 0.911        |
+|    value_loss           | 13.2         |
+------------------------------------------
+[ERROR] [1783285811.089249113] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285811.825052466] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285821.206837651] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285822.013717432] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285838.601689441] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285839.348582058] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285862.712723318] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285863.469901400] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285887.619650946] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285888.435365815] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285905.524670759] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285906.293111286] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285923.033756506] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285923.130265891] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285923.811265511] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285923.958413163] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285941.439572628] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285942.277747159] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285958.248079274] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285959.096780681] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783285971.143919600] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285971.931587374] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285988.853639217] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783285989.653994892] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286012.165800660] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286012.976072219] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=0.905; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783286027.760136083] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286028.620475246] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286050.874128246] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286051.743085328] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.128; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783286069.277395656] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286070.096970489] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286092.787300847] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286093.621682902] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286108.775255960] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286109.660764376] [drone1.drone1_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 55.8         |
+|    ep_rew_mean          | 4.79         |
+|    success_rate         | 0.99         |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 8            |
+|    time_elapsed         | 2576         |
+|    total_timesteps      | 158488       |
+| train/                  |              |
+|    approx_kl            | 0.0025216658 |
+|    clip_fraction        | 0.00137      |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.2        |
+|    explained_variance   | 0.567        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 3.53         |
+|    n_updates            | 1495         |
+|    policy_gradient_loss | -0.00724     |
+|    std                  | 0.91         |
+|    value_loss           | 10.2         |
+------------------------------------------
+[ERROR] [1783286133.496896746] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286134.387305448] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286155.498288825] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286156.339062504] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286168.803079061] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286169.706815633] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286188.411531064] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286189.263020141] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286207.317124328] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286208.180196683] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286223.413910267] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286224.328145892] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286239.227341640] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286240.152191245] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286260.123987705] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286260.997130189] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286290.436089693] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286291.370193642] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286306.632943424] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286308.040831043] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286325.644775324] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286326.588686003] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286344.051047447] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286344.946291622] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286360.759401125] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286361.663200043] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286377.854560155] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286378.810834226] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286396.167337079] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286397.081371799] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286415.666947854] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286416.631102676] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286436.682252491] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286437.605700514] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286454.291794653] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286455.228609439] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286473.901538229] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286474.849107506] [drone0.drone0_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 53.9         |
+|    ep_rew_mean          | 4.83         |
+|    success_rate         | 1            |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 9            |
+|    time_elapsed         | 2931         |
+|    total_timesteps      | 159512       |
+| train/                  |              |
+|    approx_kl            | 0.0035353308 |
+|    clip_fraction        | 0.0135       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.5        |
+|    explained_variance   | 0.641        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 2.65         |
+|    n_updates            | 1500         |
+|    policy_gradient_loss | -0.00733     |
+|    std                  | 0.909        |
+|    value_loss           | 7.92         |
+------------------------------------------
+[ERROR] [1783286487.614195107] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286488.569613644] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286508.621598911] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286509.589801979] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286532.879977700] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286533.855035985] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286559.733589540] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286560.784243657] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286581.757001423] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286582.747731800] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286605.089207416] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286606.076502938] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286622.355265354] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286623.354427584] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286647.001124997] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286647.067874900] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286647.998177732] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286648.079253303] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286667.808170496] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286668.814103737] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286690.476113596] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286691.497544105] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286708.121406702] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286709.138101816] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286730.780177573] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286731.809694082] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286754.833576781] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286755.862062149] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286773.098495040] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286774.140955209] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286786.537108419] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286787.579333721] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286809.509358304] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286810.561836698] [drone0.drone0_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 54.2         |
+|    ep_rew_mean          | 4.55         |
+|    success_rate         | 0.99         |
+| time/                   |              |
+|    fps                  | 3            |
+|    iterations           | 10           |
+|    time_elapsed         | 3282         |
+|    total_timesteps      | 160536       |
+| train/                  |              |
+|    approx_kl            | 0.0023113114 |
+|    clip_fraction        | 0.00977      |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.5        |
+|    explained_variance   | 0.647        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 3.03         |
+|    n_updates            | 1505         |
+|    policy_gradient_loss | -0.00351     |
+|    std                  | 0.908        |
+|    value_loss           | 9.21         |
+------------------------------------------
+[ERROR] [1783286840.517963931] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286841.581958926] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286852.355330459] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286854.053441504] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286881.874353370] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286883.653995596] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286905.130191588] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286906.204503556] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286930.840318442] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286931.926974284] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.024; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783286957.075301230] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286958.145966837] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286972.181892937] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286973.263758437] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783286988.749910683] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783286989.848232512] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287008.397085567] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287009.490735595] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287028.704534485] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287029.807957260] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287043.359458934] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287045.163996836] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.107; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783287065.873582534] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287066.989959647] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287096.385673654] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287097.515887680] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287128.294084285] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287129.432642699] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287154.606837195] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287155.759043551] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287168.116187019] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287169.230311044] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287195.113742081] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287196.274273459] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287210.326623600] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287211.453180191] [drone1.drone1_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 54.2        |
+|    ep_rew_mean          | 4.24        |
+|    success_rate         | 0.99        |
+| time/                   |             |
+|    fps                  | 3           |
+|    iterations           | 11          |
+|    time_elapsed         | 3682        |
+|    total_timesteps      | 161560      |
+| train/                  |             |
+|    approx_kl            | 0.010655322 |
+|    clip_fraction        | 0.0598      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.4       |
+|    explained_variance   | 0.454       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 3.35        |
+|    n_updates            | 1510        |
+|    policy_gradient_loss | -0.0176     |
+|    std                  | 0.906       |
+|    value_loss           | 8.46        |
+-----------------------------------------
+[ERROR] [1783287237.343657278] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287238.480504282] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287257.916212300] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287259.085746838] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287277.746750689] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287278.892859337] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287305.435632382] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287306.615162669] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287325.257984954] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287326.415421736] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287364.546838422] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287365.739643425] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287388.870332191] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287390.039197792] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287414.377424421] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287415.555312591] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287442.189088131] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287444.091315204] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287463.157854494] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287464.362025877] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287494.766338046] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287495.980796652] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287526.300295266] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287527.500199445] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287549.909914951] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287551.122006357] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287571.176137581] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287572.400447736] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.041; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783287602.991520362] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287604.226430946] [drone0.drone0_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 57          |
+|    ep_rew_mean          | 3.71        |
+|    success_rate         | 0.99        |
+| time/                   |             |
+|    fps                  | 3           |
+|    iterations           | 12          |
+|    time_elapsed         | 4071        |
+|    total_timesteps      | 162584      |
+| train/                  |             |
+|    approx_kl            | 0.007210668 |
+|    clip_fraction        | 0.048       |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.4       |
+|    explained_variance   | 0.649       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 2.59        |
+|    n_updates            | 1515        |
+|    policy_gradient_loss | -0.0119     |
+|    std                  | 0.905       |
+|    value_loss           | 6.58        |
+-----------------------------------------
+[ERROR] [1783287631.122216140] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287632.343998352] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.133; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783287657.397747173] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287658.643654510] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783287674.242524440] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287675.476267770] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287692.712044351] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287693.966301966] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287708.244154801] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287709.486599236] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287750.656093740] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287751.909758340] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287788.921089033] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287790.185981816] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287824.465045650] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287825.734020072] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287840.641565240] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287841.932327948] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287882.376501712] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287883.651586169] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287912.587866690] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287913.872829777] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287934.943347023] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287936.234984143] [drone0.drone0_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 62          |
+|    ep_rew_mean          | 3.05        |
+|    success_rate         | 0.98        |
+| time/                   |             |
+|    fps                  | 3           |
+|    iterations           | 13          |
+|    time_elapsed         | 4407        |
+|    total_timesteps      | 163608      |
+| train/                  |             |
+|    approx_kl            | 0.012186745 |
+|    clip_fraction        | 0.0668      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.6       |
+|    explained_variance   | 0.527       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 5.78        |
+|    n_updates            | 1520        |
+|    policy_gradient_loss | -0.0155     |
+|    std                  | 0.903       |
+|    value_loss           | 10.7        |
+-----------------------------------------
+[ERROR] [1783287974.098271993] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783287975.394994520] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.094; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783287997.955331225] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783287999.255814657] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288030.764164605] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288032.076546399] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288060.809962131] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288062.118028308] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288083.368256791] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288084.688688046] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288116.984989909] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288118.313734882] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288146.994400218] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288148.340295749] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288175.021132419] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288176.343515177] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288191.505993406] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288192.857570634] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288220.918412992] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288222.281122646] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288237.422452701] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288238.750519913] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288262.040163615] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288263.414952423] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288288.141344478] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288289.527987195] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288321.142921496] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288322.496397388] [drone1.drone1_interface]: Service returned failure
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 65           |
+|    ep_rew_mean          | 2.54         |
+|    success_rate         | 0.98         |
+| time/                   |              |
+|    fps                  | 2            |
+|    iterations           | 14           |
+|    time_elapsed         | 4790         |
+|    total_timesteps      | 164632       |
+| train/                  |              |
+|    approx_kl            | 0.0055683525 |
+|    clip_fraction        | 0.0225       |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -16.1        |
+|    explained_variance   | 0.506        |
+|    learning_rate        | 3e-05        |
+|    loss                 | 5.13         |
+|    n_updates            | 1525         |
+|    policy_gradient_loss | -0.0119      |
+|    std                  | 0.902        |
+|    value_loss           | 8.34         |
+------------------------------------------
+[ERROR] [1783288350.448862154] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288351.845497837] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288371.049235962] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288372.401041837] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288405.460141603] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288406.863088465] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288427.465351091] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288428.827061259] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288454.367014134] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288455.781512499] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.107; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783288486.771314161] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288488.144871546] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288516.283120010] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288517.663247063] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288541.283849943] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288542.711583090] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288568.494834007] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288569.888606316] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288600.293561894] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288601.732966968] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288629.105094533] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288630.508784031] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288651.501993472] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288653.024091261] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288676.609719591] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288678.069954937] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.020; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783288708.521231957] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288710.816416831] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288736.822546760] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288738.154612828] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.021; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783288777.121527401] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288778.599213357] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.032; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783288810.237375493] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288811.674241533] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288840.649995704] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288842.097018751] [drone1.drone1_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 64.5        |
+|    ep_rew_mean          | 2.92        |
+|    success_rate         | 0.98        |
+| time/                   |             |
+|    fps                  | 2           |
+|    iterations           | 15          |
+|    time_elapsed         | 5305        |
+|    total_timesteps      | 165656      |
+| train/                  |             |
+|    approx_kl            | 0.005874198 |
+|    clip_fraction        | 0.018       |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.7       |
+|    explained_variance   | 0.626       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 3.7         |
+|    n_updates            | 1530        |
+|    policy_gradient_loss | -0.00998    |
+|    std                  | 0.901       |
+|    value_loss           | 9.22        |
+-----------------------------------------
+[ERROR] [1783288872.142106969] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288873.624131287] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.000; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783288907.548965358] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288909.040094731] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.097; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783288934.157461138] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288935.660460794] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783288964.460392315] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288965.916522665] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288996.560496827] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783288998.028951747] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289025.071568382] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289027.612251579] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289058.881034236] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289060.404565197] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289096.788306314] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289098.320700941] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289121.002974098] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289122.551081049] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289153.078657264] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289154.557035163] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289182.209858296] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289183.769989907] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.029; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783289207.592999322] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289209.082782752] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289232.622026744] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289234.193644784] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289266.230862851] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289267.809767094] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.072; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783289302.204826601] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289303.702609544] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289334.041680866] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289335.630000288] [drone0.drone0_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 65.6        |
+|    ep_rew_mean          | 3.13        |
+|    success_rate         | 0.99        |
+| time/                   |             |
+|    fps                  | 2           |
+|    iterations           | 16          |
+|    time_elapsed         | 5798        |
+|    total_timesteps      | 166680      |
+| train/                  |             |
+|    approx_kl            | 0.005535274 |
+|    clip_fraction        | 0.0111      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.6       |
+|    explained_variance   | 0.528       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 5.36        |
+|    n_updates            | 1535        |
+|    policy_gradient_loss | -0.0122     |
+|    std                  | 0.9         |
+|    value_loss           | 10.5        |
+-----------------------------------------
+[ERROR] [1783289370.955769024] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289372.554556469] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=0.963; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783289402.913367555] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289404.424042367] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289438.723307955] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289440.319807467] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289470.731948341] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289472.264832488] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289497.756784595] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289499.364872360] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289525.941066201] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289527.483905000] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289558.255462841] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289559.808312784] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783289583.568556907] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289585.135200873] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=0.964; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783289613.304814238] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289614.873734807] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289642.186245535] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289643.813828905] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289670.880467942] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289672.462409904] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289699.075102142] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289700.715946477] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289721.795570361] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289723.437314490] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289747.694962765] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289749.288993633] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289779.807826463] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289781.462337411] [drone0.drone0_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 67.7        |
+|    ep_rew_mean          | 2.63        |
+|    success_rate         | 0.98        |
+| time/                   |             |
+|    fps                  | 2           |
+|    iterations           | 17          |
+|    time_elapsed         | 6252        |
+|    total_timesteps      | 167704      |
+| train/                  |             |
+|    approx_kl            | 0.006203148 |
+|    clip_fraction        | 0.0387      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.3       |
+|    explained_variance   | 0.479       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 2.76        |
+|    n_updates            | 1540        |
+|    policy_gradient_loss | -0.0106     |
+|    std                  | 0.899       |
+|    value_loss           | 8.32        |
+-----------------------------------------
+[ERROR] [1783289814.805930753] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289816.408563556] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289838.015185008] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289839.676522729] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289875.327235420] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289877.000580220] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=1.123; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783289904.506056677] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289906.119659498] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289929.438851984] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289931.121818166] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783289964.725957800] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289966.354247823] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289998.231309825] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783289999.866506333] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290028.646623275] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290030.292590780] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290049.647849913] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290051.345012971] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290087.359957510] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290089.067323590] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290137.354253180] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290139.087148919] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290165.971843159] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290167.690112161] [drone0.drone0_interface]: Service returned failure
+-----------------------------------------
+| rollout/                |             |
+|    ep_len_mean          | 70.8        |
+|    ep_rew_mean          | 1.74        |
+|    success_rate         | 0.97        |
+| time/                   |             |
+|    fps                  | 2           |
+|    iterations           | 18          |
+|    time_elapsed         | 6639        |
+|    total_timesteps      | 168728      |
+| train/                  |             |
+|    approx_kl            | 0.009190034 |
+|    clip_fraction        | 0.0609      |
+|    clip_range           | 0.2         |
+|    entropy_loss         | -16.6       |
+|    explained_variance   | 0.496       |
+|    learning_rate        | 3e-05       |
+|    loss                 | 3.04        |
+|    n_updates            | 1545        |
+|    policy_gradient_loss | -0.0207     |
+|    std                  | 0.899       |
+|    value_loss           | 9.97        |
+-----------------------------------------
+Reset started at valid low altitude z=1.129; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783290209.483684224] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290212.374387952] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290244.152681697] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290245.821344561] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.071; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783290277.400143183] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290279.137018972] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290305.778393645] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290307.455708758] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783290332.467816837] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290334.159374967] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.119; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783290359.300091159] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290361.000485641] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290391.611928059] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290393.321045454] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290420.809343453] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290422.548786891] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290461.409222309] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290463.165820741] [drone0.drone0_interface]: Service returned failure
+Reset started at valid low altitude z=0.457; climbing to hover 1.400m with bounded velocity recovery
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783290489.017978778] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290490.782985744] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290502.936630950] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290504.667538987] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783290526.844272116] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290528.589405510] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290553.916982320] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290555.688019733] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290592.752015254] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290595.649738598] [drone1.drone1_interface]: Service returned failure
+----------------------------------------
+| rollout/                |            |
+|    ep_len_mean          | 70.6       |
+|    ep_rew_mean          | 0.931      |
+|    success_rate         | 0.93       |
+| time/                   |            |
+|    fps                  | 2          |
+|    iterations           | 19         |
+|    time_elapsed         | 7063       |
+|    total_timesteps      | 169752     |
+| train/                  |            |
+|    approx_kl            | 0.00582443 |
+|    clip_fraction        | 0.0166     |
+|    clip_range           | 0.2        |
+|    entropy_loss         | -16.4      |
+|    explained_variance   | 0.579      |
+|    learning_rate        | 3e-05      |
+|    loss                 | 2.61       |
+|    n_updates            | 1550       |
+|    policy_gradient_loss | -0.00922   |
+|    std                  | 0.898      |
+|    value_loss           | 6.51       |
+----------------------------------------
+[ERROR] [1783290621.864296139] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290623.633873809] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290657.563428314] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290659.341719108] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=1.155; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783290688.435318869] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290690.213260377] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783290712.281667022] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290714.063616502] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290733.891957972] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290735.714072654] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290764.853376263] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290766.655284558] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290792.610643609] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290794.424372533] [drone1.drone1_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783290824.981840038] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290825.039985302] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290826.793747174] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290826.867074996] [drone1.drone1_interface]: Service returned failure
+Reset started at valid low altitude z=0.927; climbing to hover 1.400m with bounded velocity recovery
+[ERROR] [1783290865.769688559] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290867.584075573] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290894.673687583] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290896.499567353] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290932.313611153] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290934.128524618] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290961.131391366] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290962.959096597] [drone1.drone1_interface]: Service returned failure
+[ERROR] [1783290982.588201476] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783290984.427256894] [drone0.drone0_interface]: Service returned failure
+Skipping velocity reset; simulator service reset required (terminal_out_of_bounds)
+[ERROR] [1783291012.901210520] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291014.752308825] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291027.940988423] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291029.888362489] [drone0.drone0_interface]: Service returned failure
+Service reset attempt 1/3 failed (service_post_reset_command_path_failed); retrying full teleport...
+[ERROR] [1783291040.915276676] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291042.775840233] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291056.019717210] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291057.885264036] [drone0.drone0_interface]: Service returned failure
+Service reset attempt 2/3 failed (service_post_reset_command_path_failed); retrying full teleport...
+[ERROR] [1783291069.029988526] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291070.906481486] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291084.230856841] [drone0.drone0_interface]: Service returned failure
+[ERROR] [1783291086.113162181] [drone0.drone0_interface]: Service returned failure
+Process ForkServerProcess-1:
+Traceback (most recent call last):
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/subproc_vec_env.py", line 42, in _worker
+    observation, reset_info = env.reset()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 400, in reset
+    return super().reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/core.py", line 333, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 295, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 3420, in reset
+    self._raise_required_service_reset_failure(required_service_reset_reason)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 3243, in _raise_required_service_reset_failure
+    raise RuntimeError(
+RuntimeError: Simulator service reset is required after unsafe/out-of-bounds state; refusing velocity reset flyback. required_reason=terminal_out_of_bounds. Reset diagnostics: reason=service_post_reset_command_path_failed, failure_class=post_reset_command_path_failed, reset_service_attempts=3, reset_service_attempt_failures=[{'attempt': 1, 'reason': 'service_post_reset_command_path_failed', 'failure_class': 'post_reset_command_path_failed'}, {'attempt': 2, 'reason': 'service_post_reset_command_path_failed', 'failure_class': 'post_reset_command_path_failed'}, {'attempt': 3, 'reason': 'service_post_reset_command_path_failed', 'failure_class': 'post_reset_command_path_failed'}], elapsed=1.206, reset_phase=hold, phase=hold, settle_elapsed=0.201, target_pose=[-2.7979882105332483, 1.9797439595405164, 1.9424042508085226, -0.9749539510787826], final_pose=[-2.797989845275879, 1.979746699333191, 1.95464289188385, -0.9749539484826614], position_error=0.0122, yaw_error=0.0, service_name=/drone0/platform/reset_simulator_state, message=reset state applied, post_reset_platform_reassertion_attempted=False, post_reset_platform_fsm_ready=True, post_reset_platform_state={'connected': True, 'armed': True, 'offboard': True, 'state': 3, 'control_mode': 2}, post_reset_platform_control_mode=2, post_reset_takeoff_ready=True, post_reset_offboard_ready=True, post_reset_controller_ready=True, post_reset_controller_hold_ready=True, post_reset_pose_ready=True, post_reset_pose_observed=True, post_reset_observed_pose=[-2.797989845275879, 1.979746699333191, 1.95464289188385, -0.9749539484826614], post_reset_observed_position_error=0.0122, post_reset_actionability_ready=False, post_reset_actionability_recovered=False, post_reset_actionability={'first_probe': {'accepted': True, 'stop_accepted': True, 'actionable': False, 'reason': 'probe_motion_not_confirmed', 'probe_twist': [0.054389115422964096, -0.083915576338768, 0.0], 'twist_frame_id': 'earth', 'position_before': [-2.797989954355097, 1.9797466498033478, 1.954642927830274], 'position_after': [-2.797989954355097, 1.9797466498033478, 1.954642927830274], 'position_after_command': [-2.797989954355097, 1.9797466498033478, 1.954642927830274], 'position_after_stop': [-2.797989954355097, 1.9797466498033478, 1.954642927830274], 'position_delta': [0.0, 0.0, 0.0], 'forward_delta': 0.0, 'delta_norm': 0.0, 'min_forward_delta': 0.012, 'probe_iterations': 12, 'stop_iterations': 4, 'observation_samples': 25, 'observation_timeout': 1.25}, 'recovery_attempted': True, 'recovery_ready': True, 'second_probe': {'accepted': True, 'stop_accepted': True, 'actionable': False, 'reason': 'probe_motion_not_confirmed', 'probe_twist': [0.054389115422964096, -0.083915576338768, 0.0], 'twist_frame_id': 'earth', 'position_before': [-2.764565432006702, 1.9281833995127298, 1.956851146461535], 'position_after': [-2.7646769075800135, 1.9283523990053157, 1.957373992240395], 'position_after_command': [-2.7646769075800135, 1.9283523990053157, 1.957373992240395], 'position_after_stop': [-2.7646769075800135, 1.9283523990053157, 1.957373992240395], 'position_delta': [-0.00011134147644042969, 0.00016891956329345703, 0.0005228519439697266], 'forward_delta': -0.0002, 'delta_norm': 0.00056, 'min_forward_delta': 0.012, 'probe_iterations': 12, 'stop_iterations': 4, 'observation_samples': 25, 'observation_timeout': 1.25}}, last_command=[0.0, 0.0, 0.0, 0.0]
+Error sending velocity command: Failed to publish: publisher's context is invalid, at ./src/rcl/publisher.c:389
+Error sending velocity command: Failed to publish: publisher's context is invalid, at ./src/rcl/publisher.c:389
+Process ForkServerProcess-2:
+Traceback (most recent call last):
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/subproc_vec_env.py", line 33, in _worker
+    cmd, data = remote.recv()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/connection.py", line 414, in _recv_bytes
+    buf = self._recv(4)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/multiprocessing/connection.py", line 379, in _recv
+    chunk = read(handle, remaining)
+ConnectionResetError: [Errno 104] Connection reset by peer

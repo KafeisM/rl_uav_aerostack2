@@ -1,0 +1,7 @@
+#{"t_start": 1782838612.076703, "env_id": "None"}
+r,l,t,is_success,final_distance,is_out_of_bounds,is_unsafe_low_altitude,altitude,terminal_reason,physical_displacement,path_length,max_physical_displacement,min_altitude,motion_command_steps,motion_command_accepted_steps,motion_command_acceptance_rate,reset_method,reset_path,reset_service_attempted,vertical_safety_penalty,low_altitude_guard_active
+-2.7389975,120,34.006171,False,0.7970651634544975,False,False,2.2996285732536723,max_steps,1.0861060193192604,3.073148696418584,1.0861060193192604,1.601530950614835,120,120,1.0,simulator_service,service_success,True,0.0,False
+-26.099068,120,60.157909,False,1.841342086918584,False,False,2.8841828923598167,max_steps,1.6944988766848361,4.394244509984617,1.9277591916547117,1.6222813118247927,120,120,1.0,velocity,post_controller_hold,False,0.0,False
+-20.762407,120,83.381596,False,1.1056934242065721,False,False,2.601326086127522,max_steps,1.132291513240833,4.627783551340358,1.132291513240833,1.62746871619928,120,120,1.0,velocity,post_controller_hold,False,0.0,False
+-30.958004,120,109.086665,False,3.1936530411587616,False,False,3.7286134878908954,max_steps,3.351172256545909,7.294336761944477,3.351172256545909,1.519287883370218,120,120,1.0,velocity,post_controller_hold,False,0.0,False
+-8.797479,120,135.441317,False,0.5320008639574026,False,False,1.9487204336673578,max_steps,1.0383022496102194,3.9343197664869614,1.0383022496102194,1.5938938523359316,120,120,1.0,velocity,post_controller_hold,False,0.0,False

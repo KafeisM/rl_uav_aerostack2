@@ -1,0 +1,336 @@
+Using cpu device
+Logging to runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_155659/tensorboard/PPO_1
+----------------------------
+| time/              |     |
+|    fps             | 5   |
+|    iterations      | 1   |
+|    time_elapsed    | 24  |
+|    total_timesteps | 128 |
+----------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -19.9        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 5            |
+|    iterations           | 2            |
+|    time_elapsed         | 46           |
+|    total_timesteps      | 256          |
+| train/                  |              |
+|    approx_kl            | 0.0019601528 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -0.769       |
+|    explained_variance   | -0.0173      |
+|    learning_rate        | 0.0001       |
+|    loss                 | 1.21         |
+|    n_updates            | 5            |
+|    policy_gradient_loss | 0.00482      |
+|    std                  | 1            |
+|    value_loss           | 2.59         |
+------------------------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -19.9        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 6            |
+|    iterations           | 3            |
+|    time_elapsed         | 59           |
+|    total_timesteps      | 384          |
+| train/                  |              |
+|    approx_kl            | 0.0008008429 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -4.19        |
+|    explained_variance   | -0.0187      |
+|    learning_rate        | 0.0001       |
+|    loss                 | 13.9         |
+|    n_updates            | 10           |
+|    policy_gradient_loss | 0.00501      |
+|    std                  | 1            |
+|    value_loss           | 25.2         |
+------------------------------------------
+-------------------------------------------
+| rollout/                |               |
+|    ep_len_mean          | 200           |
+|    ep_rew_mean          | -77.7         |
+|    success_rate         | 0             |
+| time/                   |               |
+|    fps                  | 5             |
+|    iterations           | 4             |
+|    time_elapsed         | 85            |
+|    total_timesteps      | 512           |
+| train/                  |               |
+|    approx_kl            | 4.3111388e-05 |
+|    clip_fraction        | 0             |
+|    clip_range           | 0.2           |
+|    entropy_loss         | -6.8          |
+|    explained_variance   | -0.0361       |
+|    learning_rate        | 0.0001        |
+|    loss                 | 65.5          |
+|    n_updates            | 15            |
+|    policy_gradient_loss | 0.00035       |
+|    std                  | 1             |
+|    value_loss           | 129           |
+-------------------------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -60.8        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 5            |
+|    iterations           | 5            |
+|    time_elapsed         | 111          |
+|    total_timesteps      | 640          |
+| train/                  |              |
+|    approx_kl            | 0.0008591232 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -2.07        |
+|    explained_variance   | 0.0156       |
+|    learning_rate        | 0.0001       |
+|    loss                 | 5.97         |
+|    n_updates            | 20           |
+|    policy_gradient_loss | -0.0112      |
+|    std                  | 0.999        |
+|    value_loss           | 12.6         |
+------------------------------------------
+-------------------------------------------
+| rollout/                |               |
+|    ep_len_mean          | 200           |
+|    ep_rew_mean          | -60.8         |
+|    success_rate         | 0             |
+| time/                   |               |
+|    fps                  | 6             |
+|    iterations           | 6             |
+|    time_elapsed         | 124           |
+|    total_timesteps      | 768           |
+| train/                  |               |
+|    approx_kl            | 0.00016828533 |
+|    clip_fraction        | 0             |
+|    clip_range           | 0.2           |
+|    entropy_loss         | -0.183        |
+|    explained_variance   | 0.00439       |
+|    learning_rate        | 0.0001        |
+|    loss                 | 1.7           |
+|    n_updates            | 25            |
+|    policy_gradient_loss | -0.00147      |
+|    std                  | 0.999         |
+|    value_loss           | 3.15          |
+-------------------------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -51.5        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 5            |
+|    iterations           | 7            |
+|    time_elapsed         | 150          |
+|    total_timesteps      | 896          |
+| train/                  |              |
+|    approx_kl            | 3.793463e-05 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.7         |
+|    explained_variance   | -0.00226     |
+|    learning_rate        | 0.0001       |
+|    loss                 | 4.77         |
+|    n_updates            | 30           |
+|    policy_gradient_loss | -0.000455    |
+|    std                  | 0.999        |
+|    value_loss           | 9.36         |
+------------------------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -48.3        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 5            |
+|    iterations           | 8            |
+|    time_elapsed         | 178          |
+|    total_timesteps      | 1024         |
+| train/                  |              |
+|    approx_kl            | 0.0026891637 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.44        |
+|    explained_variance   | -0.0154      |
+|    learning_rate        | 0.0001       |
+|    loss                 | 2.71         |
+|    n_updates            | 35           |
+|    policy_gradient_loss | 0.0165       |
+|    std                  | 0.999        |
+|    value_loss           | 4.98         |
+------------------------------------------
+------------------------------------------
+| rollout/                |              |
+|    ep_len_mean          | 200          |
+|    ep_rew_mean          | -48.3        |
+|    success_rate         | 0            |
+| time/                   |              |
+|    fps                  | 6            |
+|    iterations           | 9            |
+|    time_elapsed         | 191          |
+|    total_timesteps      | 1152         |
+| train/                  |              |
+|    approx_kl            | 0.0010214215 |
+|    clip_fraction        | 0            |
+|    clip_range           | 0.2          |
+|    entropy_loss         | -1.94        |
+|    explained_variance   | 0.0122       |
+|    learning_rate        | 0.0001       |
+|    loss                 | 8.32         |
+|    n_updates            | 40           |
+|    policy_gradient_loss | -0.00116     |
+|    std                  | 0.999        |
+|    value_loss           | 15.1         |
+------------------------------------------
+-------------------------------------------
+| rollout/                |               |
+|    ep_len_mean          | 200           |
+|    ep_rew_mean          | -61.5         |
+|    success_rate         | 0             |
+| time/                   |               |
+|    fps                  | 5             |
+|    iterations           | 10            |
+|    time_elapsed         | 223           |
+|    total_timesteps      | 1280          |
+| train/                  |               |
+|    approx_kl            | 0.00019081868 |
+|    clip_fraction        | 0             |
+|    clip_range           | 0.2           |
+|    entropy_loss         | -5.96         |
+|    explained_variance   | -0.00187      |
+|    learning_rate        | 0.0001        |
+|    loss                 | 40.3          |
+|    n_updates            | 45            |
+|    policy_gradient_loss | -0.00206      |
+|    std                  | 0.999         |
+|    value_loss           | 83.7          |
+-------------------------------------------
+-------------------------------------------
+| rollout/                |               |
+|    ep_len_mean          | 200           |
+|    ep_rew_mean          | -68.6         |
+|    success_rate         | 0             |
+| time/                   |               |
+|    fps                  | 5             |
+|    iterations           | 11            |
+|    time_elapsed         | 253           |
+|    total_timesteps      | 1408          |
+| train/                  |               |
+|    approx_kl            | 6.6635665e-05 |
+|    clip_fraction        | 0             |
+|    clip_range           | 0.2           |
+|    entropy_loss         | -5.18         |
+|    explained_variance   | -0.00462      |
+|    learning_rate        | 0.0001        |
+|    loss                 | 21.7          |
+|    n_updates            | 50            |
+|    policy_gradient_loss | 0.0006        |
+|    std                  | 0.999         |
+|    value_loss           | 46.8          |
+-------------------------------------------
+-------------------------------------------
+| rollout/                |               |
+|    ep_len_mean          | 200           |
+|    ep_rew_mean          | -68.6         |
+|    success_rate         | 0             |
+| time/                   |               |
+|    fps                  | 5             |
+|    iterations           | 12            |
+|    time_elapsed         | 266           |
+|    total_timesteps      | 1536          |
+| train/                  |               |
+|    approx_kl            | 1.4191028e-05 |
+|    clip_fraction        | 0             |
+|    clip_range           | 0.2           |
+|    entropy_loss         | -5.47         |
+|    explained_variance   | 0.0158        |
+|    learning_rate        | 0.0001        |
+|    loss                 | 41.9          |
+|    n_updates            | 55            |
+|    policy_gradient_loss | 0.000521      |
+|    std                  | 0.999         |
+|    value_loss           | 86.2          |
+-------------------------------------------
+15:57:00 [INFO] train_ppo: === PPO infrastructure ready ===
+15:57:00 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp007.yaml
+15:57:00 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_155659
+15:57:00 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_155659/tensorboard
+15:57:00 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_155659/monitor
+15:57:00 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp007_progress_stable_2m_20k_20260626_155659/checkpoints
+15:57:00 [INFO] train_ppo: Num envs: 1
+15:57:00 [INFO] train_ppo: Namespaces: ['drone0']
+15:57:00 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+15:57:00 [INFO] train_ppo: Checkpoint callback: every 2000 steps
+15:57:00 [INFO] train_ppo: Total timesteps: 20000
+15:57:00 [INFO] train_ppo: Starting PPO learn() ...
+15:57:00 [INFO] rl_uav.envs.as2_test_env: ROS2 initialized (process-wide)
+[INFO] [1782482220.870129775] [drone0.drone0_interface]: Starting drone0
+[INFO] [1782482221.400223200] [drone0.drone0_interface]: drone0 interface initialized
+15:57:02 [INFO] rl_uav.envs.as2_test_env: Target marker publisher created on topic 'visualization_marker' frame 'earth'
+15:57:02 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+15:57:02 [INFO] rl_uav.envs.as2_test_env: Arming drone...
+15:57:03 [INFO] rl_uav.envs.as2_test_env:   Arm: OK
+15:57:03 [INFO] rl_uav.envs.as2_test_env: Setting offboard mode...
+15:57:03 [INFO] rl_uav.envs.as2_test_env:   Offboard: OK
+15:57:03 [INFO] rl_uav.envs.as2_test_env: Taking off to 1.0m...
+15:57:06 [INFO] rl_uav.envs.as2_test_env:   Takeoff: OK
+15:57:12 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.4        0.        -0.0014265  0.       ]
+15:57:32 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+15:57:41 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.5406435  -0.00363564 -0.13718688  0.20927207]
+15:58:01 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+15:58:14 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.43870726  0.17062658  0.00622197 -0.00464746]
+15:58:35 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+15:58:48 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.32812175  0.00441161  0.00869749 -0.01313261]
+15:59:08 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+15:59:21 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.30420065  0.00353017  0.00890432  0.05678971]
+15:59:42 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+15:59:56 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.83688295 -0.00828346  0.01716671 -0.01922428]
+16:00:16 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+16:00:36 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.6277881   0.05045829  0.0068171  -0.10225859]
+16:00:56 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+16:01:12 [INFO] rl_uav.envs.as2_test_env: Reset complete. Initial obs: [-0.66674274 -0.0300095  -0.0060375  -0.06384937]
+16:01:33 [INFO] rl_uav.envs.as2_test_env: Keeping drone airborne for reset...
+16:01:58 [WARNING] rl_uav.envs.as2_test_env: Timed out while driving to fixed_start_pose
+16:01:58 [INFO] rl_uav.envs.as2_test_env: Closing environment...
+16:01:58 [INFO] rl_uav.envs.as2_test_env: Landing...
+16:02:08 [WARNING] rl_uav.envs.as2_test_env: landing exceeded 10.0s during close; continuing best-effort shutdown
+16:02:10 [INFO] rl_uav.envs.as2_test_env: DroneInterface shut down
+16:02:10 [INFO] rl_uav.envs.as2_test_env: Environment closed
+Traceback (most recent call last):
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 115, in <module>
+    raise SystemExit(main())
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 101, in main
+    model.learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py", line 311, in learn
+    return super().learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 324, in learn
+    continue_training = self.collect_rollouts(self.env, callback, self.rollout_buffer, n_rollout_steps=self.n_steps)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 218, in collect_rollouts
+    new_obs, rewards, dones, infos = env.step(clipped_actions)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/base_vec_env.py", line 222, in step
+    return self.step_wait()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/vec_monitor.py", line 75, in step_wait
+    obs, rewards, dones, infos = self.venv.step_wait()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 71, in step_wait
+    obs, self.reset_infos[env_idx] = self.envs[env_idx].reset()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 400, in reset
+    return super().reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/core.py", line 333, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 295, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 655, in reset
+    self._apply_start_pose(self.fixed_start_pose)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 529, in _apply_start_pose
+    raise RuntimeError(
+RuntimeError: Velocity-based start pose reset timed out; refusing to fall back to blocking go_to during in-air reset
+ERROR conda.cli.main_run:execute(142): `conda run python3 scripts/train_ppo.py --config configs/train_ppo_phase1_exp007.yaml --num-envs 1 --total-timesteps 20000` failed. (See above for error)

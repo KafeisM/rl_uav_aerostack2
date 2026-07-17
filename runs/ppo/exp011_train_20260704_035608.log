@@ -1,0 +1,63 @@
+nohup: ignoring input
+03:56:10 [INFO] train_ppo: === PPO infrastructure ready ===
+03:56:10 [INFO] train_ppo: Config: /home/jordi/TFM/rl_uav_aerostack2/configs/train_ppo_phase1_exp011.yaml
+03:56:10 [INFO] train_ppo: Run dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp011_safe_area_randomized_50k_20260704_035610
+03:56:10 [INFO] train_ppo: Tensorboard dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp011_safe_area_randomized_50k_20260704_035610/tensorboard
+03:56:10 [INFO] train_ppo: Monitor dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp011_safe_area_randomized_50k_20260704_035610/monitor
+03:56:10 [INFO] train_ppo: Checkpoints dir: /home/jordi/TFM/rl_uav_aerostack2/runs/ppo/ppo_phase1_exp011_safe_area_randomized_50k_20260704_035610/checkpoints
+03:56:10 [INFO] train_ppo: Num envs: 1
+03:56:10 [INFO] train_ppo: Namespaces: ['drone0']
+03:56:10 [INFO] train_ppo: Policy kwargs: {'activation_fn': 'ReLU', 'net_arch': {'pi': [128, 128], 'vf': [128, 128]}}
+03:56:10 [INFO] train_ppo: Checkpoint callback: every 5000 steps
+03:56:10 [INFO] train_ppo: Total timesteps: 50000
+03:56:10 [INFO] train_ppo: Starting PPO learn() ...
+03:56:11 [INFO] rl_uav.envs.as2_test_env: ROS2 initialized (process-wide)
+[INFO] [1783130171.274661940] [drone0.drone0_interface]: Starting drone0
+[INFO] [1783130171.800494076] [drone0.drone0_interface]: drone0 interface initialized
+[WARN] [1783130172.809986541] [drone0.drone0_interface]: TakeoffBehavior Not Available
+[WARN] [1783130173.817057230] [drone0.drone0_interface]: GoToBehavior Not Available
+[WARN] [1783130174.823116150] [drone0.drone0_interface]: FollowPathBehavior Not Available
+03:56:15 [INFO] rl_uav.envs.as2_test_env: Target marker publisher created on topic 'visualization_marker' frame 'earth'
+03:56:15 [INFO] rl_uav.envs.as2_test_env: DroneInterface created for 'drone0'
+03:56:15 [INFO] rl_uav.envs.as2_test_env: Arming drone...
+03:56:15 [INFO] rl_uav.envs.as2_test_env:   Arm: OK
+03:56:15 [INFO] rl_uav.envs.as2_test_env: Setting offboard mode...
+03:56:15 [INFO] rl_uav.envs.as2_test_env:   Offboard: OK
+03:56:15 [INFO] rl_uav.envs.as2_test_env: Taking off to 1.0m...
+03:56:18 [INFO] rl_uav.envs.as2_test_env:   Takeoff: OK
+03:56:18 [WARNING] rl_uav.envs.as2_test_env: Service reset attempt 1/3 failed (service_client_create_failed); retrying full teleport...
+03:56:20 [WARNING] rl_uav.envs.as2_test_env: Service reset attempt 2/3 failed (service_client_create_failed); retrying full teleport...
+03:56:22 [INFO] rl_uav.envs.as2_test_env: Closing environment...
+03:56:22 [INFO] rl_uav.envs.as2_test_env: Landing...
+03:56:25 [INFO] rl_uav.envs.as2_test_env: DroneInterface shut down
+03:56:25 [INFO] rl_uav.envs.as2_test_env: Environment closed
+Traceback (most recent call last):
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 115, in <module>
+    raise SystemExit(main())
+  File "/home/jordi/TFM/rl_uav_aerostack2/scripts/train_ppo.py", line 101, in main
+    model.learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/ppo/ppo.py", line 311, in learn
+    return super().learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/on_policy_algorithm.py", line 311, in learn
+    total_timesteps, callback = self._setup_learn(
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/base_class.py", line 423, in _setup_learn
+    self._last_obs = self.env.reset()  # type: ignore[assignment]
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/vec_monitor.py", line 69, in reset
+    obs = self.venv.reset()
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/stable_baselines3/common/vec_env/dummy_vec_env.py", line 78, in reset
+    obs, self.reset_infos[env_idx] = self.envs[env_idx].reset(seed=self._seeds[env_idx], **maybe_options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 400, in reset
+    return super().reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/core.py", line 333, in reset
+    return self.env.reset(seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/wrappers/common.py", line 293, in reset
+    return env_reset_passive_checker(self.env, seed=seed, options=options)
+  File "/home/jordi/miniconda3/envs/rl_uav/lib/python3.10/site-packages/gymnasium/utils/passive_env_checker.py", line 185, in env_reset_passive_checker
+    result = env.reset(**kwargs)
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 3108, in reset
+    self._raise_fresh_service_reset_failure()
+  File "/home/jordi/TFM/rl_uav_aerostack2/rl_uav/envs/as2_test_env.py", line 2921, in _raise_fresh_service_reset_failure
+    raise RuntimeError(
+RuntimeError: Fresh service-backed reset failed before command path readiness; refusing velocity fallback to avoid accepted-but-ignored actions. Reset diagnostics: reason=service_client_create_failed, failure_class=service_client_unavailable, reset_service_attempts=3, reset_service_attempt_failures=[{'attempt': 1, 'reason': 'service_client_create_failed', 'failure_class': 'service_client_unavailable'}, {'attempt': 2, 'reason': 'service_client_create_failed', 'failure_class': 'service_client_unavailable'}, {'attempt': 3, 'reason': 'service_client_create_failed', 'failure_class': 'service_client_unavailable'}], service_name=/drone0/platform/reset_simulator_state, state_error=No module named 'as2_platform_multirotor_simulator'
+ERROR conda.cli.main_run:execute(142): `conda run python scripts/train_ppo.py --config configs/train_ppo_phase1_exp011.yaml` failed. (See above for error)
+Using cpu device

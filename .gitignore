@@ -26,10 +26,11 @@ build/
 .DS_Store
 Thumbs.db
 
-# Training outputs (future)
-checkpoints/
-runs/
-models/
+# Local training outputs outside published runs
+/checkpoints/
+/models/
+
+# Experiment runs are versioned for reproducibility and TensorBoard inspection.
 
 # Keep internal ATL artifacts ignored by default
 .atl/*
